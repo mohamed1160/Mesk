@@ -68,8 +68,9 @@
   </div>
 
   <!-- Header -->
-  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm px-4 py-3">
-    <div class="max-w-4xl mx-auto flex items-center justify-between gap-2">
+  <div id="topBars" class="sticky top-0 z-30">
+  <header class="bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm px-3 py-2">
+    <div class="max-w-4xl mx-auto flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5">
       <div class="flex items-center gap-2.5">
         <div class="w-10 h-10 rounded-xl bg-sky-500/20 border border-sky-400/30 flex items-center justify-center text-xl">🧴</div>
         <div>
@@ -77,57 +78,58 @@
           <p class="text-xs text-slate-500">نظام المبيعات والمصروفات السريع</p>
         </div>
       </div>
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-1.5 w-full sm:w-auto">
         <button id="btnLivePull" type="button" title="تحديث من التليفون التاني" class="hidden px-2.5 py-2 rounded-xl text-xs font-extrabold border border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition">🔄</button>
         <button id="btnShiftToggle" type="button" class="px-3 py-2 rounded-xl text-xs font-extrabold border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition whitespace-nowrap">🌙 شيفت الليل</button>
         <button id="sbStatus" type="button" title="مزامنة Supabase — اضغط للمزامنة الآن" class="px-2.5 py-2 rounded-xl text-xs font-extrabold border border-slate-300 bg-slate-50 text-slate-600 whitespace-nowrap">☁️</button>
-        <div id="userChip" class="px-2.5 py-2 rounded-xl text-xs font-extrabold border border-indigo-200 bg-indigo-50 text-indigo-700 whitespace-nowrap max-w-[130px] truncate"></div>
+        <div id="userChip" class="px-2.5 py-2 rounded-xl text-xs font-extrabold border border-indigo-200 bg-indigo-50 text-indigo-700 whitespace-nowrap flex-1 min-w-0 truncate text-center"></div>
         <button id="btnLogout" type="button" title="تسجيل خروج" class="px-2.5 py-2 rounded-xl text-xs font-extrabold border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 transition whitespace-nowrap">🚪 خروج</button>
       </div>
     </div>
   </header>
 
   <!-- Top Navigation (below header so free host bottom banners never cover it) -->
-  <nav id="mainNav" class="sticky top-[64px] z-20 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
-    <div class="max-w-4xl mx-auto flex items-center justify-between overflow-x-auto no-scrollbar gap-0.5 px-1">
-      <button type="button" data-tab="sales" class="nav-btn shrink-0 px-2.5 py-1.5 flex flex-col items-center gap-0.5 text-sky-600 font-bold">
+  <nav id="mainNav" class="bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
+    <div class="max-w-4xl mx-auto grid grid-cols-5 gap-0.5 px-1">
+      <button type="button" data-tab="sales" class="nav-btn py-1.5 flex flex-col items-center gap-0.5 text-sky-600 font-bold">
         <span class="text-lg">🛒</span>
         <span class="text-[10px]">المبيعات</span>
       </button>
-      <button type="button" data-tab="purchases" class="nav-btn shrink-0 px-2.5 py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
+      <button type="button" data-tab="purchases" class="nav-btn py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
         <span class="text-lg">🚚</span>
         <span class="text-[10px]">المشتريات</span>
       </button>
-      <button type="button" data-tab="expenses" class="nav-btn shrink-0 px-2.5 py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
+      <button type="button" data-tab="expenses" class="nav-btn py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
         <span class="text-lg">💸</span>
         <span class="text-[10px]">المصروفات</span>
       </button>
-      <button type="button" data-tab="debts" class="nav-btn shrink-0 px-2.5 py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
+      <button type="button" data-tab="debts" class="nav-btn py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
         <span class="text-lg">📒</span>
         <span class="text-[10px]">الديون</span>
       </button>
-      <button type="button" data-tab="stats" class="nav-btn shrink-0 px-2.5 py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
+      <button type="button" data-tab="stats" class="nav-btn py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
         <span class="text-lg">📊</span>
         <span class="text-[10px]">الإحصائيات</span>
       </button>
-      <button type="button" data-tab="mirror" class="nav-btn shrink-0 px-2.5 py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
+      <button type="button" data-tab="mirror" class="nav-btn py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
         <span class="text-lg">🪞</span>
         <span class="text-[10px]">المراية</span>
       </button>
-      <button type="button" data-tab="growth" class="nav-btn shrink-0 px-2.5 py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
+      <button type="button" data-tab="growth" class="nav-btn py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
         <span class="text-lg">📈</span>
         <span class="text-[10px]">النمو</span>
       </button>
-      <button type="button" data-tab="settings" class="nav-btn shrink-0 px-2.5 py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
+      <button type="button" data-tab="settings" class="nav-btn py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
         <span class="text-lg">⚙️</span>
         <span class="text-[10px]">الإعدادات</span>
       </button>
-      <button type="button" data-tab="items" class="nav-btn shrink-0 px-2.5 py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
+      <button type="button" data-tab="items" class="nav-btn py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
         <span class="text-lg">📦</span>
         <span class="text-[10px]">الأصناف</span>
       </button>
     </div>
   </nav>
+  </div>
 
   <main class="max-w-4xl mx-auto p-4 space-y-5">
 
@@ -211,9 +213,9 @@
       </div>
 
       <!-- Category Filter Pills -->
-      <div class="flex items-center gap-2">
+      <div class="flex items-start gap-2">
         <button id="btnToggleInStockOnly" type="button" class="px-3 py-1.5 rounded-full text-xs font-extrabold border border-slate-300 bg-white text-slate-700 whitespace-nowrap transition">📦 المتوفر فقط</button>
-        <div id="catFilterBar" class="flex-1 flex gap-2 overflow-x-auto pb-1"></div>
+        <div id="catFilterBar" class="flex-1 flex flex-wrap gap-1.5"></div>
       </div>
       <!-- Big Item Tiles Grid -->
       <div id="itemsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
@@ -741,7 +743,7 @@
 
 
   <!-- Barcode Camera Scanner Modal -->
-  <div id="barcodeScannerModal" class="hidden fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-3">
+  <div id="barcodeScannerModal" class="hidden fixed inset-0 z-[70] bg-black/85 flex items-center justify-center p-3">
     <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl">
       <div class="px-3.5 py-2.5 bg-slate-900 text-white flex items-center justify-between">
         <span class="text-xs font-bold">📷 ماسح الباركود بالكاميرا</span>
@@ -769,7 +771,7 @@
 
 
   <!-- Live Camera Modal -->
-  <div id="liveCamModal" class="hidden fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-3">
+  <div id="liveCamModal" class="hidden fixed inset-0 z-[70] bg-black/85 flex items-center justify-center p-3">
     <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl">
       <div class="px-3.5 py-2.5 bg-slate-900 text-white flex items-center justify-between">
         <span class="text-xs font-bold">📷 الكاميرا المباشرة</span>
@@ -1244,7 +1246,7 @@
         var b = document.createElement('button');
         b.type = 'button';
         var on = activeCat === c;
-        b.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap border transition ' +
+        b.className = 'px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap border transition ' +
           (on ? 'bg-sky-500 text-slate-950 border-sky-400' : 'bg-white text-slate-700 border-slate-300');
         b.textContent = c;
         b.addEventListener('click', function () {
