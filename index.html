@@ -95,6 +95,10 @@
         <span class="text-lg">🛒</span>
         <span class="text-[10px]">المبيعات</span>
       </button>
+      <button type="button" data-tab="invoices" class="nav-btn py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
+        <span class="text-lg">🧾</span>
+        <span class="text-[10px]">الفواتير</span>
+      </button>
       <button type="button" data-tab="purchases" class="nav-btn py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
         <span class="text-lg">🚚</span>
         <span class="text-[10px]">المشتريات</span>
@@ -251,6 +255,85 @@
         </div>
       </div>
       <div id="itemsDirList" class="space-y-2.5"></div>
+    </section>
+
+    <!-- TAB: فواتير البيع (كل الفواتير بالتفصيل) -->
+    <section id="tab-invoices" class="hidden space-y-3">
+      <div id="invHome" class="space-y-3">
+        <div class="bg-white border border-slate-200 shadow-sm rounded-2xl p-3.5">
+          <h2 class="text-base font-black text-slate-900">🧾 الفواتير</h2>
+          <p class="text-[11px] text-slate-500">اختار نوع الفواتير اللي عايز تشوفها</p>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <button id="btnInvSales" type="button" class="bg-white hover:bg-sky-50 border-2 border-sky-300 rounded-2xl p-5 text-center space-y-1 shadow-sm">
+            <div class="text-4xl">🧾</div>
+            <div class="text-sm font-black text-sky-700">فواتير البيع</div>
+            <div id="invSalesCount" class="text-[11px] font-bold text-slate-500"></div>
+          </button>
+          <button id="btnInvPurch" type="button" class="bg-white hover:bg-emerald-50 border-2 border-emerald-300 rounded-2xl p-5 text-center space-y-1 shadow-sm">
+            <div class="text-4xl">📥</div>
+            <div class="text-sm font-black text-emerald-700">فواتير الشراء</div>
+            <div id="invPurchCount" class="text-[11px] font-bold text-slate-500"></div>
+          </button>
+        </div>
+      </div>
+
+      <div id="invSalesView" class="hidden space-y-3">
+      <button type="button" class="inv-back bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 font-bold px-3 py-1.5 rounded-xl text-xs">⬅️ رجوع للفواتير</button>
+      <div class="bg-white border border-slate-200 shadow-sm rounded-2xl p-3.5 space-y-2.5">
+        <div>
+          <h2 class="text-base font-black text-sky-700">🧾 كل فواتير البيع</h2>
+          <p class="text-[11px] text-slate-500">كل فاتورة بتفاصيلها: الأصناف والكميات والأسعار والخصم والدفع والعميل</p>
+        </div>
+        <input id="siSearch" type="text" placeholder="🔍 ابحث باسم العميل أو الصنف أو رقم الفاتورة..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900">
+        <div class="grid grid-cols-2 gap-2">
+          <div><label class="block text-[10px] font-bold text-slate-500 mb-0.5">من تاريخ</label><input id="siFrom" type="date" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900"></div>
+          <div><label class="block text-[10px] font-bold text-slate-500 mb-0.5">إلى تاريخ</label><input id="siTo" type="date" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900"></div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <select id="siPay" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900"><option value="">كل طرق الدفع</option></select>
+          <select id="siType" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900"><option value="">مبيعات + مرتجعات</option><option value="sale">مبيعات فقط</option><option value="return">مرتجعات فقط</option></select>
+        </div>
+        <div class="flex flex-wrap gap-1.5">
+          <button type="button" data-si-range="today" class="si-range px-2.5 py-1 rounded-lg text-[11px] font-bold border border-slate-300 bg-white text-slate-700">اليوم</button>
+          <button type="button" data-si-range="7" class="si-range px-2.5 py-1 rounded-lg text-[11px] font-bold border border-slate-300 bg-white text-slate-700">آخر 7 أيام</button>
+          <button type="button" data-si-range="month" class="si-range px-2.5 py-1 rounded-lg text-[11px] font-bold border border-slate-300 bg-white text-slate-700">هذا الشهر</button>
+          <button type="button" data-si-range="all" class="si-range px-2.5 py-1 rounded-lg text-[11px] font-bold border border-slate-300 bg-white text-slate-700">الكل</button>
+        </div>
+      </div>
+      <div id="siSummary" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+      <div id="siList" class="space-y-2"></div>
+      <button id="siMore" type="button" class="hidden w-full bg-white border border-sky-300 text-sky-700 font-bold py-2.5 rounded-xl text-xs">عرض المزيد ⬇️</button>
+      </div>
+
+    <!-- TAB: فواتير الشراء (كل الفواتير بالتفصيل) -->
+      <div id="invPurchView" class="hidden space-y-3">
+      <button type="button" class="inv-back bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 font-bold px-3 py-1.5 rounded-xl text-xs">⬅️ رجوع للفواتير</button>
+      <div class="bg-white border border-slate-200 shadow-sm rounded-2xl p-3.5 space-y-2.5">
+        <div>
+          <h2 class="text-base font-black text-emerald-700">📥 كل فواتير الشراء</h2>
+          <p class="text-[11px] text-slate-500">كل فاتورة بتفاصيلها: المورد والأصناف والكميات والأسعار والمدفوع والمتبقي</p>
+        </div>
+        <input id="piSearch" type="text" placeholder="🔍 ابحث باسم المورد أو الصنف أو رقم الفاتورة..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900">
+        <div class="grid grid-cols-2 gap-2">
+          <div><label class="block text-[10px] font-bold text-slate-500 mb-0.5">من تاريخ</label><input id="piFrom" type="date" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900"></div>
+          <div><label class="block text-[10px] font-bold text-slate-500 mb-0.5">إلى تاريخ</label><input id="piTo" type="date" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900"></div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <select id="piSup" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900"><option value="">كل الموردين</option></select>
+          <select id="piType" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900"><option value="">فواتير + مرتجعات</option><option value="buy">فواتير شراء فقط</option><option value="return">مرتجعات للمورد فقط</option><option value="due">اللي عليها متبقي</option></select>
+        </div>
+        <div class="flex flex-wrap gap-1.5">
+          <button type="button" data-pi-range="today" class="pi-range px-2.5 py-1 rounded-lg text-[11px] font-bold border border-slate-300 bg-white text-slate-700">اليوم</button>
+          <button type="button" data-pi-range="7" class="pi-range px-2.5 py-1 rounded-lg text-[11px] font-bold border border-slate-300 bg-white text-slate-700">آخر 7 أيام</button>
+          <button type="button" data-pi-range="month" class="pi-range px-2.5 py-1 rounded-lg text-[11px] font-bold border border-slate-300 bg-white text-slate-700">هذا الشهر</button>
+          <button type="button" data-pi-range="all" class="pi-range px-2.5 py-1 rounded-lg text-[11px] font-bold border border-slate-300 bg-white text-slate-700">الكل</button>
+        </div>
+      </div>
+      <div id="piSummary" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+      <div id="piList" class="space-y-2"></div>
+      <button id="piMore" type="button" class="hidden w-full bg-white border border-emerald-300 text-emerald-700 font-bold py-2.5 rounded-xl text-xs">عرض المزيد ⬇️</button>
+      </div>
     </section>
 
     <!-- TAB 2: المشتريات والموردين -->
@@ -1220,7 +1303,7 @@
     document.querySelectorAll('.nav-btn').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var target = btn.getAttribute('data-tab');
-        ['sales', 'items', 'purchases', 'expenses', 'debts', 'stats', 'mirror', 'growth', 'settings'].forEach(function (t) {
+        ['sales', 'invoices', 'items', 'purchases', 'expenses', 'debts', 'stats', 'mirror', 'growth', 'settings'].forEach(function (t) {
           document.getElementById('tab-' + t).classList.toggle('hidden', t !== target);
         });
         document.querySelectorAll('.nav-btn').forEach(function (b) {
@@ -1231,6 +1314,7 @@
         });
         if (target === 'stats') renderStats();
         if (target === 'items') renderItemsDirectory();
+        if (target === 'invoices') showInvoicesHome();
         if (target === 'mirror') renderMirror();
         if (target === 'growth') renderGrowth();
         if (target === 'debts') renderDebts();
@@ -1541,6 +1625,7 @@
         grandTotal += netLine;
         var saleObj = {
           id: 'S-' + Date.now() + '-' + i,
+          invNo: 'S' + invTs,
           date: today,
           time: invTime,
           ts: invTs,
@@ -1610,6 +1695,7 @@
       var profit = total - (baseQty * currentItem.buy);
       var srObj = {
         id: 'SR-' + Date.now(),
+        invNo: 'R' + Date.now(),
         date: todayStr(),
         time: timeStr(),
         ts: Date.now(),
@@ -1668,6 +1754,7 @@
       }
       var sObj = {
         id: 'S-' + Date.now(),
+        invNo: 'S' + Date.now(),
         date: todayStr(),
         time: timeStr(),
         ts: Date.now(),
@@ -1749,6 +1836,7 @@
           row.querySelector('.ret-sale-btn').addEventListener('click', function () {
             state.sales.unshift({
               id: 'SR-' + Date.now(),
+              invNo: 'R' + Date.now(),
               date: todayStr(),
               time: timeStr(),
               ts: Date.now(),
@@ -2188,7 +2276,7 @@
         if (itemName && totalUnits > 0 && rowTotal >= 0) {
           var unitCost = Number((rowTotal / totalUnits).toFixed(2));
           itemsList.push({
-            itemName: itemName, unit: 'وحدة', qty: totalUnits, packFactor: pack,
+            itemName: itemName, unit: 'وحدة', qty: totalUnits, packFactor: pack, packQty: qty,
             costPrice: unitCost, expectedSellPrice: sell,
             totalCost: rowTotal, expectedProfit: sell > 0 ? ((totalUnits * sell) - rowTotal) : 0
           });
@@ -2232,6 +2320,7 @@
         }
         return {
           itemName: line.itemName, unit: existing ? existing.unit : line.unit, qty: line.qty * sign,
+          packQty: line.packQty * sign, packFactor: line.packFactor,
           costPrice: line.costPrice, expectedSellPrice: line.expectedSellPrice,
           totalCost: line.totalCost * sign, expectedProfit: line.expectedProfit * sign
         };
@@ -2245,6 +2334,8 @@
       var pObj = {
         id: (isRet ? 'PR-' : 'INV-') + Date.now(),
         date: todayStr(),
+        time: timeStr(),
+        ts: Date.now(),
         isReturn: isRet,
         supplier: supplier,
         items: signedItems,
@@ -5043,7 +5134,7 @@
     }
     function sbRenderAll() {
       [renderCatBar, renderItemsGrid, renderSalesLog, renderSuppliers, renderDatalist, renderPurchasesLog,
-       renderExpenses, renderDebts, renderStats, renderMirror, renderGrowth, refreshShiftBanner].forEach(function (fn) {
+       renderExpenses, renderDebts, renderStats, renderMirror, renderGrowth, refreshShiftBanner, refreshInvoicePages].forEach(function (fn) {
         try { if (typeof fn === 'function') fn(); } catch (e) {}
       });
     }
@@ -5309,6 +5400,329 @@
       XLSX.writeFile(wb, 'misk_order_' + sup + '_' + todayStr() + '.xlsx');
       showToast('📥 تم تحميل ملف طلب الشراء');
     });
+
+    // =====================================================================
+    // صفحات الفواتير: فواتير البيع + فواتير الشراء (كل فاتورة بتفاصيلها)
+    // =====================================================================
+    function invTsOf(o) {
+      if (o && o.ts) return Number(o.ts) || 0;
+      var m = String((o && o.id) || '').match(/^[A-Za-z]+-(\d{13})/);
+      return m ? Number(m[1]) : 0;
+    }
+    function invTimeOf(o) {
+      if (o && o.time) return o.time;
+      var t = invTsOf(o);
+      return t ? timeStr(new Date(t)) : '';
+    }
+    function invRangeDates(kind) {
+      var t = todayStr();
+      if (kind === 'today') return [t, t];
+      if (kind === '7') {
+        var d = new Date(); d.setDate(d.getDate() - 6);
+        return [d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'), t];
+      }
+      if (kind === 'month') return [t.slice(0, 7) + '-01', t];
+      return ['', ''];
+    }
+    function invSumCard(title, val, cls) {
+      return '<div class="bg-white border border-slate-200 rounded-xl p-2.5"><div class="text-[10px] font-bold text-slate-500">' + title + '</div><div class="text-sm font-black ' + (cls || 'text-slate-900') + '">' + val + '</div></div>';
+    }
+    function invPrintHtml(title, bodyHtml) {
+      var w = window.open('', '_blank');
+      if (!w) { showToast('⚠️ المتصفح منع نافذة الطباعة — اسمح بالنوافذ المنبثقة'); return; }
+      w.document.write('<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>' + escHtml(title) + '</title>' +
+        '<style>body{font-family:Tahoma,Arial,sans-serif;padding:14px;color:#111}h2{margin:0 0 4px}table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}th,td{border:1px solid #bbb;padding:5px 6px;text-align:right}th{background:#eee}.t{font-weight:bold;font-size:15px}.m{color:#555;font-size:12px}</style></head><body>' +
+        bodyHtml + '<script>setTimeout(function(){window.print();},300);<\/script></body></html>');
+      w.document.close();
+    }
+
+    // ---------------- فواتير البيع ----------------
+    var siLimit = 40, siCache = {};
+    function groupSalesInvoices() {
+      var lines = state.sales.slice().sort(function (a, b) { return invTsOf(b) - invTsOf(a); });
+      var invs = [], byNo = {};
+      lines.forEach(function (s) {
+        var ts = invTsOf(s);
+        if (s.invNo && byNo[s.invNo]) { byNo[s.invNo].lines.push(s); return; }
+        var last = invs[invs.length - 1];
+        if (!s.invNo && last && !last.explicit && !s.isReturn && !last.isReturn &&
+            Math.abs(last.ts - ts) <= 3000 && last.date === s.date && (last.customer || '') === (s.customer || '') && last.payment === s.payment) {
+          last.lines.push(s); return;
+        }
+        var inv = { key: s.invNo || ('L' + s.id), explicit: !!s.invNo, ts: ts, date: s.date, time: invTimeOf(s), customer: s.customer || '', payment: s.payment || '', isReturn: !!s.isReturn, lines: [s] };
+        invs.push(inv);
+        if (s.invNo) byNo[s.invNo] = inv;
+      });
+      invs.forEach(function (inv) {
+        inv.no = inv.ts ? String(inv.ts).slice(-6) : String(inv.key).slice(-6);
+        inv.total = inv.lines.reduce(function (a, l) { return a + (Number(l.total) || 0); }, 0);
+        inv.discount = inv.lines.reduce(function (a, l) { return a + (Number(l.discount) || 0); }, 0);
+        inv.profit = inv.lines.reduce(function (a, l) { return a + (Number(l.profit) || 0); }, 0);
+        inv.gross = inv.total + inv.discount * (inv.isReturn ? -1 : 1);
+      });
+      return invs;
+    }
+    function saleInvoiceText(inv) {
+      var t = '🧾 *فاتورة ' + (inv.isReturn ? 'مرتجع ' : '') + 'محل مسك للمنظفات* #' + inv.no + '\n📅 ' + inv.date + (inv.time ? ' • 🕒 ' + inv.time : '') + (inv.customer ? '\n👤 العميل: ' + inv.customer : '') + '\n';
+      t += inv.lines.map(function (l, i) { return (i + 1) + '- ' + l.itemName + ' × ' + Math.abs(l.qty) + ' ' + l.unit + ' = ' + fmt(Math.abs(l.total)) + ' ج.م'; }).join('\n');
+      if (inv.discount > 0) t += '\n🎁 خصم: ' + fmt(inv.discount) + ' ج.م';
+      t += '\n💰 *الإجمالي: ' + fmt(Math.abs(inv.total)) + ' ج.م*\n💳 الدفع: ' + inv.payment;
+      return t;
+    }
+    function saleInvoicePrint(inv) {
+      var rows = inv.lines.map(function (l, i) {
+        return '<tr><td>' + (i + 1) + '</td><td>' + escHtml(l.itemName) + '</td><td>' + Math.abs(l.qty) + ' ' + escHtml(l.unit) + '</td><td>' + fmt(l.sellPrice) + '</td><td>' + fmt(l.discount || 0) + '</td><td>' + fmt(Math.abs(l.total)) + '</td></tr>';
+      }).join('');
+      invPrintHtml('فاتورة ' + inv.no,
+        '<h2>مسك للمنظفات — فاتورة ' + (inv.isReturn ? 'مرتجع ' : 'بيع ') + '#' + inv.no + '</h2><div class="m">' + inv.date + (inv.time ? ' — ' + inv.time : '') + (inv.customer ? ' — العميل: ' + escHtml(inv.customer) : '') + ' — الدفع: ' + escHtml(inv.payment) + '</div>' +
+        '<table><tr><th>#</th><th>الصنف</th><th>الكمية</th><th>السعر</th><th>الخصم</th><th>الإجمالي</th></tr>' + rows + '</table><div class="t">الإجمالي: ' + fmt(Math.abs(inv.total)) + ' ج.م</div>');
+    }
+    function renderSalesInvoices() {
+      var list = byId('siList'); if (!list) return;
+      var invs = groupSalesInvoices();
+      var paySel = byId('siPay'), curPay = paySel.value, pays = {};
+      invs.forEach(function (i) { if (i.payment) pays[i.payment] = 1; });
+      paySel.innerHTML = '<option value="">كل طرق الدفع</option>' + Object.keys(pays).map(function (p) { return '<option value="' + escHtml(p) + '">' + escHtml(p) + '</option>'; }).join('');
+      paySel.value = pays[curPay] ? curPay : '';
+
+      var q = byId('siSearch').value.trim(), from = byId('siFrom').value, to = byId('siTo').value, pay = paySel.value, type = byId('siType').value;
+      var f = invs.filter(function (i) {
+        if (from && i.date < from) return false;
+        if (to && i.date > to) return false;
+        if (pay && i.payment !== pay) return false;
+        if (type === 'sale' && i.isReturn) return false;
+        if (type === 'return' && !i.isReturn) return false;
+        if (q) {
+          var hit = (i.customer || '').indexOf(q) > -1 || i.no.indexOf(q) > -1 ||
+            i.lines.some(function (l) { return (l.itemName || '').indexOf(q) > -1; });
+          if (!hit) return false;
+        }
+        return true;
+      });
+
+      var sales = f.filter(function (i) { return !i.isReturn; }), rets = f.filter(function (i) { return i.isReturn; });
+      var sTot = sales.reduce(function (a, i) { return a + i.total; }, 0);
+      var rTot = rets.reduce(function (a, i) { return a + Math.abs(i.total); }, 0);
+      var prof = f.reduce(function (a, i) { return a + i.profit; }, 0);
+      var disc = sales.reduce(function (a, i) { return a + i.discount; }, 0);
+      byId('siSummary').innerHTML =
+        invSumCard('عدد الفواتير', sales.length + (rets.length ? ' + ' + rets.length + ' مرتجع' : '')) +
+        invSumCard('إجمالي المبيعات', fmt(sTot) + ' ج.م', 'text-emerald-700') +
+        invSumCard('المرتجعات', fmt(rTot) + ' ج.م', 'text-rose-600') +
+        invSumCard('صافي الربح', fmt(prof) + ' ج.م', prof >= 0 ? 'text-sky-700' : 'text-rose-600') +
+        (disc > 0 ? invSumCard('إجمالي الخصومات', fmt(disc) + ' ج.م', 'text-amber-700') : '');
+
+      siCache = {};
+      if (f.length === 0) {
+        list.innerHTML = '<div class="bg-white border border-slate-200 rounded-2xl p-6 text-center text-xs text-slate-500">لا توجد فواتير مطابقة</div>';
+        byId('siMore').classList.add('hidden');
+        return;
+      }
+      list.innerHTML = f.slice(0, siLimit).map(function (inv) {
+        siCache[inv.key] = inv;
+        var neg = inv.isReturn;
+        var rows = inv.lines.map(function (l, i) {
+          return '<tr class="border-t border-slate-100"><td class="py-1.5 px-1 text-slate-400">' + (i + 1) + '</td>' +
+            '<td class="py-1.5 px-1 font-bold text-slate-900 break-words">' + escHtml(l.itemName) + '</td>' +
+            '<td class="py-1.5 px-1 whitespace-nowrap">' + Math.abs(l.qty) + ' ' + escHtml(l.unit || '') + '</td>' +
+            '<td class="py-1.5 px-1">' + fmt(l.sellPrice) + '</td>' +
+            '<td class="py-1.5 px-1 ' + (l.discount > 0 ? 'text-amber-600' : 'text-slate-400') + '">' + fmt(l.discount || 0) + '</td>' +
+            '<td class="py-1.5 px-1 font-extrabold ' + (neg ? 'text-rose-600' : 'text-emerald-700') + '">' + fmt(Math.abs(l.total)) + '</td></tr>';
+        }).join('');
+        return '<details class="bg-white border ' + (neg ? 'border-rose-200' : 'border-slate-200') + ' rounded-2xl shadow-sm overflow-hidden">' +
+          '<summary class="list-none cursor-pointer p-3 flex items-center justify-between gap-2">' +
+            '<div class="min-w-0"><div class="text-xs font-black text-slate-900">🧾 فاتورة #' + inv.no + (neg ? ' <span class="text-rose-600">[مرتجع]</span>' : '') + '</div>' +
+            '<div class="text-[11px] text-slate-500 truncate">' + inv.date + (inv.time ? ' • 🕒 ' + inv.time : '') + ' • ' + (inv.customer ? '👤 ' + escHtml(inv.customer) : 'بدون عميل') + '</div></div>' +
+            '<div class="text-left shrink-0"><div class="text-sm font-black ' + (neg ? 'text-rose-600' : 'text-emerald-700') + '">' + fmt(Math.abs(inv.total)) + ' ج.م</div>' +
+            '<div class="text-[10px] text-slate-500">' + inv.lines.length + ' صنف • ' + escHtml(inv.payment) + '</div></div>' +
+          '</summary>' +
+          '<div class="border-t border-slate-200 p-3 space-y-2">' +
+            '<table class="w-full text-[11px] text-right"><thead class="text-slate-500"><tr><th class="px-1">#</th><th class="px-1">الصنف</th><th class="px-1">الكمية</th><th class="px-1">السعر</th><th class="px-1">خصم</th><th class="px-1">الإجمالي</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+            '<div class="grid grid-cols-2 gap-1.5 text-[11px]">' +
+              '<div class="bg-slate-50 rounded-lg px-2 py-1">قبل الخصم: <b>' + fmt(Math.abs(inv.gross)) + '</b></div>' +
+              '<div class="bg-slate-50 rounded-lg px-2 py-1">الخصم: <b class="text-amber-700">' + fmt(inv.discount) + '</b></div>' +
+              '<div class="bg-slate-50 rounded-lg px-2 py-1">الدفع: <b>' + escHtml(inv.payment) + '</b></div>' +
+              '<div class="bg-slate-50 rounded-lg px-2 py-1">الربح: <b class="' + (inv.profit >= 0 ? 'text-sky-700' : 'text-rose-600') + '">' + fmt(inv.profit) + '</b></div>' +
+            '</div>' +
+            '<div class="flex gap-2">' +
+              '<button type="button" data-act="wa" data-key="' + escHtml(inv.key) + '" class="flex-1 bg-emerald-600 text-white font-bold py-2 rounded-xl text-[11px]">📲 واتساب</button>' +
+              '<button type="button" data-act="print" data-key="' + escHtml(inv.key) + '" class="flex-1 bg-slate-700 text-white font-bold py-2 rounded-xl text-[11px]">🖨️ طباعة</button>' +
+            '</div>' +
+          '</div></details>';
+      }).join('');
+      byId('siMore').classList.toggle('hidden', f.length <= siLimit);
+      byId('siMore').textContent = 'عرض المزيد ⬇️ (' + (f.length - siLimit) + ' فاتورة)';
+    }
+    ['siSearch', 'siFrom', 'siTo', 'siPay', 'siType'].forEach(function (id) {
+      byId(id).addEventListener(id === 'siSearch' ? 'input' : 'change', function () { siLimit = 40; renderSalesInvoices(); });
+    });
+    document.querySelectorAll('.si-range').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var r = invRangeDates(b.getAttribute('data-si-range'));
+        byId('siFrom').value = r[0]; byId('siTo').value = r[1];
+        siLimit = 40; renderSalesInvoices();
+      });
+    });
+    byId('siMore').addEventListener('click', function () { siLimit += 40; renderSalesInvoices(); });
+    byId('siList').addEventListener('click', function (e) {
+      var btn = e.target.closest('button[data-act]'); if (!btn) return;
+      var inv = siCache[btn.getAttribute('data-key')]; if (!inv) return;
+      if (btn.getAttribute('data-act') === 'wa') window.open('https://wa.me/?text=' + encodeURIComponent(saleInvoiceText(inv)), '_blank');
+      else saleInvoicePrint(inv);
+    });
+
+    // ---------------- فواتير الشراء ----------------
+    var piLimit = 40, piCache = {};
+    function normalizePurchase(p) {
+      var lines = Array.isArray(p.items) ? p.items : [{ itemName: p.itemName, unit: p.unit, qty: p.qty, costPrice: p.costPrice, totalCost: p.totalCost }];
+      var ts = invTsOf(p), total = Number(p.totalCost) || 0;
+      var absTotal = Math.abs(total);
+      var paid = (p.paidAmount !== undefined) ? Number(p.paidAmount) : absTotal;
+      return {
+        key: String(p.id), no: ts ? String(ts).slice(-6) : String(p.id).slice(-6), ts: ts, date: p.date, time: invTimeOf(p),
+        supplier: p.supplier || 'غير محدد', isReturn: !!p.isReturn, lines: lines,
+        total: total, paid: paid, remaining: Number(p.remainingAmount) || 0,
+        profit: Number(p.expectedProfit) || 0
+      };
+    }
+    function purchaseInvoiceText(inv) {
+      var t = '📥 *فاتورة ' + (inv.isReturn ? 'مرتجع شراء' : 'شراء') + ' - محل مسك للمنظفات* #' + inv.no + '\n📅 ' + inv.date + (inv.time ? ' • 🕒 ' + inv.time : '') + '\n🚚 المورد: ' + inv.supplier + '\n';
+      t += inv.lines.map(function (l, i) { return (i + 1) + '- ' + l.itemName + ' × ' + Math.abs(l.qty) + ' ' + (l.unit || '') + ' = ' + fmt(Math.abs(l.totalCost)) + ' ج.م'; }).join('\n');
+      t += '\n💰 *الإجمالي: ' + fmt(Math.abs(inv.total)) + ' ج.م*\n✅ المدفوع: ' + fmt(inv.paid) + ' ج.م' + (inv.remaining > 0 ? '\n⏳ المتبقي: ' + fmt(inv.remaining) + ' ج.م' : '');
+      return t;
+    }
+    function purchaseInvoicePrint(inv) {
+      var rows = inv.lines.map(function (l, i) {
+        return '<tr><td>' + (i + 1) + '</td><td>' + escHtml(l.itemName) + '</td><td>' + Math.abs(l.qty) + ' ' + escHtml(l.unit || '') + '</td><td>' + fmt(l.costPrice) + '</td><td>' + fmt(Math.abs(l.totalCost)) + '</td></tr>';
+      }).join('');
+      invPrintHtml('فاتورة شراء ' + inv.no,
+        '<h2>مسك للمنظفات — فاتورة ' + (inv.isReturn ? 'مرتجع شراء ' : 'شراء ') + '#' + inv.no + '</h2><div class="m">' + inv.date + (inv.time ? ' — ' + inv.time : '') + ' — المورد: ' + escHtml(inv.supplier) + '</div>' +
+        '<table><tr><th>#</th><th>الصنف</th><th>الكمية</th><th>سعر الوحدة</th><th>الإجمالي</th></tr>' + rows + '</table>' +
+        '<div class="t">الإجمالي: ' + fmt(Math.abs(inv.total)) + ' ج.م — المدفوع: ' + fmt(inv.paid) + ' — المتبقي: ' + fmt(inv.remaining) + '</div>');
+    }
+    function renderPurchaseInvoices() {
+      var list = byId('piList'); if (!list) return;
+      var invs = state.purchases.map(normalizePurchase).sort(function (a, b) { return b.ts - a.ts; });
+      var supSel = byId('piSup'), curSup = supSel.value, sups = {};
+      invs.forEach(function (i) { sups[i.supplier] = 1; });
+      supSel.innerHTML = '<option value="">كل الموردين</option>' + Object.keys(sups).map(function (s) { return '<option value="' + escHtml(s) + '">' + escHtml(s) + '</option>'; }).join('');
+      supSel.value = sups[curSup] ? curSup : '';
+
+      var q = byId('piSearch').value.trim(), from = byId('piFrom').value, to = byId('piTo').value, sup = supSel.value, type = byId('piType').value;
+      var f = invs.filter(function (i) {
+        if (from && i.date < from) return false;
+        if (to && i.date > to) return false;
+        if (sup && i.supplier !== sup) return false;
+        if (type === 'buy' && i.isReturn) return false;
+        if (type === 'return' && !i.isReturn) return false;
+        if (type === 'due' && !(i.remaining > 0)) return false;
+        if (q) {
+          var hit = i.supplier.indexOf(q) > -1 || i.no.indexOf(q) > -1 ||
+            i.lines.some(function (l) { return (l.itemName || '').indexOf(q) > -1; });
+          if (!hit) return false;
+        }
+        return true;
+      });
+
+      var buys = f.filter(function (i) { return !i.isReturn; }), rets = f.filter(function (i) { return i.isReturn; });
+      var bTot = buys.reduce(function (a, i) { return a + i.total; }, 0);
+      var rTot = rets.reduce(function (a, i) { return a + Math.abs(i.total); }, 0);
+      var paid = buys.reduce(function (a, i) { return a + i.paid; }, 0);
+      var rem = buys.reduce(function (a, i) { return a + i.remaining; }, 0);
+      byId('piSummary').innerHTML =
+        invSumCard('عدد الفواتير', buys.length + (rets.length ? ' + ' + rets.length + ' مرتجع' : '')) +
+        invSumCard('إجمالي المشتريات', fmt(bTot) + ' ج.م', 'text-amber-700') +
+        invSumCard('المدفوع', fmt(paid) + ' ج.م', 'text-emerald-700') +
+        invSumCard('المتبقي للموردين', fmt(rem) + ' ج.م', rem > 0 ? 'text-rose-600' : 'text-slate-900') +
+        (rets.length ? invSumCard('مرتجعات للموردين', fmt(rTot) + ' ج.م', 'text-rose-600') : '');
+
+      piCache = {};
+      if (f.length === 0) {
+        list.innerHTML = '<div class="bg-white border border-slate-200 rounded-2xl p-6 text-center text-xs text-slate-500">لا توجد فواتير مطابقة</div>';
+        byId('piMore').classList.add('hidden');
+        return;
+      }
+      list.innerHTML = f.slice(0, piLimit).map(function (inv) {
+        piCache[inv.key] = inv;
+        var neg = inv.isReturn;
+        var rows = inv.lines.map(function (l, i) {
+          var packTxt = (l.packFactor > 1 && l.packQty) ? ('<div class="text-[10px] text-indigo-600">' + Math.abs(l.packQty) + ' × ' + l.packFactor + ' وحدة</div>') : '';
+          var extra = (l.expectedSellPrice > 0) ? ('<div class="text-[10px] text-slate-500">بيع ' + fmt(l.expectedSellPrice) + (l.expectedProfit ? ' • ربح متوقع ' + fmt(Math.abs(l.expectedProfit)) : '') + '</div>') : '';
+          return '<tr class="border-t border-slate-100"><td class="py-1.5 px-1 text-slate-400">' + (i + 1) + '</td>' +
+            '<td class="py-1.5 px-1 break-words"><div class="font-bold text-slate-900">' + escHtml(l.itemName) + '</div>' + extra + '</td>' +
+            '<td class="py-1.5 px-1 whitespace-nowrap">' + Math.abs(l.qty) + ' ' + escHtml(l.unit || '') + packTxt + '</td>' +
+            '<td class="py-1.5 px-1">' + fmt(l.costPrice) + '</td>' +
+            '<td class="py-1.5 px-1 font-extrabold ' + (neg ? 'text-rose-600' : 'text-amber-700') + '">' + fmt(Math.abs(l.totalCost)) + '</td></tr>';
+        }).join('');
+        var status = neg ? '' : (inv.remaining > 0 ? '<span class="text-rose-600 font-bold">متبقي ' + fmt(inv.remaining) + '</span>' : '<span class="text-emerald-600 font-bold">مسددة ✓</span>');
+        return '<details class="bg-white border ' + (neg ? 'border-rose-200' : 'border-slate-200') + ' rounded-2xl shadow-sm overflow-hidden">' +
+          '<summary class="list-none cursor-pointer p-3 flex items-center justify-between gap-2">' +
+            '<div class="min-w-0"><div class="text-xs font-black text-slate-900">📥 فاتورة #' + inv.no + (neg ? ' <span class="text-rose-600">[مرتجع]</span>' : '') + '</div>' +
+            '<div class="text-[11px] text-slate-500 truncate">' + inv.date + (inv.time ? ' • 🕒 ' + inv.time : '') + ' • 🚚 ' + escHtml(inv.supplier) + '</div></div>' +
+            '<div class="text-left shrink-0"><div class="text-sm font-black ' + (neg ? 'text-rose-600' : 'text-amber-700') + '">' + fmt(Math.abs(inv.total)) + ' ج.م</div>' +
+            '<div class="text-[10px] text-slate-500">' + inv.lines.length + ' صنف' + (status ? ' • ' + status : '') + '</div></div>' +
+          '</summary>' +
+          '<div class="border-t border-slate-200 p-3 space-y-2">' +
+            '<table class="w-full text-[11px] text-right"><thead class="text-slate-500"><tr><th class="px-1">#</th><th class="px-1">الصنف</th><th class="px-1">الكمية</th><th class="px-1">سعر الوحدة</th><th class="px-1">الإجمالي</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+            '<div class="grid grid-cols-2 gap-1.5 text-[11px]">' +
+              '<div class="bg-slate-50 rounded-lg px-2 py-1">المورد: <b>' + escHtml(inv.supplier) + '</b></div>' +
+              '<div class="bg-slate-50 rounded-lg px-2 py-1">الإجمالي: <b>' + fmt(Math.abs(inv.total)) + '</b></div>' +
+              (neg ? '' : '<div class="bg-slate-50 rounded-lg px-2 py-1">المدفوع: <b class="text-emerald-700">' + fmt(inv.paid) + '</b></div>' +
+              '<div class="bg-slate-50 rounded-lg px-2 py-1">المتبقي: <b class="' + (inv.remaining > 0 ? 'text-rose-600' : 'text-slate-700') + '">' + fmt(inv.remaining) + '</b></div>' +
+              (inv.profit ? '<div class="bg-slate-50 rounded-lg px-2 py-1 col-span-2">الربح المتوقع: <b class="text-sky-700">' + fmt(inv.profit) + '</b></div>' : '')) +
+            '</div>' +
+            '<div class="flex gap-2">' +
+              '<button type="button" data-act="wa" data-key="' + escHtml(inv.key) + '" class="flex-1 bg-emerald-600 text-white font-bold py-2 rounded-xl text-[11px]">📲 واتساب</button>' +
+              '<button type="button" data-act="print" data-key="' + escHtml(inv.key) + '" class="flex-1 bg-slate-700 text-white font-bold py-2 rounded-xl text-[11px]">🖨️ طباعة</button>' +
+            '</div>' +
+          '</div></details>';
+      }).join('');
+      byId('piMore').classList.toggle('hidden', f.length <= piLimit);
+      byId('piMore').textContent = 'عرض المزيد ⬇️ (' + (f.length - piLimit) + ' فاتورة)';
+    }
+    ['piSearch', 'piFrom', 'piTo', 'piSup', 'piType'].forEach(function (id) {
+      byId(id).addEventListener(id === 'piSearch' ? 'input' : 'change', function () { piLimit = 40; renderPurchaseInvoices(); });
+    });
+    document.querySelectorAll('.pi-range').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var r = invRangeDates(b.getAttribute('data-pi-range'));
+        byId('piFrom').value = r[0]; byId('piTo').value = r[1];
+        piLimit = 40; renderPurchaseInvoices();
+      });
+    });
+    byId('piMore').addEventListener('click', function () { piLimit += 40; renderPurchaseInvoices(); });
+    byId('piList').addEventListener('click', function (e) {
+      var btn = e.target.closest('button[data-act]'); if (!btn) return;
+      var inv = piCache[btn.getAttribute('data-key')]; if (!inv) return;
+      if (btn.getAttribute('data-act') === 'wa') window.open('https://wa.me/?text=' + encodeURIComponent(purchaseInvoiceText(inv)), '_blank');
+      else purchaseInvoicePrint(inv);
+    });
+    function showInvView(mode) {
+      byId('invHome').classList.toggle('hidden', mode !== 'home');
+      byId('invSalesView').classList.toggle('hidden', mode !== 'sales');
+      byId('invPurchView').classList.toggle('hidden', mode !== 'purch');
+      if (mode === 'sales') renderSalesInvoices();
+      if (mode === 'purch') renderPurchaseInvoices();
+      window.scrollTo(0, 0);
+    }
+    function showInvoicesHome() {
+      try {
+        var sc = groupSalesInvoices().filter(function (i) { return !i.isReturn; }).length;
+        byId('invSalesCount').textContent = sc + ' فاتورة';
+        byId('invPurchCount').textContent = state.purchases.filter(function (p) { return !p.isReturn; }).length + ' فاتورة';
+      } catch (e) {}
+      showInvView('home');
+    }
+    byId('btnInvSales').addEventListener('click', function () { showInvView('sales'); });
+    byId('btnInvPurch').addEventListener('click', function () { showInvView('purch'); });
+    document.querySelectorAll('.inv-back').forEach(function (b) { b.addEventListener('click', showInvoicesHome); });
+    function refreshInvoicePages() {
+      var t = byId('tab-invoices');
+      if (!t || t.classList.contains('hidden')) return;
+      if (!byId('invSalesView').classList.contains('hidden')) renderSalesInvoices();
+      else if (!byId('invPurchView').classList.contains('hidden')) renderPurchaseInvoices();
+      else showInvoicesHome();
+    }
 
     // Init
     if (document.getElementById('purchaseTableBody') && document.getElementById('purchaseTableBody').children.length === 0) {
