@@ -7,6 +7,7 @@
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     body {
@@ -21,6 +22,8 @@
       -webkit-font-smoothing: antialiased;
       font-variant-numeric: tabular-nums;
     }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     .tile-press:active {
       transform: scale(0.96);
     }
@@ -76,6 +79,7 @@
       </div>
       <div class="flex items-center gap-2">
         <button id="btnLivePull" type="button" title="تحديث من التليفون التاني" class="hidden px-2.5 py-2 rounded-xl text-xs font-extrabold border border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition">🔄</button>
+        <button id="btnShiftToggle" type="button" class="px-3 py-2 rounded-xl text-xs font-extrabold border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition whitespace-nowrap">🌙 شيفت الليل</button>
         <button id="sbStatus" type="button" title="مزامنة Supabase — اضغط للمزامنة الآن" class="px-2.5 py-2 rounded-xl text-xs font-extrabold border border-slate-300 bg-slate-50 text-slate-600 whitespace-nowrap">☁️</button>
         <div id="userChip" class="px-2.5 py-2 rounded-xl text-xs font-extrabold border border-indigo-200 bg-indigo-50 text-indigo-700 whitespace-nowrap max-w-[130px] truncate"></div>
         <button id="btnLogout" type="button" title="تسجيل خروج" class="px-2.5 py-2 rounded-xl text-xs font-extrabold border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 transition whitespace-nowrap">🚪 خروج</button>
@@ -85,38 +89,42 @@
 
   <!-- Top Navigation (below header so free host bottom banners never cover it) -->
   <nav id="mainNav" class="sticky top-[64px] z-20 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
-    <div class="max-w-4xl mx-auto grid grid-cols-4 sm:grid-cols-8">
-      <button type="button" data-tab="sales" class="nav-btn py-2 flex flex-col items-center gap-0.5 text-sky-600 font-bold">
+    <div class="max-w-4xl mx-auto flex items-center justify-between overflow-x-auto no-scrollbar gap-0.5 px-1">
+      <button type="button" data-tab="sales" class="nav-btn shrink-0 px-2.5 py-1.5 flex flex-col items-center gap-0.5 text-sky-600 font-bold">
         <span class="text-lg">🛒</span>
         <span class="text-[10px]">المبيعات</span>
       </button>
-      <button type="button" data-tab="purchases" class="nav-btn py-2 flex flex-col items-center gap-0.5 text-slate-500">
+      <button type="button" data-tab="purchases" class="nav-btn shrink-0 px-2.5 py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
         <span class="text-lg">🚚</span>
         <span class="text-[10px]">المشتريات</span>
       </button>
-      <button type="button" data-tab="expenses" class="nav-btn py-2 flex flex-col items-center gap-0.5 text-slate-500">
+      <button type="button" data-tab="expenses" class="nav-btn shrink-0 px-2.5 py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
         <span class="text-lg">💸</span>
         <span class="text-[10px]">المصروفات</span>
       </button>
-      <button type="button" data-tab="debts" class="nav-btn py-2 flex flex-col items-center gap-0.5 text-slate-500">
+      <button type="button" data-tab="debts" class="nav-btn shrink-0 px-2.5 py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
         <span class="text-lg">📒</span>
         <span class="text-[10px]">الديون</span>
       </button>
-      <button type="button" data-tab="stats" class="nav-btn py-2 flex flex-col items-center gap-0.5 text-slate-500">
+      <button type="button" data-tab="stats" class="nav-btn shrink-0 px-2.5 py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
         <span class="text-lg">📊</span>
         <span class="text-[10px]">الإحصائيات</span>
       </button>
-      <button type="button" data-tab="mirror" class="nav-btn py-2 flex flex-col items-center gap-0.5 text-slate-500">
+      <button type="button" data-tab="mirror" class="nav-btn shrink-0 px-2.5 py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
         <span class="text-lg">🪞</span>
         <span class="text-[10px]">المراية</span>
       </button>
-      <button type="button" data-tab="growth" class="nav-btn py-2 flex flex-col items-center gap-0.5 text-slate-500">
+      <button type="button" data-tab="growth" class="nav-btn shrink-0 px-2.5 py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
         <span class="text-lg">📈</span>
         <span class="text-[10px]">النمو</span>
       </button>
-      <button type="button" data-tab="settings" class="nav-btn py-2 flex flex-col items-center gap-0.5 text-slate-500">
+      <button type="button" data-tab="settings" class="nav-btn shrink-0 px-2.5 py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
         <span class="text-lg">⚙️</span>
         <span class="text-[10px]">الإعدادات</span>
+      </button>
+      <button type="button" data-tab="items" class="nav-btn shrink-0 px-2.5 py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
+        <span class="text-lg">📦</span>
+        <span class="text-[10px]">الأصناف</span>
       </button>
     </div>
   </nav>
@@ -222,6 +230,27 @@
       </div>
     </section>
 
+        <!-- TAB: الأصناف (دليل كامل لكل صنف ببياناته وأسعار الموردين) -->
+    <section id="tab-items" class="hidden space-y-4">
+      <div class="bg-white border border-slate-200 shadow-sm rounded-2xl p-3.5 space-y-2.5">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 class="text-base font-black text-sky-700">📦 دليل الأصناف الشامل</h2>
+            <p class="text-[11px] text-slate-500">كل صنف بكامل بياناته والمخزون وأسعار الموردين</p>
+          </div>
+          <button id="btnDirWaLow" type="button" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs">📲 واتساب النواقص بالموردين</button>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <input id="itemsDirSearch" type="text" placeholder="🔍 ابحث بالاسم أو الباركود..." class="flex-1 min-w-[160px] bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900">
+          <select id="itemsDirCat" class="bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-900">
+            <option value="الكل">كل الأقسام</option>
+          </select>
+          <button id="btnItemsDirLowOnly" type="button" class="px-3 py-2 rounded-xl text-xs font-bold border border-slate-300 bg-white text-slate-700">⚠️ النواقص فقط</button>
+        </div>
+      </div>
+      <div id="itemsDirList" class="space-y-2.5"></div>
+    </section>
+
     <!-- TAB 2: المشتريات والموردين -->
     <section id="tab-purchases" class="hidden space-y-4">
       <div class="bg-white border border-slate-200 shadow-sm rounded-2xl p-4 space-y-3">
@@ -231,8 +260,9 @@
             + مورد جديد
           </button>
         </div>
-        <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl border border-slate-200">
+        <div class="grid grid-cols-3 gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200">
           <button id="pModeBuyBtn" type="button" class="py-2 rounded-lg text-xs font-bold bg-emerald-500 text-slate-950 transition">فاتورة شراء</button>
+          <button id="pModeOrderBtn" type="button" class="py-2 rounded-lg text-xs font-bold text-slate-600 transition">📝 طلب فاتورة</button>
           <button id="pModeReturnBtn" type="button" class="py-2 rounded-lg text-xs font-bold text-slate-600 transition">↩️ مرتجع للمورد</button>
         </div>
 
@@ -245,9 +275,7 @@
         <div id="purchaseTableBody" class="space-y-2.5"></div>
 
         <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
-          <button id="btnAddPurchaseRows" type="button" class="bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 font-bold text-xs px-3.5 py-2.5 rounded-xl">
-            + إضافة 10 سطور
-          </button>
+          <span class="text-[11px] font-bold text-emerald-700">✨ يفتح صف جديد تلقائياً عند كتابة الصنف</span>
           <div class="text-sm font-extrabold text-amber-600">
             إجمالي الفاتورة: <span id="pTableTotal">0.00</span> ج.م
             <span class="text-xs font-normal text-emerald-600 mr-2">(ربح متوقع: <span id="pTableProfit">0.00</span>)</span>
@@ -265,6 +293,10 @@
           </div>
         </div>
 
+        <div id="pOrderActionsBox" class="hidden grid grid-cols-2 gap-2">
+          <button id="btnSendOrderWa" type="button" class="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-3 rounded-xl text-xs">📲 إرسال الطلبية واتساب</button>
+          <button id="btnExportOrderXlsx" type="button" class="bg-sky-600 hover:bg-sky-500 text-white font-extrabold py-2.5 px-3 rounded-xl text-xs">📥 تصدير الطلبية Excel</button>
+        </div>
         <button id="btnSaveFullInvoice" type="button" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold py-3 rounded-xl transition">
           ✅ حفظ الفاتورة بالكامل وتحديث المخزون
         </button>
@@ -383,6 +415,10 @@
 
       <!-- SUB-PAGE 1: الملخص المالي -->
       <div id="statsSubSummary" class="space-y-4">
+        <div class="bg-emerald-50 border border-emerald-300 rounded-2xl p-3 space-y-2">
+          <div class="text-xs font-black text-emerald-900">💰 كسبت كام؟ (صافي ربح المحل بعد المصروفات التشغيلية)</div>
+          <div id="profitQuickCards" class="grid grid-cols-1 sm:grid-cols-3 gap-2"></div>
+        </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="kpiCards"></div>
         <div class="grid grid-cols-3 gap-2.5" id="ratioCards"></div>
         <div class="bg-white border border-slate-200 shadow-sm rounded-2xl p-4">
@@ -711,10 +747,12 @@
         <span class="text-xs font-bold">📷 ماسح الباركود بالكاميرا</span>
         <button type="button" id="btnCloseBarcodeScanner" class="text-xs bg-slate-700 px-2.5 py-1 rounded-lg font-bold">✕ إغلاق</button>
       </div>
-      <div class="bg-black relative">
+      <div id="barcodeVideoWrap" class="bg-black relative">
         <video id="barcodeScanVideo" autoplay playsinline muted class="w-full max-h-64 object-cover"></video>
         <div class="absolute inset-x-8 top-1/2 -translate-y-1/2 h-16 border-2 border-emerald-400 rounded-xl pointer-events-none"></div>
       </div>
+      <div id="barcodeReader" class="hidden w-full bg-black"></div>
+      <div id="barcodeFileTmp" class="hidden"></div>
       <div class="p-3 space-y-2 bg-white">
         <p id="barcodeScanHint" class="text-[11px] font-bold text-slate-600 text-center">وجّه الكاميرا على باركود المنتج...</p>
         <label class="block w-full text-center cursor-pointer bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300 font-bold py-2 rounded-xl text-xs">
@@ -1006,6 +1044,10 @@
           <input id="newItemPackSell" type="number" step="any" min="0" placeholder="سعرها" class="bg-white border border-slate-300 rounded-lg px-2 py-2 text-slate-900 text-xs">
         </div>
       </div>
+      <div id="itemSupplierPricesBox" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 space-y-1.5">
+        <div class="text-[11px] font-extrabold text-emerald-800">🚚 كارت أسعار الموردين لهذا الصنف:</div>
+        <div id="itemSupplierPricesList" class="space-y-1 max-h-36 overflow-y-auto text-[11px]"></div>
+      </div>
       <div class="flex gap-2 pt-1">
         <button type="submit" class="flex-1 bg-sky-500 hover:bg-sky-400 text-slate-950 font-extrabold py-3 rounded-xl">حفظ الصنف</button>
         <button id="btnDeleteItem" type="button" class="hidden bg-rose-600 hover:bg-rose-500 text-white font-bold px-3.5 py-3 rounded-xl">🗑️ حذف</button>
@@ -1176,7 +1218,7 @@
     document.querySelectorAll('.nav-btn').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var target = btn.getAttribute('data-tab');
-        ['sales', 'purchases', 'expenses', 'debts', 'stats', 'mirror', 'growth', 'settings'].forEach(function (t) {
+        ['sales', 'items', 'purchases', 'expenses', 'debts', 'stats', 'mirror', 'growth', 'settings'].forEach(function (t) {
           document.getElementById('tab-' + t).classList.toggle('hidden', t !== target);
         });
         document.querySelectorAll('.nav-btn').forEach(function (b) {
@@ -1186,6 +1228,7 @@
           b.classList.toggle('text-slate-500', !active);
         });
         if (target === 'stats') renderStats();
+        if (target === 'items') renderItemsDirectory();
         if (target === 'mirror') renderMirror();
         if (target === 'growth') renderGrowth();
         if (target === 'debts') renderDebts();
@@ -1245,7 +1288,7 @@
           : '<div class="w-full h-20 rounded-xl bg-sky-50/80 border border-sky-100 flex items-center justify-center text-3xl mb-2">🧴</div>';
         btn.className = 'relative tile-press bg-white hover:bg-sky-50/40 border border-slate-200 hover:border-sky-400 rounded-2xl p-2.5 text-center flex flex-col items-center justify-between min-h-[168px] transition shadow-sm';
         btn.innerHTML =
-          '<span class="edit-item-btn absolute top-3.5 left-3.5 z-10 w-7 h-7 rounded-lg bg-white/90 shadow border border-slate-200 hover:bg-sky-500 hover:text-white text-xs flex items-center justify-center" title="تعديل الصنف">✏️</span>' +
+          
           imgHtml +
           '<span class="text-sm sm:text-base font-extrabold text-slate-900 leading-snug line-clamp-2">' + it.name + '</span>' +
           '<div class="mt-1.5 w-full space-y-1">' +
@@ -1254,10 +1297,7 @@
               ? ('<div class="text-[11px] font-bold mt-0.5 ' + stkCls + '">العرض: ' + stk.toFixed(stk % 1 === 0 ? 0 : 2) + ' | <span class="text-amber-700">الكراتين: ' + (Number(it.warehouseStock) || 0) + '</span></div>')
               : ('<div class="text-[11px] font-bold mt-0.5 ' + stkCls + '">المخزون: ' + stk.toFixed(stk % 1 === 0 ? 0 : 2) + '</div>')) +
           '</div>';
-        btn.querySelector('.edit-item-btn').addEventListener('click', function (ev) {
-          ev.stopPropagation();
-          openEditItemModal(it);
-        });
+
         btn.addEventListener('click', function () { openSaleModal(it); });
         grid.appendChild(btn);
       });
@@ -1735,8 +1775,10 @@
         }
         row.querySelector('.del-sale-btn').addEventListener('click', function () {
           state.sales = state.sales.filter(function (x) { return x.id !== s.id; });
+          syncToSheet({ type: 'delete_record', target: 'sale', id: s.id });
           saveState();
           renderSalesLog();
+          setTimeout(pushCloudSnapshot, 200);
         });
         box.appendChild(row);
       });
@@ -1775,6 +1817,43 @@
     document.getElementById('newItemCam').addEventListener('change', handleItemImageFile);
 
     var editingItemId = null;
+        function renderItemSupplierPrices(itemName) {
+      var list = document.getElementById('itemSupplierPricesList');
+      if (!list) return;
+      var bySup = {};
+      state.purchases.forEach(function (p) {
+        if (p.isReturn) return;
+        var sup = p.supplier || 'غير محدد';
+        var lines = Array.isArray(p.items) ? p.items : [{ itemName: p.itemName, qty: p.qty, costPrice: p.costPrice, totalCost: p.totalCost }];
+        lines.forEach(function (ln) {
+          if (ln.itemName === itemName) {
+            var q = Number(ln.qty) || 0;
+            var uc = Number(ln.costPrice) || (q > 0 ? (Number(ln.totalCost) / q) : 0);
+            if (!bySup[sup]) {
+              bySup[sup] = { supplier: sup, lastPrice: uc, lastDate: p.date || '', minPrice: uc, maxPrice: uc, count: 0 };
+            }
+            bySup[sup].count += 1;
+            if (uc > 0 && uc < bySup[sup].minPrice) bySup[sup].minPrice = uc;
+            if (uc > bySup[sup].maxPrice) bySup[sup].maxPrice = uc;
+          }
+        });
+      });
+      var entries = Object.keys(bySup).map(function (k) { return bySup[k]; }).sort(function (a, b) { return a.lastPrice - b.lastPrice; });
+      if (entries.length === 0) {
+        list.innerHTML = '<div class="text-slate-500 text-center py-1">لم يتم تسجيل فواتير شراء لهذا الصنف بعد</div>';
+        return;
+      }
+      var cheapest = entries[0].lastPrice;
+      list.innerHTML = entries.map(function (e, i) {
+        var badge = (i === 0 && entries.length > 1) ? '<span class="bg-emerald-600 text-white px-1.5 py-0.5 rounded text-[9px] font-bold">الأرخص 🏆</span>' : '';
+        return '<div class="bg-white border border-emerald-200 rounded-lg px-2 py-1.5 flex items-center justify-between gap-2">' +
+          '<div><span class="font-extrabold text-slate-900">' + e.supplier + '</span> ' + badge + '<div class="text-[10px] text-slate-500">آخر فاتورة: ' + e.lastDate + ' (' + e.count + ' مرة)</div></div>' +
+          '<div class="text-left"><div class="font-black text-emerald-700">' + fmt(e.lastPrice) + ' ج.م</div>' +
+          (e.minPrice !== e.maxPrice ? '<div class="text-[9px] text-slate-500">من ' + fmt(e.minPrice) + ' إلى ' + fmt(e.maxPrice) + '</div>' : '') +
+          '</div></div>';
+      }).join('');
+    }
+
     function openEditItemModal(it) {
       editingItemId = it.id;
       document.getElementById('addItemModalTitle').textContent = 'تعديل الصنف';
@@ -1794,6 +1873,8 @@
       var prev = document.getElementById('newItemImgPreview');
       if (pendingItemImg) { prev.src = pendingItemImg; prev.classList.remove('hidden'); }
       else { prev.classList.add('hidden'); }
+      renderItemSupplierPrices(it.name);
+      document.getElementById('itemSupplierPricesBox').classList.remove('hidden');
       document.getElementById('btnDeleteItem').classList.remove('hidden');
       document.getElementById('addItemModal').classList.remove('hidden');
     }
@@ -1807,6 +1888,7 @@
       document.getElementById('newItemWarehouseBox').classList.toggle('hidden', document.getElementById('newItemCat').value !== 'ادوات نظافة');
       pendingItemImg = '';
       document.getElementById('newItemImgPreview').classList.add('hidden');
+      document.getElementById('itemSupplierPricesBox').classList.add('hidden');
       document.getElementById('btnDeleteItem').classList.add('hidden');
       document.getElementById('addItemModal').classList.remove('hidden');
     });
@@ -1873,6 +1955,7 @@
     }
 
     function renderDatalist() {
+      if (typeof renderItemsDirectory === 'function' && document.getElementById('tab-items') && !document.getElementById('tab-items').classList.contains('hidden')) renderItemsDirectory();
       var dl = document.getElementById('itemsDatalist');
       dl.innerHTML = '';
       state.items.forEach(function (it) {
@@ -1894,15 +1977,17 @@
             '<input type="text" autocomplete="off" placeholder="اكتب اسم الصنف..." class="p-name flex-1 min-w-0 bg-white border border-slate-300 rounded-lg px-2.5 py-2 text-slate-900 text-xs font-bold">' +
             '<div class="p-suggest hidden absolute right-8 left-0 top-full z-40 mt-0.5 bg-white border border-sky-400 rounded-lg shadow-xl max-h-44 overflow-y-auto"></div>' +
           '</div>' +
+          '<div class="p-cheaper-alert hidden text-[11px] font-extrabold text-amber-800 bg-amber-100 border border-amber-300 rounded-lg px-2 py-1"></div>' +
           '<div class="grid grid-cols-3 gap-1.5 text-[11px]">' +
-            '<div><label class="block text-slate-500 font-bold mb-0.5">الكمية</label><input type="number" step="any" min="0" placeholder="1" class="p-qty w-full bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-slate-900 text-xs text-center font-bold"></div>' +
+            '<div><label class="block text-slate-500 font-bold mb-0.5">الكمية (كبيرة)</label><input type="number" step="any" min="0" placeholder="1" class="p-qty w-full bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-slate-900 text-xs text-center font-bold"></div>' +
             '<div><label class="block text-slate-500 font-bold mb-0.5">عدد الوحدات</label><input type="number" step="any" min="1" placeholder="1" class="p-pack w-full bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-slate-900 text-xs text-center font-bold"></div>' +
-            '<div><label class="block text-slate-500 font-bold mb-0.5">إجمالي الشراء</label><input type="number" step="any" min="0" placeholder="0" class="p-total w-full bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-slate-900 text-xs text-center font-extrabold"></div>' +
+            '<div><label class="block text-slate-500 font-bold mb-0.5">سعر الوحدة الكبيرة</label><input type="number" step="any" min="0" placeholder="0" class="p-pack-cost w-full bg-white border border-sky-400 rounded-lg px-2 py-1.5 text-slate-900 text-xs text-center font-extrabold"></div>' +
           '</div>' +
-          '<div class="grid grid-cols-3 gap-1.5 items-center text-[11px] pt-1 border-t border-slate-200">' +
-            '<div class="bg-white border border-slate-200 rounded-lg px-2 py-1 text-center"><span class="block text-[10px] text-slate-400">شراء الوحدة</span><span class="p-unit-cost font-extrabold text-amber-600">0.00</span></div>' +
-            '<div><label class="block text-[10px] text-slate-500 font-bold mb-0.5">بيع الوحدة</label><input type="number" step="any" min="0" placeholder="0" class="p-sell w-full bg-white border border-slate-300 rounded-lg px-2 py-1 text-slate-900 text-xs text-center font-bold"></div>' +
-            '<div class="bg-white border border-slate-200 rounded-lg px-2 py-1 text-center"><span class="block text-[10px] text-slate-400">نسبة الربح</span><span class="p-margin font-extrabold text-slate-400">—</span></div>' +
+          '<div class="grid grid-cols-4 gap-1.5 items-center text-[11px] pt-1 border-t border-slate-200">' +
+            '<div class="bg-white border border-slate-200 rounded-lg px-1.5 py-1 text-center"><span class="block text-[10px] text-slate-400">الإجمالي</span><span class="p-row-total font-extrabold text-sky-700">0.00</span></div>' +
+            '<div class="bg-white border border-slate-200 rounded-lg px-1.5 py-1 text-center"><span class="block text-[10px] text-slate-400">شراء الوحدة</span><span class="p-unit-cost font-extrabold text-amber-600">0.00</span></div>' +
+            '<div><label class="block text-[10px] text-slate-500 font-bold mb-0.5">بيع الوحدة</label><input type="number" step="any" min="0" placeholder="0" class="p-sell w-full bg-white border border-slate-300 rounded-lg px-1.5 py-1 text-slate-900 text-xs text-center font-bold"></div>' +
+            '<div class="bg-white border border-slate-200 rounded-lg px-1.5 py-1 text-center"><span class="block text-[10px] text-slate-400">الربح %</span><span class="p-margin font-extrabold text-slate-400">—</span></div>' +
           '</div>';
 
         (function (rowEl) {
@@ -1910,7 +1995,7 @@
           var sugBox = rowEl.querySelector('.p-suggest');
           var qtyInp = rowEl.querySelector('.p-qty');
           var packInp = rowEl.querySelector('.p-pack');
-          var totalInp = rowEl.querySelector('.p-total');
+          var packCostInp = rowEl.querySelector('.p-pack-cost');
           var sellInp = rowEl.querySelector('.p-sell');
 
           function showSuggestions() {
@@ -1929,7 +2014,15 @@
                 if (!qtyInp.value) qtyInp.value = 1;
                 packInp.value = (it.packFactor && it.packFactor > 0) ? it.packFactor : 1;
                 sellInp.value = it.sell || '';
+                if (purchaseMode === 'order' && it.buy > 0) {
+                  var pv = parseFloat(packInp.value) || 1;
+                  packCostInp.value = Number((pv * it.buy).toFixed(2));
+                }
                 sugBox.classList.add('hidden');
+                var allRows = document.querySelectorAll('#purchaseTableBody .p-row');
+                if (allRows.length > 0 && rowEl === allRows[allRows.length - 1]) {
+                  addPurchaseRows(1);
+                }
                 recalcPurchaseTable();
               });
               sugBox.appendChild(opt);
@@ -1937,7 +2030,13 @@
             sugBox.classList.remove('hidden');
           }
           nameInp.addEventListener('focus', showSuggestions);
-          nameInp.addEventListener('input', showSuggestions);
+          nameInp.addEventListener('input', function () {
+            showSuggestions();
+            var allRows = document.querySelectorAll('#purchaseTableBody .p-row');
+            if (allRows.length > 0 && rowEl === allRows[allRows.length - 1] && nameInp.value.trim().length > 0) {
+              addPurchaseRows(1);
+            }
+          });
           nameInp.addEventListener('blur', function () {
             setTimeout(function () { sugBox.classList.add('hidden'); }, 150);
             var exact = state.items.find(function (x) { return x.name === nameInp.value.trim(); });
@@ -1948,7 +2047,7 @@
               recalcPurchaseTable();
             }
           });
-          [qtyInp, packInp, totalInp, sellInp].forEach(function (el) {
+          [qtyInp, packInp, packCostInp, sellInp].forEach(function (el) {
             el.addEventListener('input', recalcPurchaseTable);
           });
         })(tr);
@@ -1957,16 +2056,47 @@
       }
     }
 
+    function checkCheaperSupplierForRow(rowEl) {
+      var alertEl = rowEl.querySelector('.p-cheaper-alert');
+      if (!alertEl) return;
+      var itemName = rowEl.querySelector('.p-name').value.trim();
+      var curSup = document.getElementById('pSupplier').value;
+      if (!itemName || typeof getItemSupplierStats !== 'function') {
+        alertEl.classList.add('hidden');
+        return;
+      }
+      var sups = getItemSupplierStats(itemName);
+      if (sups.length === 0) {
+        alertEl.classList.add('hidden');
+        return;
+      }
+      var cheapest = sups[0];
+      var curRec = sups.find(function (s) { return s.supplier === curSup; });
+      if (cheapest.supplier !== curSup && (!curRec || cheapest.lastPrice < curRec.lastPrice)) {
+        alertEl.textContent = '💡 تنبيه: جبته أرخص من (' + cheapest.supplier + ') بـ ' + fmt(cheapest.lastPrice) + ' ج.م' + (curRec ? (' بدل ' + fmt(curRec.lastPrice) + ' عند ' + curSup) : '');
+        alertEl.classList.remove('hidden');
+      } else {
+        alertEl.classList.add('hidden');
+      }
+    }
+    document.getElementById('pSupplier').addEventListener('change', function () {
+      document.querySelectorAll('#purchaseTableBody .p-row').forEach(checkCheaperSupplierForRow);
+    });
+
     function recalcPurchaseTable() {
       var rows = document.querySelectorAll('#purchaseTableBody .p-row');
       var sumCost = 0, sumProfit = 0;
       rows.forEach(function (tr) {
+        checkCheaperSupplierForRow(tr);
         var q = parseFloat(tr.querySelector('.p-qty').value) || 0;
         var pk = parseFloat(tr.querySelector('.p-pack').value) || 1;
-        var rc = parseFloat(tr.querySelector('.p-total').value) || 0;
+        var packCost = parseFloat(tr.querySelector('.p-pack-cost').value) || 0;
         var sl = parseFloat(tr.querySelector('.p-sell').value) || 0;
         var totalUnits = q * pk;
-        var unitCost = totalUnits > 0 ? (rc / totalUnits) : 0;
+        var rc = q * packCost;
+        var unitCost = pk > 0 ? (packCost / pk) : 0;
+        var rtCell = tr.querySelector('.p-row-total');
+        if (rtCell) rtCell.textContent = fmt(rc);
         var ucCell = tr.querySelector('.p-unit-cost');
         var pNm = tr.querySelector('.p-name').value.trim();
         var exIt = state.items.find(function (x) { return x.name === pNm; });
@@ -1999,9 +2129,7 @@
     }
     document.getElementById('pPaidAmount').addEventListener('input', recalcPurchaseTable);
 
-    document.getElementById('btnAddPurchaseRows').addEventListener('click', function () {
-      addPurchaseRows(10);
-    });
+    
 
     document.getElementById('btnOpenAddSupplier').addEventListener('click', function () {
       document.getElementById('addSupplierModal').classList.remove('hidden');
@@ -2026,14 +2154,22 @@
     function setPurchaseMode(m) {
       purchaseMode = m;
       var isBuy = m === 'buy';
+      var isOrd = m === 'order';
+      var isRet = m === 'return';
       document.getElementById('pModeBuyBtn').className = 'py-2 rounded-lg text-xs font-bold transition ' + (isBuy ? 'bg-emerald-500 text-slate-950' : 'text-slate-600');
-      document.getElementById('pModeReturnBtn').className = 'py-2 rounded-lg text-xs font-bold transition ' + (!isBuy ? 'bg-rose-500 text-white' : 'text-slate-600');
-      document.getElementById('pSectionTitle').textContent = isBuy ? 'فاتورة شراء (جدول أصناف)' : '↩️ مرتجع شراء للمورد';
+      document.getElementById('pModeOrderBtn').className = 'py-2 rounded-lg text-xs font-bold transition ' + (isOrd ? 'bg-sky-500 text-slate-950' : 'text-slate-600');
+      document.getElementById('pModeReturnBtn').className = 'py-2 rounded-lg text-xs font-bold transition ' + (isRet ? 'bg-rose-500 text-white' : 'text-slate-600');
+      document.getElementById('pSectionTitle').textContent = isBuy ? 'فاتورة شراء (جدول أصناف)' : (isOrd ? '📝 تجهيز طلب فاتورة للمورد' : '↩️ مرتجع شراء للمورد');
+      document.getElementById('pOrderActionsBox').classList.toggle('hidden', !isOrd);
       var btn = document.getElementById('btnSaveFullInvoice');
-      btn.textContent = isBuy ? '✅ حفظ الفاتورة بالكامل وتحديث المخزون' : '↩️ حفظ مرتجع المورد وخصمه من المخزون';
-      btn.className = 'w-full font-extrabold py-3 rounded-xl transition ' + (isBuy ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950' : 'bg-rose-500 hover:bg-rose-600 text-white');
+      btn.classList.toggle('hidden', isOrd);
+      if (!isOrd) {
+        btn.textContent = isBuy ? '✅ حفظ الفاتورة بالكامل وتحديث المخزون' : '↩️ حفظ مرتجع المورد وخصمه من المخزون';
+        btn.className = 'w-full font-extrabold py-3 rounded-xl transition ' + (isBuy ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950' : 'bg-rose-500 hover:bg-rose-600 text-white');
+      }
     }
     document.getElementById('pModeBuyBtn').addEventListener('click', function () { setPurchaseMode('buy'); });
+    document.getElementById('pModeOrderBtn').addEventListener('click', function () { setPurchaseMode('order'); });
     document.getElementById('pModeReturnBtn').addEventListener('click', function () { setPurchaseMode('return'); });
 
     document.getElementById('btnSaveFullInvoice').addEventListener('click', function () {
@@ -2043,13 +2179,14 @@
         var itemName = tr.querySelector('.p-name').value.trim();
         var qty = parseFloat(tr.querySelector('.p-qty').value) || 0;
         var pack = parseFloat(tr.querySelector('.p-pack').value) || 1;
-        var rowTotal = parseFloat(tr.querySelector('.p-total').value) || 0;
+        var packCost = parseFloat(tr.querySelector('.p-pack-cost').value) || 0;
+        var rowTotal = qty * packCost;
         var sell = parseFloat(tr.querySelector('.p-sell').value) || 0;
         var totalUnits = qty * pack;
         if (itemName && totalUnits > 0 && rowTotal >= 0) {
           var unitCost = Number((rowTotal / totalUnits).toFixed(2));
           itemsList.push({
-            itemName: itemName, unit: 'وحدة', qty: totalUnits,
+            itemName: itemName, unit: 'وحدة', qty: totalUnits, packFactor: pack,
             costPrice: unitCost, expectedSellPrice: sell,
             totalCost: rowTotal, expectedProfit: sell > 0 ? ((totalUnits * sell) - rowTotal) : 0
           });
@@ -2074,11 +2211,21 @@
             if (line.expectedSellPrice > 0) existing.sell = line.expectedSellPrice;
           }
           existing.stock = Number(((Number(existing.stock) || 0) + (line.qty * sign)).toFixed(3));
+          // أول مرة تتكتب "عدد الوحدات" للصنف: نحفظها عليه (الكرتونة/الباكت = كام وحدة)
+          if (!isRet && line.packFactor > 1 && !(Number(existing.packFactor) > 0)) {
+            existing.packName = existing.packName || 'كرتونة';
+            existing.packFactor = line.packFactor;
+            existing.packSell = (Number(existing.sell) > 0) ? Number((existing.sell * line.packFactor).toFixed(2)) : 0;
+          }
         } else if (!isRet) {
+          var hasPk = line.packFactor > 1;
           state.items.push({
             id: 'i' + Date.now() + Math.floor(Math.random() * 1000),
             name: line.itemName, unit: 'قطعة', cat: 'اخرى',
-            buy: line.costPrice, sell: line.expectedSellPrice, stock: line.qty, img: ''
+            buy: line.costPrice, sell: line.expectedSellPrice, stock: line.qty, img: '',
+            packName: hasPk ? 'كرتونة' : '',
+            packFactor: hasPk ? line.packFactor : 0,
+            packSell: (hasPk && line.expectedSellPrice > 0) ? Number((line.expectedSellPrice * line.packFactor).toFixed(2)) : 0
           });
         }
         return {
@@ -2121,7 +2268,7 @@
 
       document.getElementById('pPaidAmount').value = '';
       document.getElementById('purchaseTableBody').innerHTML = '';
-      addPurchaseRows(5);
+      addPurchaseRows(2);
       recalcPurchaseTable();
       saveState();
       renderItemsGrid();
@@ -2179,8 +2326,10 @@
         }
         row.querySelector('.del-purch-btn').addEventListener('click', function () {
           state.purchases = state.purchases.filter(function (x) { return x.id !== p.id; });
+          syncToSheet({ type: 'delete_record', target: 'purchase', id: p.id });
           saveState();
           renderPurchasesLog();
+          setTimeout(pushCloudSnapshot, 200);
         });
         box.appendChild(row);
       });
@@ -2238,8 +2387,10 @@
           '</div>';
         row.querySelector('button').addEventListener('click', function () {
           state.expenses = state.expenses.filter(function (x) { return x.id !== ex.id; });
+          syncToSheet({ type: 'delete_record', target: 'expense', id: ex.id });
           saveState();
           renderExpenses();
+          setTimeout(pushCloudSnapshot, 200);
         });
         list.appendChild(row);
       });
@@ -2569,6 +2720,44 @@
     }
 
     function renderStats() {
+      // Live "كسبت كام؟" (اليوم / آخر 7 أيام / هذا الشهر)
+      var pqBox = document.getElementById('profitQuickCards');
+      if (pqBox) {
+        var tDay = todayStr();
+        var tMon = tDay.slice(0, 7);
+        var dObj = new Date();
+        dObj.setDate(dObj.getDate() - 6);
+        var wkStart = dObj.getFullYear() + '-' + String(dObj.getMonth() + 1).padStart(2, '0') + '-' + String(dObj.getDate()).padStart(2, '0');
+
+        function calcPeriod(salesFilterFn, expFilterFn, baseObj) {
+          var sArr = state.sales.filter(salesFilterFn);
+          var eArr = state.expenses.filter(expFilterFn);
+          var sTot = sArr.reduce(function (a, b) { return a + (Number(b.total) || 0); }, 0) + (baseObj ? baseObj.sales : 0);
+          var gProf = sArr.reduce(function (a, b) { return a + (Number(b.profit) || 0); }, 0) + (baseObj ? baseObj.gross : 0);
+          var opE = eArr.filter(function (e) { return e.category === 'مصروفات تشغيلية'; }).reduce(function (a, b) { return a + (Number(b.amount) || 0); }, 0) + (baseObj ? baseObj.op : 0);
+          var allE = eArr.reduce(function (a, b) { return a + (Number(b.amount) || 0); }, 0) + (baseObj ? (baseObj.op + baseObj.home + baseObj.sad) : 0);
+          return { sales: sTot, opExp: opE, allExp: allE, netProfit: gProf - opE };
+        }
+
+        var pToday = calcPeriod(function (s) { return s.date === tDay; }, function (e) { return e.date === tDay; }, null);
+        var pWeek = calcPeriod(function (s) { return s.date && s.date >= wkStart && s.date <= tDay; }, function (e) { return e.date && e.date >= wkStart && e.date <= tDay; }, null);
+        var mBase = (EXCEL_BASELINES.allMonths || []).find(function (m) { return m.ym === tMon; }) || null;
+        var pMonth = calcPeriod(function (s) { return s.date && s.date.slice(0, 7) === tMon; }, function (e) { return e.date && e.date.slice(0, 7) === tMon; }, mBase);
+
+        var pCards = [
+          { title: '☀️ كسبت كام النهارده؟', d: pToday },
+          { title: '📅 كسبت كام الأسبوع ده؟', d: pWeek },
+          { title: '🗓️ كسبت كام الشهر ده؟', d: pMonth }
+        ];
+        pqBox.innerHTML = pCards.map(function (c) {
+          return '<div class="bg-white border border-emerald-200 rounded-xl p-2.5 space-y-1">' +
+            '<div class="text-[11px] font-extrabold text-slate-600">' + c.title + '</div>' +
+            '<div class="text-lg font-black ' + (c.d.netProfit >= 0 ? 'text-emerald-700' : 'text-rose-600') + '">' + fmt(c.d.netProfit) + ' ج.م</div>' +
+            '<div class="text-[10px] font-bold text-slate-500">مبيعات: ' + fmt(c.d.sales) + ' | مصروفات: ' + fmt(c.d.allExp) + '</div>' +
+          '</div>';
+        }).join('');
+      }
+
       var fSales = state.sales.filter(function (s) { return matchDateFilter(s.date); });
       var fPurch = state.purchases.filter(function (p) { return matchDateFilter(p.date); });
       var fExp = state.expenses.filter(function (e) { return matchDateFilter(e.date); });
@@ -3484,6 +3673,20 @@
       setTimeout(function () { document.getElementById('unlockPinInput').focus(); }, 50);
     }
 
+    document.getElementById('btnShiftToggle').addEventListener('click', function () {
+      if (getShiftMode() === 'night') {
+        applyShiftMode('morning');
+        showToast('☀️ تم التحويل لشيفت الصبح (مبيعات فقط)');
+      } else if (isAdmin()) {
+        applyShiftMode('night');
+        showToast('🌙 تم فتح شيفت الليل بكل الصلاحيات');
+      } else {
+        requirePinAction('🌙 فتح شيفت الليل (الإدارة)', 'ادخل باسورد الأدمن لفتح كل الصلاحيات.', function () {
+          applyShiftMode('night');
+          showToast('🌙 تم فتح شيفت الليل بكل الصلاحيات');
+        });
+      }
+    });
     async function tryUnlockNight() {
       var val = document.getElementById('unlockPinInput').value.trim();
       if (await adminPasswordCheck(val)) {
@@ -3894,7 +4097,9 @@
       document.getElementById('liveCamModal').classList.add('hidden');
     }
     document.getElementById('btnOpenLiveCam').addEventListener('click', function () {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/i.test(navigator.userAgent));
+      // على الموبايل: افتح كاميرا الجهاز مباشرة (من نفس الضغطة)
+      if (isMobile || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.isSecureContext) {
         document.getElementById('newItemCam').click();
         return;
       }
@@ -3920,9 +4125,9 @@
       var c = document.createElement('canvas');
       c.width = w; c.height = h;
       c.getContext('2d').drawImage(v, 0, 0, w, h);
-      newItemImgData = c.toDataURL('image/jpeg', 0.82);
+      pendingItemImg = c.toDataURL('image/jpeg', 0.7);
       var prev = document.getElementById('newItemImgPreview');
-      if (prev) { prev.src = newItemImgData; prev.classList.remove('hidden'); }
+      if (prev) { prev.src = pendingItemImg; prev.classList.remove('hidden'); }
       stopLiveCam();
       showToast('📸 تم التقاط صورة الصنف');
     });
@@ -3987,7 +4192,18 @@
     var bcInterval = null;
     var bcTargetMode = 'sale';
 
+    var bcH5 = null, bcActive = false;
+    function bcFormats() {
+      if (!window.Html5QrcodeSupportedFormats) return undefined;
+      var F = Html5QrcodeSupportedFormats;
+      return [F.EAN_13, F.EAN_8, F.UPC_A, F.UPC_E, F.CODE_128, F.CODE_39, F.ITF, F.QR_CODE];
+    }
+    function bcCanLive() {
+      return !!(window.isSecureContext && navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+    }
+
     function stopBarcodeScanner() {
+      bcActive = false;
       if (bcInterval) { clearInterval(bcInterval); bcInterval = null; }
       if (bcStream) {
         bcStream.getTracks().forEach(function (t) { t.stop(); });
@@ -3995,10 +4211,17 @@
       }
       var v = document.getElementById('barcodeScanVideo');
       if (v) v.srcObject = null;
+      if (bcH5) {
+        var inst = bcH5; bcH5 = null;
+        try { inst.stop().then(function () { try { inst.clear(); } catch (e) {} }).catch(function () {}); } catch (e) {}
+      }
+      document.getElementById('barcodeReader').classList.add('hidden');
       document.getElementById('barcodeScannerModal').classList.add('hidden');
     }
 
     function applyDetectedBarcode(code) {
+      if (!bcActive) return;
+      bcActive = false;
       buzzFeedback();
       stopBarcodeScanner();
       if (bcTargetMode === 'item') {
@@ -4009,37 +4232,61 @@
       }
     }
 
+    function bcLiveFailed() {
+      document.getElementById('barcodeVideoWrap').classList.add('hidden');
+      document.getElementById('barcodeReader').classList.add('hidden');
+      document.getElementById('barcodeScanHint').textContent = 'تعذر فتح الكاميرا المباشرة (اسمح للكاميرا من إعدادات المتصفح) — اضغط زر التصوير تحت وصوّر الباركود';
+    }
+
     function openBarcodeScanner(mode) {
       bcTargetMode = mode;
+      bcActive = true;
+      var hint = document.getElementById('barcodeScanHint');
+      var wrap = document.getElementById('barcodeVideoWrap');
+      var reader = document.getElementById('barcodeReader');
       document.getElementById('manualBarcodeInput').value = '';
       document.getElementById('barcodeScannerModal').classList.remove('hidden');
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        document.getElementById('barcodeScanHint').textContent = 'الكاميرا غير مدعومة هنا — اكتب الرقم يدوياً أو استخدم جهاز الباركود';
+      wrap.classList.add('hidden');
+      reader.classList.add('hidden');
+
+      // الملف مفتوح من الجهاز (مش https) => المتصفح بيمنع الكاميرا المباشرة،
+      // فنفتح كاميرا الموبايل نفسها فوراً (لازم تتنده من نفس الضغطة)
+      if (!bcCanLive()) {
+        hint.textContent = '📸 بتفتح كاميرا الموبايل — صوّر الباركود وهيتقرأ تلقائياً';
+        document.getElementById('barcodePhotoInput').click();
         return;
       }
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false })
-        .then(function (stream) {
-          bcStream = stream;
-          var v = document.getElementById('barcodeScanVideo');
-          v.srcObject = stream;
-          if ('BarcodeDetector' in window) {
-            document.getElementById('barcodeScanHint').textContent = 'وجّه الكاميرا على باركود المنتج...';
-            var detector = new BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39', 'qr_code'] });
+
+      hint.textContent = 'وجّه الكاميرا على باركود المنتج...';
+      if ('BarcodeDetector' in window) {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false })
+          .then(function (stream) {
+            if (!bcActive) { stream.getTracks().forEach(function (t) { t.stop(); }); return; }
+            bcStream = stream;
+            wrap.classList.remove('hidden');
+            var v = document.getElementById('barcodeScanVideo');
+            v.srcObject = stream;
+            var p = v.play && v.play(); if (p && p.catch) p.catch(function () {});
+            var detector = new BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39', 'itf', 'qr_code'] });
             bcInterval = setInterval(function () {
               if (!v || v.readyState < 2) return;
               detector.detect(v).then(function (codes) {
-                if (codes && codes.length > 0 && codes[0].rawValue) {
-                  applyDetectedBarcode(codes[0].rawValue);
-                }
+                if (codes && codes.length > 0 && codes[0].rawValue) applyDetectedBarcode(codes[0].rawValue);
               }).catch(function () {});
             }, 250);
-          } else {
-            document.getElementById('barcodeScanHint').textContent = 'اكتب رقم الباركود تحت أو امسح بجهاز الباركود';
-          }
-        })
-        .catch(function () {
-          document.getElementById('barcodeScanHint').textContent = 'الكاميرا المباشرة مقفولة هنا (جرب زر التصوير تحت أو افتح من رابط الموقع)';
-        });
+          })
+          .catch(bcLiveFailed);
+      } else if (window.Html5Qrcode) {
+        reader.classList.remove('hidden');
+        try {
+          bcH5 = new Html5Qrcode('barcodeReader', { verbose: false, formatsToSupport: bcFormats() });
+          bcH5.start({ facingMode: 'environment' }, { fps: 10, qrbox: { width: 260, height: 120 } },
+            function (txt) { if (txt) applyDetectedBarcode(txt); }, function () {})
+            .catch(function () { bcH5 = null; bcLiveFailed(); });
+        } catch (e) { bcH5 = null; bcLiveFailed(); }
+      } else {
+        bcLiveFailed();
+      }
     }
 
     document.getElementById('btnScanSaleBarcode').addEventListener('click', function () { openBarcodeScanner('sale'); });
@@ -4049,29 +4296,40 @@
       var val = document.getElementById('manualBarcodeInput').value.trim();
       if (val) applyDetectedBarcode(val);
     });
+
+    // قراءة الباركود من صورة (كاميرا الموبايل أو المعرض)
+    function decodeBarcodeFile(file) {
+      function viaLib() {
+        if (!window.Html5Qrcode) { showToast('⚠️ مكتبة قراءة الباركود لم تتحمل (تأكد من الإنترنت) — اكتب الرقم يدوياً'); return; }
+        var tmp = new Html5Qrcode('barcodeFileTmp', { verbose: false, formatsToSupport: bcFormats() });
+        tmp.scanFile(file, false).then(function (txt) {
+          try { tmp.clear(); } catch (e) {}
+          if (txt) applyDetectedBarcode(txt); else showToast('⚠️ لم يتم التعرف على باركود، جرب تقرّب وتصوّر تاني');
+        }).catch(function () {
+          showToast('⚠️ لم يتم التعرف على باركود واضح، قرّب الكاميرا وصوّر تاني أو اكتب الرقم');
+        });
+      }
+      if ('BarcodeDetector' in window) {
+        var img = new Image();
+        img.onload = function () {
+          var det = new BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39', 'itf', 'qr_code'] });
+          det.detect(img).then(function (codes) {
+            URL.revokeObjectURL(img.src);
+            if (codes && codes.length > 0 && codes[0].rawValue) applyDetectedBarcode(codes[0].rawValue);
+            else viaLib();
+          }).catch(function () { URL.revokeObjectURL(img.src); viaLib(); });
+        };
+        img.onerror = viaLib;
+        img.src = URL.createObjectURL(file);
+      } else {
+        viaLib();
+      }
+    }
     document.getElementById('barcodePhotoInput').addEventListener('change', function (e) {
       var file = e.target.files && e.target.files[0];
-      if (!file) return;
-      var img = new Image();
-      img.onload = function () {
-        if ('BarcodeDetector' in window) {
-          var det = new BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128', 'code_39', 'qr_code'] });
-          det.detect(img).then(function (codes) {
-            if (codes && codes.length > 0 && codes[0].rawValue) {
-              applyDetectedBarcode(codes[0].rawValue);
-            } else {
-              showToast('⚠️ لم يتم التعرف على باركود واضح في الصورة، جرب تقرب الكاميرا');
-            }
-          }).catch(function () {
-            showToast('⚠️ تعذر قراءة الباركود من الصورة');
-          });
-        } else {
-          showToast('⚠️ المتصفح لا يدعم قراءة الباركود من الصورة، اكتب الرقم يدوياً');
-        }
-        URL.revokeObjectURL(img.src);
-      };
-      img.src = URL.createObjectURL(file);
       e.target.value = '';
+      if (!file) return;
+      decodeBarcodeFile(file);
     });
 
     document.getElementById('newItemCat').addEventListener('change', function (e) {
@@ -4479,7 +4737,11 @@
         var th = parseInt(document.getElementById('lowStockThreshold').value, 10) || 3;
         var lows = state.items.filter(function (it) { return (Number(it.stock) || 0) < th; });
         if (lows.length === 0) { showToast('لا توجد نواقص حالياً'); return; }
-        var msg = '📦 *طلب نواقص محل مسك للمنظفات* (' + todayStr() + '):\n' + lows.slice(0, 50).map(function (it, i) { return (i + 1) + '- ' + it.name + ' (المتبقي: ' + (Number(it.stock) || 0) + ')'; }).join('\n');
+        var msg = '📦 *طلب نواقص محل مسك للمنظفات* (' + todayStr() + '):\n' + lows.slice(0, 50).map(function (it, i) {
+          var sups = getItemSupplierStats(it.name);
+          var cheapStr = sups.length > 0 ? (' — الأرخص: ' + sups[0].supplier + ' (' + fmt(sups[0].lastPrice) + ' ج.م)') : (it.buy > 0 ? (' — آخر شراء: ' + fmt(it.buy) + ' ج.م') : '');
+          return (i + 1) + '- ' + it.name + ' (المتبقي: ' + (Number(it.stock) || 0) + ')' + cheapStr;
+        }).join('\n');
         window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
       });
     }
@@ -4908,7 +5170,148 @@
     sbReady = true;
     if (sbGetSession()) sbSync();
 
+    // Shared Item Supplier Stats & Items Directory (#tab-items) + Purchase Order Export
+    function getItemSupplierStats(itemName) {
+      var bySup = {};
+      state.purchases.forEach(function (p) {
+        if (p.isReturn) return;
+        var sup = p.supplier || 'غير محدد';
+        var lines = Array.isArray(p.items) ? p.items : [{ itemName: p.itemName, qty: p.qty, costPrice: p.costPrice, totalCost: p.totalCost }];
+        lines.forEach(function (ln) {
+          if (ln.itemName === itemName) {
+            var q = Number(ln.qty) || 0;
+            var uc = Number(ln.costPrice) || (q > 0 ? (Number(ln.totalCost) / q) : 0);
+            if (!bySup[sup]) bySup[sup] = { supplier: sup, lastPrice: uc, lastDate: p.date || '', minPrice: uc, maxPrice: uc, count: 0 };
+            bySup[sup].count += 1;
+            if (uc > 0 && uc < bySup[sup].minPrice) bySup[sup].minPrice = uc;
+            if (uc > 0 && uc > bySup[sup].maxPrice) bySup[sup].maxPrice = uc;
+          }
+        });
+      });
+      return Object.keys(bySup).map(function (k) { return bySup[k]; }).sort(function (a, b) { return a.lastPrice - b.lastPrice; });
+    }
+
+    var itemsDirLowOnly = false;
+    function renderItemsDirectory() {
+      var catSel = document.getElementById('itemsDirCat');
+      if (catSel && catSel.options.length <= 1) {
+        var cats = [];
+        state.items.forEach(function (it) { if (it.cat && cats.indexOf(it.cat) === -1) cats.push(it.cat); });
+        cats.forEach(function (c) {
+          var o = document.createElement('option');
+          o.value = c; o.textContent = c;
+          catSel.appendChild(o);
+        });
+      }
+      var q = (document.getElementById('itemsDirSearch').value || '').trim();
+      var catF = catSel ? catSel.value : 'الكل';
+      var list = document.getElementById('itemsDirList');
+      if (!list) return;
+
+      var filtered = state.items.filter(function (it) {
+        if (catF !== 'الكل' && it.cat !== catF) return false;
+        if (itemsDirLowOnly && (Number(it.stock) || 0) > 3) return false;
+        if (q && it.name.indexOf(q) === -1 && (!it.barcode || String(it.barcode).indexOf(q) === -1)) return false;
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        list.innerHTML = '<div class="bg-white border border-slate-200 rounded-2xl p-6 text-center text-xs text-slate-500">لا توجد أصناف مطابقة</div>';
+        return;
+      }
+
+      list.innerHTML = '';
+      filtered.forEach(function (it) {
+        var sups = getItemSupplierStats(it.name);
+        var margin = (it.buy > 0 && it.sell > 0) ? (((it.sell - it.buy) / it.buy) * 100).toFixed(1) + '%' : '—';
+        var supHtml = sups.length > 0
+          ? sups.map(function (s, idx) {
+              return '<span class="inline-block px-2 py-0.5 rounded-lg text-[10px] font-bold ' + (idx === 0 ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-slate-100 text-slate-700') + '">' +
+                (idx === 0 ? '🏆 ' : '') + s.supplier + ': ' + fmt(s.lastPrice) + ' ج.م</span>';
+            }).join(' ')
+          : '<span class="text-[10px] text-slate-400">لا توجد فواتير شراء مسجلة</span>';
+
+        var card = document.createElement('div');
+        card.className = 'bg-white border border-slate-200 shadow-sm rounded-2xl p-3 space-y-2 text-xs';
+        card.innerHTML =
+          '<div class="flex items-start justify-between gap-2">' +
+            '<div><div class="text-sm font-black text-slate-900">' + it.name + '</div><div class="text-[11px] text-slate-500">' + it.cat + ' • الوحدة: ' + it.unit + (it.barcode ? ' • باركود: ' + it.barcode : '') + '</div></div>' +
+            '<button type="button" class="dir-edit-btn px-2.5 py-1 rounded-lg bg-sky-50 text-sky-700 border border-sky-200 font-bold text-[11px]">✏️ تعديل</button>' +
+          '</div>' +
+          '<div class="grid grid-cols-4 gap-1.5 text-center">' +
+            '<div class="bg-slate-50 rounded-lg p-1.5"><span class="block text-[10px] text-slate-500">الشراء</span><strong class="text-amber-700">' + fmt(it.buy) + '</strong></div>' +
+            '<div class="bg-slate-50 rounded-lg p-1.5"><span class="block text-[10px] text-slate-500">البيع</span><strong class="text-emerald-700">' + fmt(it.sell) + '</strong></div>' +
+            '<div class="bg-slate-50 rounded-lg p-1.5"><span class="block text-[10px] text-slate-500">الربح %</span><strong class="text-sky-700">' + margin + '</strong></div>' +
+            '<div class="bg-slate-50 rounded-lg p-1.5"><span class="block text-[10px] text-slate-500">' + (it.cat === 'ادوات نظافة' ? 'عرض/كراتين' : 'المخزون') + '</span><strong class="' + ((Number(it.stock) || 0) <= 3 ? 'text-rose-600' : 'text-slate-900') + '">' + (Number(it.stock) || 0) + (it.cat === 'ادوات نظافة' ? ('/' + (Number(it.warehouseStock) || 0)) : '') + '</strong></div>' +
+          '</div>' +
+          (it.packName ? '<div class="text-[11px] font-bold text-indigo-700 bg-indigo-50 rounded-lg px-2 py-1">📦 ' + it.packName + ': ' + it.packFactor + ' ' + it.unit + ' (بسعر ' + fmt(it.packSell) + ' ج.م)</div>' : '') +
+          '<div class="flex flex-wrap items-center gap-1 pt-1 border-t border-slate-100"><span class="text-[10px] font-bold text-slate-500">الموردون:</span> ' + supHtml + '</div>';
+
+        card.querySelector('.dir-edit-btn').addEventListener('click', function () { openEditItemModal(it); });
+        list.appendChild(card);
+      });
+    }
+
+    document.getElementById('itemsDirSearch').addEventListener('input', renderItemsDirectory);
+    document.getElementById('itemsDirCat').addEventListener('change', renderItemsDirectory);
+    document.getElementById('btnItemsDirLowOnly').addEventListener('click', function () {
+      itemsDirLowOnly = !itemsDirLowOnly;
+      this.className = 'px-3 py-2 rounded-xl text-xs font-bold transition ' + (itemsDirLowOnly ? 'bg-amber-400 text-slate-950' : 'border border-slate-300 bg-white text-slate-700');
+      renderItemsDirectory();
+    });
+    document.getElementById('btnDirWaLow').addEventListener('click', function () {
+      var lows = state.items.filter(function (it) { return (Number(it.stock) || 0) <= 3; });
+      if (lows.length === 0) { showToast('لا توجد نواقص حالياً'); return; }
+      var msg = '📦 *نواقص محل مسك للمنظفات* (' + todayStr() + '):\n' + lows.slice(0, 50).map(function (it, i) {
+        var sups = getItemSupplierStats(it.name);
+        var cheapStr = sups.length > 0 ? (' — الأرخص: ' + sups[0].supplier + ' (' + fmt(sups[0].lastPrice) + ' ج.م)') : (it.buy > 0 ? (' — آخر شراء: ' + fmt(it.buy) + ' ج.م') : '');
+        return (i + 1) + '- ' + it.name + ' (المتبقي: ' + (Number(it.stock) || 0) + ')' + cheapStr;
+      }).join('\n');
+      window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+    });
+
+    // Purchase Order Export (WhatsApp & Excel)
+    function collectPurchaseOrderLines() {
+      var rows = document.querySelectorAll('#purchaseTableBody .p-row');
+      var lines = [];
+      rows.forEach(function (tr) {
+        var nm = tr.querySelector('.p-name').value.trim();
+        var q = parseFloat(tr.querySelector('.p-qty').value) || 0;
+        var pk = parseFloat(tr.querySelector('.p-pack').value) || 1;
+        var pkCost = parseFloat(tr.querySelector('.p-pack-cost').value) || 0;
+        var tot = q * pkCost;
+        if (nm && q > 0) {
+          lines.push({ name: nm, qty: q, pack: pk, totalUnits: q * pk, estCost: tot });
+        }
+      });
+      return lines;
+    }
+    document.getElementById('btnSendOrderWa').addEventListener('click', function () {
+      var lines = collectPurchaseOrderLines();
+      if (lines.length === 0) { showToast('⚠️ اكتب صنف واحد على الأقل في الطلبية'); return; }
+      var msg = '📝 *طلب شراء بضاعة - محل مسك للمنظفات*\n📅 التاريخ: ' + todayStr() + '\n' +
+        lines.map(function (l, i) { return (i + 1) + '- ' + l.name + ' — الكمية: ' + l.qty; }).join('\n');
+      window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+    });
+    document.getElementById('btnExportOrderXlsx').addEventListener('click', function () {
+      var lines = collectPurchaseOrderLines();
+      if (lines.length === 0) { showToast('⚠️ اكتب صنف واحد على الأقل في الطلبية'); return; }
+      if (typeof XLSX === 'undefined') { showToast('⚠️ تأكد من الاتصال بالإنترنت'); return; }
+      var sup = document.getElementById('pSupplier').value;
+      var rows = lines.map(function (l, i) {
+        return { 'م': i + 1, 'المورد': sup, 'اسم الصنف': l.name, 'الكمية': l.qty, 'عدد الوحدات': l.pack, 'إجمالي القطع': l.totalUnits, 'التكلفة المتوقعة': l.estCost };
+      });
+      var ws = XLSX.utils.json_to_sheet(rows);
+      var wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'طلب شراء');
+      XLSX.writeFile(wb, 'misk_order_' + sup + '_' + todayStr() + '.xlsx');
+      showToast('📥 تم تحميل ملف طلب الشراء');
+    });
+
     // Init
+    if (document.getElementById('purchaseTableBody') && document.getElementById('purchaseTableBody').children.length === 0) {
+      addPurchaseRows(2);
+    }
     renderCatBar();
     renderItemsGrid();
     renderSalesLog();
