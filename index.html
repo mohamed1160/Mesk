@@ -244,7 +244,10 @@
             <h2 class="text-base font-black text-sky-700">📦 دليل الأصناف الشامل</h2>
             <p class="text-[11px] text-slate-500">كل صنف بكامل بياناته والمخزون وأسعار الموردين</p>
           </div>
-          <button id="btnDirWaLow" type="button" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs">📲 واتساب النواقص بالموردين</button>
+          <div class="flex flex-wrap gap-1.5">
+            <button id="btnDirOpenOrder" type="button" class="bg-sky-600 hover:bg-sky-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs">🧾 طلب الشراء (0)</button>
+            <button id="btnDirWaLow" type="button" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl text-xs">📲 واتساب النواقص بالموردين</button>
+          </div>
         </div>
         <div class="flex flex-wrap gap-2">
           <input id="itemsDirSearch" type="text" placeholder="🔍 ابحث بالاسم أو الباركود..." class="flex-1 min-w-[160px] bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-900">
@@ -252,6 +255,14 @@
             <option value="الكل">كل الأقسام</option>
           </select>
           <button id="btnItemsDirLowOnly" type="button" class="px-3 py-2 rounded-xl text-xs font-bold border border-slate-300 bg-white text-slate-700">⚠️ النواقص فقط</button>
+          <select id="itemsDirSort" class="bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-900">
+            <option value="default">↕️ ترتيب: الافتراضي</option>
+            <option value="sales_desc">🔥 أعلى معدل بيع (الأكثر مبيعاً)</option>
+            <option value="sales_asc">🐢 أقل معدل بيع (الراكد أولاً)</option>
+            <option value="low_first">⚠️ النواقص أولاً</option>
+            <option value="stock_desc">📈 أعلى كمية مخزون</option>
+            <option value="stock_asc">📉 أقل كمية مخزون</option>
+          </select>
         </div>
       </div>
       <div id="itemsDirList" class="space-y-2.5"></div>
@@ -547,6 +558,8 @@
                   <th class="py-2.5 px-2 whitespace-nowrap">معدل/يوم</th>
                   <th class="py-2.5 px-2 whitespace-nowrap">يكفي</th>
                   <th class="py-2.5 px-2">الحالة</th>
+                  <th class="py-2.5 px-2 whitespace-nowrap">أرخص مورد</th>
+                  <th class="py-2.5 px-2">طلب</th>
                 </tr>
               </thead>
               <tbody id="itemRatesBody" class="divide-y divide-slate-200"></tbody>
@@ -1143,11 +1156,37 @@
       </div>
       <div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 space-y-2">
         <div class="text-[11px] font-bold text-sky-700">وحدة بيع ثانية / جملة (اختياري: شكارة أو كرتونة)</div>
-        <div class="grid grid-cols-3 gap-1.5">
-          <input id="newItemPackName" type="text" placeholder="الاسم (شكارة)" class="bg-white border border-slate-300 rounded-lg px-2 py-2 text-slate-900 text-xs">
-          <input id="newItemPackFactor" type="number" step="any" min="1" placeholder="فيها كام؟" class="bg-white border border-slate-300 rounded-lg px-2 py-2 text-slate-900 text-xs">
-          <input id="newItemPackSell" type="number" step="any" min="0" placeholder="سعرها" class="bg-white border border-slate-300 rounded-lg px-2 py-2 text-slate-900 text-xs">
+        <div class="grid grid-cols-2 gap-1.5">
+          <div>
+            <label class="block text-[10px] text-slate-500 font-bold mb-0.5">اسم الوحدة الكبرى</label>
+            <input id="newItemPackName" type="text" placeholder="الاسم (شكارة)" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-2 text-slate-900 text-xs">
+          </div>
+          <div>
+            <label class="block text-[10px] text-slate-500 font-bold mb-0.5">عدد الوحدات في العبوة</label>
+            <input id="newItemPackFactor" type="number" step="any" min="1" placeholder="فيها كام؟" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-2 text-slate-900 text-xs">
+          </div>
+          <div>
+            <label class="block text-[10px] text-sky-700 font-bold mb-0.5">سعر شراء الوحدة الكبرى</label>
+            <input id="newItemPackBuy" type="number" step="any" min="0" placeholder="سعر الكرتونة/الشكارة" class="w-full bg-white border border-sky-400 rounded-lg px-2 py-2 text-slate-900 text-xs font-bold">
+          </div>
+          <div>
+            <label class="block text-[10px] text-slate-500 font-bold mb-0.5">سعر بيع الوحدة الكبرى</label>
+            <input id="newItemPackSell" type="number" step="any" min="0" placeholder="سعرها" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-2 text-slate-900 text-xs">
+          </div>
         </div>
+        <div id="newItemPackBuyHint" class="text-[10px] font-bold text-sky-700"></div>
+      </div>
+      <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 space-y-2">
+        <div class="text-[11px] font-extrabold text-emerald-800">⚡ تزويد المخزون السريع</div>
+        <div class="flex items-center gap-1.5">
+          <input id="quickStockQty" type="number" step="any" min="0" placeholder="الكمية" class="w-20 bg-white border border-emerald-300 rounded-lg px-2 py-1.5 text-xs font-extrabold text-center text-slate-900">
+          <select id="quickStockType" class="flex-1 min-w-0 bg-white border border-emerald-300 rounded-lg px-2 py-1.5 text-xs font-bold text-slate-900">
+            <option value="small">وحدة صغرى (قطعة/زجاجة)</option>
+            <option value="big">وحدة كبرى (× معامل الكرتونة)</option>
+          </select>
+          <button id="btnQuickStockAdd" type="button" class="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs px-3 py-1.5 rounded-lg whitespace-nowrap">➕ زوّد</button>
+        </div>
+        <div id="quickStockHint" class="text-[10px] text-emerald-700 font-bold"></div>
       </div>
       <div id="itemSupplierPricesBox" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 space-y-1.5">
         <div class="text-[11px] font-extrabold text-emerald-800">🚚 كارت أسعار الموردين لهذا الصنف:</div>
@@ -2004,27 +2043,118 @@
       document.getElementById('newItemPackName').value = it.packName || '';
       document.getElementById('newItemPackFactor').value = it.packFactor || '';
       document.getElementById('newItemPackSell').value = it.packSell || '';
+      packBuyManual = false;
+      document.getElementById('newItemPackBuy').value = (Number(it.packFactor) > 0 && Number(it.buy) > 0) ? Number((it.buy * it.packFactor).toFixed(2)) : '';
+      updatePackBuyHint();
       pendingItemImg = it.img || '';
       var prev = document.getElementById('newItemImgPreview');
       if (pendingItemImg) { prev.src = pendingItemImg; prev.classList.remove('hidden'); }
       else { prev.classList.add('hidden'); }
       renderItemSupplierPrices(it.name);
+      document.getElementById('quickStockQty').value = '';
+      document.getElementById('quickStockType').value = 'small';
+      refreshQuickStockUI();
       document.getElementById('itemSupplierPricesBox').classList.remove('hidden');
       document.getElementById('btnDeleteItem').classList.remove('hidden');
       document.getElementById('addItemModal').classList.remove('hidden');
     }
+
+    // ===== سعر شراء الوحدة الكبرى ⇄ سعر شراء الوحدة الصغرى (حساب تلقائي) =====
+    var packBuyManual = false; // true لما المستخدم يكتب سعر الوحدة الكبرى بنفسه
+    function updatePackBuyHint() {
+      var hint = document.getElementById('newItemPackBuyHint');
+      if (!hint) return;
+      var pb = parseFloat(document.getElementById('newItemPackBuy').value) || 0;
+      var f = parseFloat(document.getElementById('newItemPackFactor').value) || 0;
+      var un = document.getElementById('newItemUnit').value || 'وحدة';
+      var nm = (document.getElementById('newItemPackName').value || '').trim() || 'العبوة';
+      if (pb > 0 && f > 0) {
+        hint.textContent = '🧮 ' + fmt(pb) + ' ÷ ' + f + ' = ' + fmt(pb / f) + ' ج.م لكل ' + un + ' (سعر شراء الوحدة الصغرى)';
+      } else if (pb > 0 && !(f > 0)) {
+        hint.textContent = '⚠️ اكتب عدد الوحدات في ' + nm + ' عشان يتحسب سعر شراء الوحدة الصغرى';
+      } else {
+        hint.textContent = '';
+      }
+    }
+    function syncBuyFromPack() {
+      var pbEl = document.getElementById('newItemPackBuy');
+      var f = parseFloat(document.getElementById('newItemPackFactor').value) || 0;
+      var buyEl = document.getElementById('newItemBuy');
+      if (packBuyManual) {
+        var pb = parseFloat(pbEl.value) || 0;
+        if (pb > 0 && f > 0) buyEl.value = Number((pb / f).toFixed(4));
+      } else {
+        var b = parseFloat(buyEl.value) || 0;
+        pbEl.value = (b > 0 && f > 0) ? Number((b * f).toFixed(2)) : '';
+      }
+      updatePackBuyHint();
+    }
+    document.getElementById('newItemPackBuy').addEventListener('input', function () {
+      packBuyManual = (this.value !== '');
+      syncBuyFromPack();
+    });
+    document.getElementById('newItemPackFactor').addEventListener('input', syncBuyFromPack);
+    document.getElementById('newItemBuy').addEventListener('input', function () {
+      // لو عدّلت سعر الوحدة الصغرى يدوي، سعر الكبرى يتحدث ليطابقه
+      packBuyManual = false;
+      syncBuyFromPack();
+    });
+    document.getElementById('newItemUnit').addEventListener('change', updatePackBuyHint);
+    document.getElementById('newItemPackName').addEventListener('input', updatePackBuyHint);
+
+    function refreshQuickStockUI() {
+      var f = parseFloat(document.getElementById('newItemPackFactor').value) || 0;
+      var nm = (document.getElementById('newItemPackName').value || '').trim() || 'كرتونة';
+      var opt = document.querySelector('#quickStockType option[value="big"]');
+      var un = document.getElementById('newItemUnit').value || 'وحدة';
+      opt.textContent = f > 1 ? ('وحدة كبرى (' + nm + ' = ' + f + ' ' + un + ')') : 'وحدة كبرى (حدد معامل الكرتونة أولاً)';
+      var q = parseFloat(document.getElementById('quickStockQty').value) || 0;
+      var big = document.getElementById('quickStockType').value === 'big';
+      document.getElementById('quickStockHint').textContent = q > 0 ? ('سيُضاف ' + (big ? (q + ' × ' + f + ' = ' + Number((q * f).toFixed(3))) : q) + ' ' + un + ' للمخزون') : '';
+    }
+    ['quickStockQty', 'quickStockType', 'newItemPackFactor', 'newItemPackName', 'newItemUnit'].forEach(function (id) {
+      var el = document.getElementById(id);
+      el.addEventListener('input', refreshQuickStockUI);
+      el.addEventListener('change', refreshQuickStockUI);
+    });
+    document.getElementById('btnQuickStockAdd').addEventListener('click', function () {
+      var qty = parseFloat(document.getElementById('quickStockQty').value) || 0;
+      if (qty <= 0) { showToast('⚠️ اكتب الكمية المراد إضافتها'); return; }
+      var big = document.getElementById('quickStockType').value === 'big';
+      var factor = parseFloat(document.getElementById('newItemPackFactor').value) || 0;
+      if (big && factor <= 1) { showToast('⚠️ حدد معامل الكرتونة (فيها كام؟) أولاً'); return; }
+      var add = big ? qty * factor : qty;
+      var cur = parseFloat(document.getElementById('newItemStock').value) || 0;
+      var nv = Number((cur + add).toFixed(3));
+      document.getElementById('newItemStock').value = nv;
+      if (editingItemId) {
+        var it = state.items.find(function (x) { return x.id === editingItemId; });
+        if (it) {
+          it.stock = nv;
+          saveState();
+          renderItemsGrid();
+          renderDatalist();
+        }
+      }
+      document.getElementById('quickStockQty').value = '';
+      refreshQuickStockUI();
+      showToast('✅ تمت زيادة المخزون ' + Number(add.toFixed(3)) + ' ← الرصيد: ' + nv);
+    });
 
     // Add New Item
     document.getElementById('btnOpenAddItem').addEventListener('click', function () {
       editingItemId = null;
       document.getElementById('addItemModalTitle').textContent = 'إضافة صنف جديد للمربعات';
       document.getElementById('addItemForm').reset();
+      packBuyManual = false;
+      updatePackBuyHint();
       document.getElementById('newItemWarehouseStock').value = 0;
       document.getElementById('newItemWarehouseBox').classList.toggle('hidden', document.getElementById('newItemCat').value !== 'ادوات نظافة');
       pendingItemImg = '';
       document.getElementById('newItemImgPreview').classList.add('hidden');
       document.getElementById('itemSupplierPricesBox').classList.add('hidden');
       document.getElementById('btnDeleteItem').classList.add('hidden');
+      refreshQuickStockUI();
       document.getElementById('addItemModal').classList.remove('hidden');
     });
     document.getElementById('btnCloseAddItem').addEventListener('click', function () {
@@ -2113,10 +2243,12 @@
             '<div class="p-suggest hidden absolute right-8 left-0 top-full z-40 mt-0.5 bg-white border border-sky-400 rounded-lg shadow-xl max-h-44 overflow-y-auto"></div>' +
           '</div>' +
           '<div class="p-cheaper-alert hidden text-[11px] font-extrabold text-amber-800 bg-amber-100 border border-amber-300 rounded-lg px-2 py-1"></div>' +
-          '<div class="grid grid-cols-3 gap-1.5 text-[11px]">' +
-            '<div><label class="block text-slate-500 font-bold mb-0.5">الكمية (كبيرة)</label><input type="number" step="any" min="0" placeholder="1" class="p-qty w-full bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-slate-900 text-xs text-center font-bold"></div>' +
-            '<div><label class="block text-slate-500 font-bold mb-0.5">عدد الوحدات</label><input type="number" step="any" min="1" placeholder="1" class="p-pack w-full bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-slate-900 text-xs text-center font-bold"></div>' +
-            '<div><label class="block text-slate-500 font-bold mb-0.5">سعر الوحدة الكبيرة</label><input type="number" step="any" min="0" placeholder="0" class="p-pack-cost w-full bg-white border border-sky-400 rounded-lg px-2 py-1.5 text-slate-900 text-xs text-center font-extrabold"></div>' +
+          '<div class="flex items-center gap-2 text-[11px]"><label class="text-slate-500 font-bold whitespace-nowrap">نوع الوحدة:</label>' +
+            '<select class="p-unit-type flex-1 bg-white border border-indigo-300 rounded-lg px-2 py-1.5 text-slate-900 text-xs font-bold"><option value="big">📦 وحدة كبرى (كرتونة/جركن)</option><option value="small">🔹 وحدة صغرى (قطعة/زجاجة)</option></select></div>' +
+          '<div class="p-qty-grid grid grid-cols-3 gap-1.5 text-[11px]">' +
+            '<div><label class="p-qty-label block text-slate-500 font-bold mb-0.5">الكمية (كبيرة)</label><input type="number" step="any" min="0" placeholder="1" class="p-qty w-full bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-slate-900 text-xs text-center font-bold"></div>' +
+            '<div class="p-pack-wrap"><label class="block text-slate-500 font-bold mb-0.5">عدد الوحدات</label><input type="number" step="any" min="1" placeholder="1" class="p-pack w-full bg-white border border-slate-300 rounded-lg px-2 py-1.5 text-slate-900 text-xs text-center font-bold"></div>' +
+            '<div><label class="p-cost-label block text-slate-500 font-bold mb-0.5">سعر الوحدة الكبيرة</label><input type="number" step="any" min="0" placeholder="0" class="p-pack-cost w-full bg-white border border-sky-400 rounded-lg px-2 py-1.5 text-slate-900 text-xs text-center font-extrabold"></div>' +
           '</div>' +
           '<div class="grid grid-cols-4 gap-1.5 items-center text-[11px] pt-1 border-t border-slate-200">' +
             '<div class="bg-white border border-slate-200 rounded-lg px-1.5 py-1 text-center"><span class="block text-[10px] text-slate-400">الإجمالي</span><span class="p-row-total font-extrabold text-sky-700">0.00</span></div>' +
@@ -2132,6 +2264,18 @@
           var packInp = rowEl.querySelector('.p-pack');
           var packCostInp = rowEl.querySelector('.p-pack-cost');
           var sellInp = rowEl.querySelector('.p-sell');
+          var typeSel = rowEl.querySelector('.p-unit-type');
+
+          typeSel.addEventListener('change', function () {
+            applyUnitTypeUI(rowEl);
+            var ex = state.items.find(function (x) { return x.name === nameInp.value.trim(); });
+            if (ex) {
+              var small = typeSel.value === 'small';
+              if (!small && !packInp.value) packInp.value = (ex.packFactor && ex.packFactor > 0) ? ex.packFactor : 1;
+              if (!packCostInp.value && ex.buy > 0) packCostInp.value = Number((ex.buy * (small ? 1 : (parseFloat(packInp.value) || 1))).toFixed(2));
+            }
+            recalcPurchaseTable();
+          });
 
           function showSuggestions() {
             var q = nameInp.value.trim();
@@ -2150,7 +2294,7 @@
                 packInp.value = (it.packFactor && it.packFactor > 0) ? it.packFactor : 1;
                 sellInp.value = it.sell || '';
                 if (purchaseMode === 'order' && it.buy > 0) {
-                  var pv = parseFloat(packInp.value) || 1;
+                  var pv = typeSel.value === 'small' ? 1 : (parseFloat(packInp.value) || 1);
                   packCostInp.value = Number((pv * it.buy).toFixed(2));
                 }
                 sugBox.classList.add('hidden');
@@ -2191,6 +2335,26 @@
       }
     }
 
+    // قراءة قيم الصف حسب نوع الوحدة: صغرى => المعامل = 1 والسعر = سعر الوحدة الصغرى مباشرة
+    function applyUnitTypeUI(rowEl) {
+      var small = rowEl.querySelector('.p-unit-type').value === 'small';
+      rowEl.querySelector('.p-pack-wrap').classList.toggle('hidden', small);
+      var g = rowEl.querySelector('.p-qty-grid');
+      g.classList.toggle('grid-cols-2', small);
+      g.classList.toggle('grid-cols-3', !small);
+      rowEl.querySelector('.p-qty-label').textContent = small ? 'الكمية (وحدات)' : 'الكمية (كبيرة)';
+      rowEl.querySelector('.p-cost-label').textContent = small ? 'سعر الوحدة الصغرى' : 'سعر الوحدة الكبيرة';
+    }
+    function getPurchaseRowVals(tr) {
+      var small = tr.querySelector('.p-unit-type').value === 'small';
+      return {
+        small: small,
+        qty: parseFloat(tr.querySelector('.p-qty').value) || 0,
+        pack: small ? 1 : (parseFloat(tr.querySelector('.p-pack').value) || 1),
+        packCost: parseFloat(tr.querySelector('.p-pack-cost').value) || 0
+      };
+    }
+
     function checkCheaperSupplierForRow(rowEl) {
       var alertEl = rowEl.querySelector('.p-cheaper-alert');
       if (!alertEl) return;
@@ -2223,9 +2387,8 @@
       var sumCost = 0, sumProfit = 0;
       rows.forEach(function (tr) {
         checkCheaperSupplierForRow(tr);
-        var q = parseFloat(tr.querySelector('.p-qty').value) || 0;
-        var pk = parseFloat(tr.querySelector('.p-pack').value) || 1;
-        var packCost = parseFloat(tr.querySelector('.p-pack-cost').value) || 0;
+        var rv = getPurchaseRowVals(tr);
+        var q = rv.qty, pk = rv.pack, packCost = rv.packCost;
         var sl = parseFloat(tr.querySelector('.p-sell').value) || 0;
         var totalUnits = q * pk;
         var rc = q * packCost;
@@ -2263,6 +2426,7 @@
       document.getElementById('pRemainingAmount').textContent = fmt(rem) + ' ج.م';
     }
     document.getElementById('pPaidAmount').addEventListener('input', recalcPurchaseTable);
+    document.getElementById('purchaseTableBody').addEventListener('input', function () { if (typeof updateOrderCountBtn === 'function') updateOrderCountBtn(); });
 
     
 
@@ -2312,9 +2476,8 @@
       var itemsList = [];
       rows.forEach(function (tr) {
         var itemName = tr.querySelector('.p-name').value.trim();
-        var qty = parseFloat(tr.querySelector('.p-qty').value) || 0;
-        var pack = parseFloat(tr.querySelector('.p-pack').value) || 1;
-        var packCost = parseFloat(tr.querySelector('.p-pack-cost').value) || 0;
+        var rv = getPurchaseRowVals(tr);
+        var qty = rv.qty, pack = rv.pack, packCost = rv.packCost;
         var rowTotal = qty * packCost;
         var sell = parseFloat(tr.querySelector('.p-sell').value) || 0;
         var totalUnits = qty * pack;
@@ -2990,7 +3153,7 @@
       tbody.innerHTML = '';
       var labels = [], values = [];
       if (itemStats.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" class="py-4 text-center text-slate-400 text-xs">لا توجد أصناف مسجلة بعد</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="12" class="py-4 text-center text-slate-400 text-xs">لا توجد أصناف مسجلة بعد</td></tr>';
       } else {
         itemStats.forEach(function (st) {
           if (st.rev > 0 && labels.length < 8) { labels.push(st.name); values.push(st.rev); }
@@ -3008,7 +3171,10 @@
             '<td class="py-2 px-2 text-indigo-700 font-bold">' + qf(st.mo) + '</td>' +
             '<td class="py-2 px-2 text-slate-700">' + (st.mo > 0 ? (st.mo / 30).toFixed(2) : '—') + '</td>' +
             '<td class="py-2 px-2 whitespace-nowrap">' + coverHtml(st.onhand, st.mo) + '</td>' +
-            '<td class="py-2 px-2">' + statusBadge + '</td>';
+            '<td class="py-2 px-2">' + statusBadge + '</td>' +
+            '<td class="py-2 px-2 whitespace-nowrap text-[11px]">' + (function () { var itx = state.items.find(function (x) { return x.name === st.name; }); return itx ? cheapestBadgeHtml(itx) : '—'; })() + '</td>' +
+            '<td class="py-2 px-2"><button type="button" class="stat-req-btn px-2 py-1 rounded-lg bg-amber-50 text-amber-800 border border-amber-300 font-bold text-[11px] whitespace-nowrap">📝 طلب</button></td>';
+          tr.querySelector('.stat-req-btn').addEventListener('click', function () { requestItemToOrder(st.name); });
           tbody.appendChild(tr);
         });
       }
@@ -5348,7 +5514,75 @@
       return Object.keys(bySup).map(function (k) { return bySup[k]; }).sort(function (a, b) { return a.lastPrice - b.lastPrice; });
     }
 
+    // ===== أرخص مورد + طلب الصنف + معدل البيع =====
+    var DIR_LOW_LIMIT = 3; // نفس حد النواقص المستخدم في باقي التطبيق (رصيد <= 3)
+    function cheapestSupplierOf(itemName) {
+      var sups = getItemSupplierStats(itemName);
+      return sups.length > 0 ? sups[0] : null;
+    }
+    function cheapestBadgeHtml(it) {
+      var c = cheapestSupplierOf(it.name);
+      if (!c) return '<span class="text-[10px] text-slate-400">لا يوجد سعر مورد مسجل</span>';
+      var packTxt = (Number(it.packFactor) > 1) ? (' <span class="text-[10px] font-bold text-indigo-700">(' + escHtml(it.packName || 'الكبرى') + ': ' + fmt(c.lastPrice * it.packFactor) + ')</span>') : '';
+      return '<span class="inline-block px-2 py-0.5 rounded-lg text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">🏆 ' + escHtml(c.supplier) + ': ' + fmt(c.lastPrice) + ' ج.م/' + escHtml(it.unit || 'وحدة') + '</span>' + packTxt;
+    }
+    function getItemSalesMap() {
+      var d7 = dateNDaysAgo(6), d30 = dateNDaysAgo(29), m = {};
+      state.sales.forEach(function (sl) {
+        if (!sl.date || !sl.itemName) return;
+        var bq = saleBaseQty(sl);
+        var o = m[sl.itemName] || (m[sl.itemName] = { d7: 0, d30: 0 });
+        if (sl.date >= d30) o.d30 += bq;
+        if (sl.date >= d7) o.d7 += bq;
+      });
+      return m;
+    }
+    function countOrderLines() {
+      var n = 0;
+      document.querySelectorAll('#purchaseTableBody .p-row').forEach(function (r) { if (r.querySelector('.p-name').value.trim()) n++; });
+      return n;
+    }
+    function updateOrderCountBtn() {
+      var b = document.getElementById('btnDirOpenOrder');
+      if (b) b.textContent = '🧾 طلب الشراء (' + countOrderLines() + ')';
+    }
+    // يضيف الصنف لطلب فاتورة الشراء؛ لو موجود يزوّد الكمية بدل التكرار
+    function requestItemToOrder(itemName) {
+      var it = state.items.find(function (x) { return x.name === itemName; });
+      if (!it) { showToast('⚠️ الصنف غير موجود'); return; }
+      setPurchaseMode('order');
+      var rows = Array.prototype.slice.call(document.querySelectorAll('#purchaseTableBody .p-row'));
+      var row = rows.find(function (r) { return r.querySelector('.p-name').value.trim() === itemName; });
+      var qtyNow;
+      if (row) {
+        var qi = row.querySelector('.p-qty');
+        qtyNow = (parseFloat(qi.value) || 0) + 1;
+        qi.value = qtyNow;
+      } else {
+        row = rows.find(function (r) { return !r.querySelector('.p-name').value.trim(); });
+        if (!row) { addPurchaseRows(1); rows = document.querySelectorAll('#purchaseTableBody .p-row'); row = rows[rows.length - 1]; }
+        var hasPk = Number(it.packFactor) > 1;
+        var typeSel = row.querySelector('.p-unit-type');
+        typeSel.value = hasPk ? 'big' : 'small';
+        row.querySelector('.p-name').value = it.name;
+        row.querySelector('.p-qty').value = 1;
+        row.querySelector('.p-pack').value = hasPk ? it.packFactor : 1;
+        row.querySelector('.p-sell').value = it.sell || '';
+        var cs = cheapestSupplierOf(it.name);
+        var unitPrice = cs ? cs.lastPrice : (Number(it.buy) || 0);
+        row.querySelector('.p-pack-cost').value = unitPrice > 0 ? Number((unitPrice * (hasPk ? it.packFactor : 1)).toFixed(2)) : '';
+        applyUnitTypeUI(row);
+        qtyNow = 1;
+        var all = document.querySelectorAll('#purchaseTableBody .p-row');
+        if (all[all.length - 1].querySelector('.p-name').value.trim()) addPurchaseRows(1);
+      }
+      recalcPurchaseTable();
+      updateOrderCountBtn();
+      showToast('📝 ' + itemName + ' ← طلب الشراء (الكمية: ' + qtyNow + ')');
+    }
+
     var itemsDirLowOnly = false;
+    var itemsDirSort = 'default';
     function renderItemsDirectory() {
       var catSel = document.getElementById('itemsDirCat');
       if (catSel && catSel.options.length <= 1) {
@@ -5364,13 +5598,36 @@
       var catF = catSel ? catSel.value : 'الكل';
       var list = document.getElementById('itemsDirList');
       if (!list) return;
+      updateOrderCountBtn();
+
+      var salesMap = getItemSalesMap();
+      function soldOf(it) { return salesMap[it.name] || { d7: 0, d30: 0 }; }
+      function stockOf(it) { return Number(it.stock) || 0; }
 
       var filtered = state.items.filter(function (it) {
         if (catF !== 'الكل' && it.cat !== catF) return false;
-        if (itemsDirLowOnly && (Number(it.stock) || 0) > 3) return false;
+        if (itemsDirLowOnly && stockOf(it) > DIR_LOW_LIMIT) return false;
         if (q && it.name.indexOf(q) === -1 && (!it.barcode || String(it.barcode).indexOf(q) === -1)) return false;
         return true;
       });
+
+      var byName = function (a, b) { return String(a.name).localeCompare(String(b.name), 'ar'); };
+      if (itemsDirSort === 'sales_desc') {
+        filtered.sort(function (a, b) { return (soldOf(b).d30 - soldOf(a).d30) || (soldOf(b).d7 - soldOf(a).d7) || byName(a, b); });
+      } else if (itemsDirSort === 'sales_asc') {
+        filtered.sort(function (a, b) { return (soldOf(a).d30 - soldOf(b).d30) || (soldOf(a).d7 - soldOf(b).d7) || byName(a, b); });
+      } else if (itemsDirSort === 'low_first') {
+        filtered.sort(function (a, b) {
+          var la = stockOf(a) <= DIR_LOW_LIMIT ? 0 : 1, lb = stockOf(b) <= DIR_LOW_LIMIT ? 0 : 1;
+          if (la !== lb) return la - lb;
+          if (la === 0) return (stockOf(a) - stockOf(b)) || (soldOf(b).d30 - soldOf(a).d30) || byName(a, b);
+          return (soldOf(b).d30 - soldOf(a).d30) || byName(a, b);
+        });
+      } else if (itemsDirSort === 'stock_desc') {
+        filtered.sort(function (a, b) { return (stockOf(b) - stockOf(a)) || byName(a, b); });
+      } else if (itemsDirSort === 'stock_asc') {
+        filtered.sort(function (a, b) { return (stockOf(a) - stockOf(b)) || byName(a, b); });
+      }
 
       if (filtered.length === 0) {
         list.innerHTML = '<div class="bg-white border border-slate-200 rounded-2xl p-6 text-center text-xs text-slate-500">لا توجد أصناف مطابقة</div>';
@@ -5381,6 +5638,7 @@
       filtered.forEach(function (it) {
         var sups = getItemSupplierStats(it.name);
         var margin = (it.buy > 0 && it.sell > 0) ? (((it.sell - it.buy) / it.buy) * 100).toFixed(1) + '%' : '—';
+        var sold = soldOf(it);
         var supHtml = sups.length > 0
           ? sups.map(function (s, idx) {
               return '<span class="inline-block px-2 py-0.5 rounded-lg text-[10px] font-bold ' + (idx === 0 ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-slate-100 text-slate-700') + '">' +
@@ -5389,26 +5647,45 @@
           : '<span class="text-[10px] text-slate-400">لا توجد فواتير شراء مسجلة</span>';
 
         var card = document.createElement('div');
-        card.className = 'bg-white border border-slate-200 shadow-sm rounded-2xl p-3 space-y-2 text-xs';
+        card.className = 'bg-white border ' + (stockOf(it) <= DIR_LOW_LIMIT ? 'border-rose-200' : 'border-slate-200') + ' shadow-sm rounded-2xl p-3 space-y-2 text-xs';
         card.innerHTML =
           '<div class="flex items-start justify-between gap-2">' +
             '<div><div class="text-sm font-black text-slate-900">' + it.name + '</div><div class="text-[11px] text-slate-500">' + it.cat + ' • الوحدة: ' + it.unit + (it.barcode ? ' • باركود: ' + it.barcode : '') + '</div></div>' +
-            '<button type="button" class="dir-edit-btn px-2.5 py-1 rounded-lg bg-sky-50 text-sky-700 border border-sky-200 font-bold text-[11px]">✏️ تعديل</button>' +
+            '<div class="flex gap-1 shrink-0">' +
+              '<button type="button" class="dir-req-btn px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 border border-amber-300 font-bold text-[11px]">📝 طلب الصنف</button>' +
+              '<button type="button" class="dir-edit-btn px-2.5 py-1 rounded-lg bg-sky-50 text-sky-700 border border-sky-200 font-bold text-[11px]">✏️ تعديل</button>' +
+            '</div>' +
           '</div>' +
+          '<div class="flex flex-wrap items-center gap-1"><span class="text-[10px] font-bold text-slate-500">أرخص سعر:</span> ' + cheapestBadgeHtml(it) + '</div>' +
           '<div class="grid grid-cols-4 gap-1.5 text-center">' +
             '<div class="bg-slate-50 rounded-lg p-1.5"><span class="block text-[10px] text-slate-500">الشراء</span><strong class="text-amber-700">' + fmt(it.buy) + '</strong></div>' +
             '<div class="bg-slate-50 rounded-lg p-1.5"><span class="block text-[10px] text-slate-500">البيع</span><strong class="text-emerald-700">' + fmt(it.sell) + '</strong></div>' +
             '<div class="bg-slate-50 rounded-lg p-1.5"><span class="block text-[10px] text-slate-500">الربح %</span><strong class="text-sky-700">' + margin + '</strong></div>' +
-            '<div class="bg-slate-50 rounded-lg p-1.5"><span class="block text-[10px] text-slate-500">' + (it.cat === 'ادوات نظافة' ? 'عرض/كراتين' : 'المخزون') + '</span><strong class="' + ((Number(it.stock) || 0) <= 3 ? 'text-rose-600' : 'text-slate-900') + '">' + (Number(it.stock) || 0) + (it.cat === 'ادوات نظافة' ? ('/' + (Number(it.warehouseStock) || 0)) : '') + '</strong></div>' +
+            '<div class="bg-slate-50 rounded-lg p-1.5"><span class="block text-[10px] text-slate-500">' + (it.cat === 'ادوات نظافة' ? 'عرض/كراتين' : 'المخزون') + '</span><strong class="' + (stockOf(it) <= DIR_LOW_LIMIT ? 'text-rose-600' : 'text-slate-900') + '">' + stockOf(it) + (it.cat === 'ادوات نظافة' ? ('/' + (Number(it.warehouseStock) || 0)) : '') + '</strong></div>' +
+          '</div>' +
+          '<div class="grid grid-cols-3 gap-1.5 text-center">' +
+            '<div class="bg-indigo-50 rounded-lg p-1.5"><span class="block text-[10px] text-indigo-600">مباع آخر 7 أيام</span><strong class="text-indigo-800">' + qf(sold.d7) + '</strong></div>' +
+            '<div class="bg-indigo-50 rounded-lg p-1.5"><span class="block text-[10px] text-indigo-600">مباع آخر 30 يوم</span><strong class="text-indigo-800">' + qf(sold.d30) + '</strong></div>' +
+            '<div class="bg-indigo-50 rounded-lg p-1.5"><span class="block text-[10px] text-indigo-600">معدل/يوم</span><strong class="text-indigo-800">' + (sold.d30 > 0 ? (sold.d30 / 30).toFixed(2) : '—') + '</strong></div>' +
           '</div>' +
           (it.packName ? '<div class="text-[11px] font-bold text-indigo-700 bg-indigo-50 rounded-lg px-2 py-1">📦 ' + it.packName + ': ' + it.packFactor + ' ' + it.unit + ' (بسعر ' + fmt(it.packSell) + ' ج.م)</div>' : '') +
           '<div class="flex flex-wrap items-center gap-1 pt-1 border-t border-slate-100"><span class="text-[10px] font-bold text-slate-500">الموردون:</span> ' + supHtml + '</div>';
 
         card.querySelector('.dir-edit-btn').addEventListener('click', function () { openEditItemModal(it); });
+        card.querySelector('.dir-req-btn').addEventListener('click', function () { requestItemToOrder(it.name); });
         list.appendChild(card);
       });
     }
 
+    document.getElementById('itemsDirSort').addEventListener('change', function () {
+      itemsDirSort = this.value;
+      renderItemsDirectory();
+    });
+    document.getElementById('btnDirOpenOrder').addEventListener('click', function () {
+      setPurchaseMode('order');
+      document.querySelector('.nav-btn[data-tab="purchases"]').click();
+      window.scrollTo(0, 0);
+    });
     document.getElementById('itemsDirSearch').addEventListener('input', renderItemsDirectory);
     document.getElementById('itemsDirCat').addEventListener('change', renderItemsDirectory);
     document.getElementById('btnItemsDirLowOnly').addEventListener('click', function () {
@@ -5433,12 +5710,11 @@
       var lines = [];
       rows.forEach(function (tr) {
         var nm = tr.querySelector('.p-name').value.trim();
-        var q = parseFloat(tr.querySelector('.p-qty').value) || 0;
-        var pk = parseFloat(tr.querySelector('.p-pack').value) || 1;
-        var pkCost = parseFloat(tr.querySelector('.p-pack-cost').value) || 0;
+        var rv = getPurchaseRowVals(tr);
+        var q = rv.qty, pk = rv.pack, pkCost = rv.packCost;
         var tot = q * pkCost;
         if (nm && q > 0) {
-          lines.push({ name: nm, qty: q, pack: pk, totalUnits: q * pk, estCost: tot });
+          lines.push({ name: nm, qty: q, pack: pk, small: rv.small, totalUnits: q * pk, estCost: tot });
         }
       });
       return lines;
@@ -5447,7 +5723,7 @@
       var lines = collectPurchaseOrderLines();
       if (lines.length === 0) { showToast('⚠️ اكتب صنف واحد على الأقل في الطلبية'); return; }
       var msg = '📝 *طلب شراء بضاعة - محل مسك للمنظفات*\n📅 التاريخ: ' + todayStr() + '\n' +
-        lines.map(function (l, i) { return (i + 1) + '- ' + l.name + ' — الكمية: ' + l.qty; }).join('\n');
+        lines.map(function (l, i) { return (i + 1) + '- ' + l.name + ' — الكمية: ' + l.qty + (l.small ? ' وحدة' : (l.pack > 1 ? (' (× ' + l.pack + ' وحدة)') : '')); }).join('\n');
       window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
     });
     document.getElementById('btnExportOrderXlsx').addEventListener('click', function () {
@@ -5456,7 +5732,7 @@
       if (typeof XLSX === 'undefined') { showToast('⚠️ تأكد من الاتصال بالإنترنت'); return; }
       var sup = document.getElementById('pSupplier').value;
       var rows = lines.map(function (l, i) {
-        return { 'م': i + 1, 'المورد': sup, 'اسم الصنف': l.name, 'الكمية': l.qty, 'عدد الوحدات': l.pack, 'إجمالي القطع': l.totalUnits, 'التكلفة المتوقعة': l.estCost };
+        return { 'م': i + 1, 'المورد': sup, 'اسم الصنف': l.name, 'نوع الوحدة': l.small ? 'صغرى' : 'كبرى', 'الكمية': l.qty, 'عدد الوحدات': l.pack, 'إجمالي القطع': l.totalUnits, 'التكلفة المتوقعة': l.estCost };
       });
       var ws = XLSX.utils.json_to_sheet(rows);
       var wb = XLSX.utils.book_new();
