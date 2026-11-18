@@ -1446,9 +1446,27 @@
       });
     });
 
+    var DEFAULT_CATS = ["سوايل", "مسحوق", "ورقيات", "سلك", "مبيد", "فلاش", "منظف اطباق", "منظف ملابس", "منظف", "صابون يد", "اخرى", "ادوات نظافة", "ليف", "اكياس جيل"];
+    // كل الأقسام: الافتراضية + أي قسم مكتوب على أي صنف (باترينه / رف / ... إلخ)
+    function getAllCats() {
+      var out = DEFAULT_CATS.slice();
+      state.items.forEach(function (it) {
+        var c = String(it.cat || 'رف').trim();
+        if (c && out.indexOf(c) === -1) out.push(c);
+      });
+      return out;
+    }
+    function fillCatSelect(selected) {
+      var sel = document.getElementById('newItemCat');
+      var cats = getAllCats();
+      if (selected && cats.indexOf(selected) === -1) cats.push(selected);
+      sel.innerHTML = cats.map(function (c) { return '<option value="' + escHtml(c) + '">' + escHtml(c) + '</option>'; }).join('') + '<option value="__new__">➕ قسم جديد...</option>';
+      sel.value = selected && cats.indexOf(selected) > -1 ? selected : cats[0];
+    }
     var activeCat = 'الكل';
     function renderCatBar() {
-      var cats = ["الكل", "سوايل", "مسحوق", "ورقيات", "سلك", "مبيد", "فلاش", "منظف اطباق", "منظف ملابس", "منظف", "صابون يد", "اخرى", "ادوات نظافة", "ليف", "اكياس جيل"];
+      var cats = ['الكل'].concat(getAllCats());
+      if (cats.indexOf(activeCat) === -1) activeCat = 'الكل';
       var bar = document.getElementById('catFilterBar');
       bar.innerHTML = '';
       cats.forEach(function (c) {
@@ -2181,7 +2199,7 @@
       document.getElementById('newItemSell').value = it.sell;
       document.getElementById('newItemStock').value = it.stock || 0;
       document.getElementById('newItemUnit').value = it.unit || 'لتر';
-      document.getElementById('newItemCat').value = it.cat || 'رف';
+      fillCatSelect(it.cat || 'رف');
       document.getElementById('newItemWarehouseStock').value = it.warehouseStock || 0;
       document.getElementById('newItemWarehouseBox').classList.toggle('hidden', it.cat !== 'ادوات نظافة');
       document.getElementById('newItemPackName').value = it.packName || '';
@@ -2290,6 +2308,7 @@
       editingItemId = null;
       document.getElementById('addItemModalTitle').textContent = 'إضافة صنف جديد للمربعات';
       document.getElementById('addItemForm').reset();
+      fillCatSelect();
       packBuyManual = false;
       updatePackBuyHint();
       document.getElementById('newItemWarehouseStock').value = 0;
@@ -2311,6 +2330,7 @@
       if (String(editingItemId).indexOf('mix-') === 0) { try { localStorage.setItem('misk_mixdel_' + editingItemId, '1'); } catch (e) {} }
       state.items = state.items.filter(function (x) { return x.id !== editingItemId; });
       saveState();
+      renderCatBar();
       renderItemsGrid();
       renderDatalist();
       document.getElementById('addItemModal').classList.add('hidden');
@@ -2344,6 +2364,7 @@
         state.items.push(payload);
       }
       saveState();
+      renderCatBar();
       renderItemsGrid();
       renderDatalist();
       e.target.reset();
@@ -4784,6 +4805,12 @@
     });
 
     document.getElementById('newItemCat').addEventListener('change', function (e) {
+      if (e.target.value === '__new__') {
+        var nc = (prompt('اسم القسم الجديد:') || '').trim();
+        fillCatSelect(nc || DEFAULT_CATS[0]);
+      }
+    });
+    document.getElementById('newItemCat').addEventListener('change', function (e) {
       document.getElementById('newItemWarehouseBox').classList.toggle('hidden', e.target.value !== 'ادوات نظافة');
     });
     document.getElementById('btnTransferToShop').addEventListener('click', function () {
@@ -5695,14 +5722,11 @@
     var itemsDirSort = 'default';
     function renderItemsDirectory() {
       var catSel = document.getElementById('itemsDirCat');
-      if (catSel && catSel.options.length <= 1) {
-        var cats = [];
-        state.items.forEach(function (it) { if (it.cat && cats.indexOf(it.cat) === -1) cats.push(it.cat); });
-        cats.forEach(function (c) {
-          var o = document.createElement('option');
-          o.value = c; o.textContent = c;
-          catSel.appendChild(o);
-        });
+      if (catSel) {
+        var keepCat = catSel.value || 'الكل';
+        var allC = getAllCats();
+        catSel.innerHTML = '<option value="الكل">كل الأقسام</option>' + allC.map(function (c) { return '<option value="' + escHtml(c) + '">' + escHtml(c) + '</option>'; }).join('');
+        catSel.value = allC.indexOf(keepCat) > -1 ? keepCat : 'الكل';
       }
       var q = (document.getElementById('itemsDirSearch').value || '').trim();
       var catF = catSel ? catSel.value : 'الكل';
