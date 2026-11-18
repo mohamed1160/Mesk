@@ -6,7 +6,7 @@
   <title>مسك للمنظفات - نظام الكاشير والإدارة</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
@@ -860,23 +860,6 @@
   </div>
 
 
-  <!-- Live Camera Modal -->
-  <div id="liveCamModal" class="hidden fixed inset-0 z-[70] bg-black/85 flex items-center justify-center p-3">
-    <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl">
-      <div class="px-3.5 py-2.5 bg-slate-900 text-white flex items-center justify-between">
-        <span class="text-xs font-bold">📷 الكاميرا المباشرة</span>
-        <button type="button" id="btnCloseLiveCam" class="text-xs bg-slate-700 px-2.5 py-1 rounded-lg font-bold">✕ إغلاق</button>
-      </div>
-      <div class="bg-black relative">
-        <video id="liveCamVideo" autoplay playsinline muted class="w-full max-h-72 object-cover"></video>
-      </div>
-      <div class="p-3 flex gap-2 bg-white">
-        <button type="button" id="btnSnapLiveCam" class="flex-1 bg-sky-500 hover:bg-sky-400 text-slate-950 font-extrabold py-2.5 rounded-xl text-sm">📸 التقط الصورة</button>
-      </div>
-    </div>
-  </div>
-
-
   <!-- Shift Unlock PIN Modal -->
   <div id="shiftPinModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white border border-slate-200 rounded-2xl shadow-xl w-full max-w-xs p-4 space-y-3">
@@ -1067,64 +1050,18 @@
 
   <!-- Modal: Add New Item -->
   <div id="addItemModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-    <form id="addItemForm" class="bg-white border border-slate-300 rounded-2xl p-5 w-full max-w-sm space-y-3 my-auto">
+    <form id="addItemForm" class="bg-white border border-slate-300 rounded-2xl p-4 w-full max-w-sm space-y-3 my-auto">
       <h3 id="addItemModalTitle" class="text-base font-extrabold text-sky-600">إضافة صنف جديد للمربعات</h3>
-      <div>
-        <label class="block text-xs text-slate-600 mb-1">اسم الصنف</label>
-        <input id="newItemName" type="text" placeholder="مثال: صابون سائل سايب" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-slate-900">
-      </div>
-      <div>
-        <label class="block text-xs text-slate-600 mb-1">الباركود (اختياري)</label>
-        <div class="flex gap-2">
-          <input id="newItemBarcode" type="text" inputmode="numeric" placeholder="امسح بجهاز الباركود أو الكاميرا..." class="flex-1 min-w-0 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 text-xs font-bold">
-          <button id="btnScanItemBarcode" type="button" class="px-3 py-2 rounded-xl bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300 text-xs font-bold whitespace-nowrap">📷 مسح</button>
+
+      <!-- 1) الاسم والقسم -->
+      <div class="grid grid-cols-5 gap-2">
+        <div class="col-span-3">
+          <label class="block text-xs text-slate-600 mb-1">اسم الصنف</label>
+          <input id="newItemName" type="text" placeholder="مثال: فاميليا مطبخ ازرق" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-slate-900 font-bold">
         </div>
-      </div>
-      <div>
-        <label class="block text-xs text-slate-600 mb-1">صورة الصنف (اختياري)</label>
-        <div class="flex items-center gap-2">
-          <img id="newItemImgPreview" src="" alt="" class="hidden w-12 h-12 rounded-xl object-cover border border-slate-600">
-          <button id="btnOpenLiveCam" type="button" class="flex-1 text-center cursor-pointer bg-sky-500/20 border border-sky-400/40 text-sky-700 font-bold text-xs py-2.5 px-2 rounded-xl">
-            📷 تصوير بالكاميرا
-          </button>
-          <input id="newItemCam" type="file" accept="image/*" capture="environment" class="hidden">
-          <label class="flex-1 text-center cursor-pointer bg-slate-200 text-slate-700 font-bold text-xs py-2.5 px-2 rounded-xl">
-            🖼️ من المعرض
-            <input id="newItemImg" type="file" accept="image/*" class="hidden">
-          </label>
-        </div>
-      </div>
-      <div class="grid grid-cols-2 gap-2">
-        <div>
-          <label class="block text-xs text-slate-600 mb-1">سعر الشراء</label>
-          <input id="newItemBuy" type="number" step="any" min="0" placeholder="0.00" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-slate-900">
-        </div>
-        <div>
-          <label class="block text-xs text-slate-600 mb-1">سعر البيع</label>
-          <input id="newItemSell" type="number" step="any" min="0" placeholder="0.00" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-slate-900">
-        </div>
-      </div>
-      <div class="grid grid-cols-3 gap-2">
-        <div>
-          <label class="block text-xs text-slate-600 mb-1">المخزون</label>
-          <input id="newItemStock" type="number" step="any" min="0" value="0" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-slate-900">
-        </div>
-        <div>
-          <label class="block text-xs text-slate-600 mb-1">الوحدة</label>
-          <select id="newItemUnit" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2 py-2.5 text-slate-900 text-xs">
-            <option value="كيس">كيس</option>
-            <option value="لتر">لتر</option>
-            <option value="عبوة">عبوة</option>
-            <option value="كيلو">كيلو</option>
-            <option value="كرتونة">كرتونة</option>
-            <option value="جركن">جركن</option>
-            <option value="باكت">باكت</option>
-            <option value="قطعة">قطعة</option>
-          </select>
-        </div>
-        <div>
+        <div class="col-span-2">
           <label class="block text-xs text-slate-600 mb-1">القسم</label>
-          <select id="newItemCat" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2 py-2.5 text-slate-900 text-xs">
+          <select id="newItemCat" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2 py-2.5 text-slate-900 text-xs font-bold">
             <option value="سوايل">سوايل</option>
             <option value="مسحوق">مسحوق</option>
             <option value="ورقيات">ورقيات</option>
@@ -1142,56 +1079,111 @@
           </select>
         </div>
       </div>
-            <div id="newItemWarehouseBox" class="hidden bg-amber-50 border border-amber-200 rounded-xl p-2.5 space-y-2">
-        <div class="text-[11px] font-extrabold text-amber-800">📦 مخزن الكراتين (جوه) ← العرض (بره)</div>
-        <div class="flex items-center gap-2">
-          <label class="text-xs text-slate-700 font-bold whitespace-nowrap">في الكراتين (جوه):</label>
-          <input id="newItemWarehouseStock" type="number" step="any" min="0" value="0" class="flex-1 bg-white border border-amber-300 rounded-lg px-2.5 py-1.5 text-slate-900 text-xs font-bold text-center">
+
+      <!-- 2) الشراء: الوحدة الكبرى -->
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-2.5 space-y-2">
+        <div class="text-[11px] font-extrabold text-amber-800">📦 الشراء — الوحدة الكبرى (كرتونة / شكارة / باكت)</div>
+        <div class="grid grid-cols-3 gap-1.5">
+          <div>
+            <label class="block text-[10px] text-slate-600 font-bold mb-0.5">اسمها</label>
+            <input id="newItemPackName" type="text" placeholder="كرتونة" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-2 text-slate-900 text-xs font-bold">
+          </div>
+          <div>
+            <label class="block text-[10px] text-slate-600 font-bold mb-0.5">فيها كام وحدة؟</label>
+            <input id="newItemPackFactor" type="number" step="any" min="1" placeholder="12" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-2 text-slate-900 text-xs font-bold text-center">
+          </div>
+          <div>
+            <label class="block text-[10px] text-sky-700 font-bold mb-0.5">سعر شرائها</label>
+            <input id="newItemPackBuy" type="number" step="any" min="0" placeholder="0" class="w-full bg-white border border-sky-400 rounded-lg px-2 py-2 text-slate-900 text-xs font-extrabold text-center">
+          </div>
         </div>
-        <div class="flex items-center gap-1.5 pt-1 border-t border-amber-200/70">
-          <span class="text-[11px] font-bold text-slate-600 whitespace-nowrap">طلّع للعرض:</span>
-          <input id="transferQtyInput" type="number" step="any" min="1" value="1" class="w-16 bg-white border border-amber-300 rounded-lg px-2 py-1 text-xs font-extrabold text-center text-slate-900">
-          <button id="btnTransferToShop" type="button" class="flex-1 text-xs font-extrabold bg-amber-400 hover:bg-amber-300 text-slate-950 py-1.5 px-2 rounded-lg">🔄 تحويل للعرض</button>
-        </div>
-      </div>
-      <div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 space-y-2">
-        <div class="text-[11px] font-bold text-sky-700">وحدة بيع ثانية / جملة (اختياري: شكارة أو كرتونة)</div>
-        <div class="grid grid-cols-2 gap-1.5">
-          <div>
-            <label class="block text-[10px] text-slate-500 font-bold mb-0.5">اسم الوحدة الكبرى</label>
-            <input id="newItemPackName" type="text" placeholder="الاسم (شكارة)" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-2 text-slate-900 text-xs">
-          </div>
-          <div>
-            <label class="block text-[10px] text-slate-500 font-bold mb-0.5">عدد الوحدات في العبوة</label>
-            <input id="newItemPackFactor" type="number" step="any" min="1" placeholder="فيها كام؟" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-2 text-slate-900 text-xs">
-          </div>
-          <div>
-            <label class="block text-[10px] text-sky-700 font-bold mb-0.5">سعر شراء الوحدة الكبرى</label>
-            <input id="newItemPackBuy" type="number" step="any" min="0" placeholder="سعر الكرتونة/الشكارة" class="w-full bg-white border border-sky-400 rounded-lg px-2 py-2 text-slate-900 text-xs font-bold">
-          </div>
-          <div>
-            <label class="block text-[10px] text-slate-500 font-bold mb-0.5">سعر بيع الوحدة الكبرى</label>
-            <input id="newItemPackSell" type="number" step="any" min="0" placeholder="سعرها" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-2 text-slate-900 text-xs">
-          </div>
+        <div>
+          <label class="block text-[10px] text-slate-600 font-bold mb-0.5">سعر شراء الوحدة الصغرى <span class="text-emerald-700">(بيتحسب تلقائي من اللي فوق)</span></label>
+          <input id="newItemBuy" type="number" step="any" min="0" placeholder="0.00" required class="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-2 text-slate-900 text-sm font-extrabold">
         </div>
         <div id="newItemPackBuyHint" class="text-[10px] font-bold text-sky-700"></div>
       </div>
+
+      <!-- 3) البيع والمخزون -->
       <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 space-y-2">
-        <div class="text-[11px] font-extrabold text-emerald-800">⚡ تزويد المخزون السريع</div>
-        <div class="flex items-center gap-1.5">
-          <input id="quickStockQty" type="number" step="any" min="0" placeholder="الكمية" class="w-20 bg-white border border-emerald-300 rounded-lg px-2 py-1.5 text-xs font-extrabold text-center text-slate-900">
-          <select id="quickStockType" class="flex-1 min-w-0 bg-white border border-emerald-300 rounded-lg px-2 py-1.5 text-xs font-bold text-slate-900">
-            <option value="small">وحدة صغرى (قطعة/زجاجة)</option>
-            <option value="big">وحدة كبرى (× معامل الكرتونة)</option>
-          </select>
-          <button id="btnQuickStockAdd" type="button" class="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs px-3 py-1.5 rounded-lg whitespace-nowrap">➕ زوّد</button>
+        <div class="text-[11px] font-extrabold text-emerald-800">💰 البيع والمخزون <span class="font-bold text-emerald-700">(المخزون بأصغر وحدة بتتباع)</span></div>
+        <div class="grid grid-cols-2 gap-1.5">
+          <div>
+            <label class="block text-[10px] text-slate-600 font-bold mb-0.5">اسم الوحدة الصغرى</label>
+            <input id="newItemUnit" type="text" list="unitsDatalist" value="قطعة" placeholder="قطعة / بكرة / لتر" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-2 text-slate-900 text-xs font-bold">
+            <datalist id="unitsDatalist"><option value="قطعة"><option value="لتر"><option value="كيس"><option value="كيلو"><option value="علبة"><option value="بكرة"><option value="زجاجة"><option value="جركن"><option value="وحدة"></datalist>
+          </div>
+          <div>
+            <label class="block text-[10px] text-slate-600 font-bold mb-0.5">سعر بيع الوحدة الصغرى</label>
+            <input id="newItemSell" type="number" step="any" min="0" placeholder="0.00" required class="w-full bg-white border border-slate-300 rounded-lg px-2 py-2 text-slate-900 text-xs font-extrabold text-center">
+          </div>
+          <div>
+            <label class="block text-[10px] text-slate-600 font-bold mb-0.5">سعر بيع الكبرى / العرض</label>
+            <input id="newItemPackSell" type="number" step="any" min="0" placeholder="مثال: 95" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-2 text-slate-900 text-xs font-extrabold text-center">
+          </div>
+          <div>
+            <label class="block text-[10px] text-slate-600 font-bold mb-0.5">المخزون (بالصغرى)</label>
+            <input id="newItemStock" type="number" step="any" min="0" value="0" required class="w-full bg-white border border-slate-300 rounded-lg px-2 py-2 text-slate-900 text-xs font-extrabold text-center">
+          </div>
         </div>
-        <div id="quickStockHint" class="text-[10px] text-emerald-700 font-bold"></div>
+        <div class="text-[10px] text-slate-500">لو بعت الوحدة الكبرى بيخصم من المخزون (عدد الوحدات اللي فيها) تلقائي. مثال العرض: اسم "عرض 3" + فيه 3 + سعره 95.</div>
       </div>
-      <div id="itemSupplierPricesBox" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 space-y-1.5">
-        <div class="text-[11px] font-extrabold text-emerald-800">🚚 كارت أسعار الموردين لهذا الصنف:</div>
-        <div id="itemSupplierPricesList" class="space-y-1 max-h-36 overflow-y-auto text-[11px]"></div>
+
+      <!-- لون الصنف -->
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-extrabold text-slate-700">🎨 لون الصنف في شاشة المبيعات</span>
+          <button id="btnColorAuto" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-extrabold border border-slate-300 bg-white text-slate-700">✨ تلقائي</button>
+        </div>
+        <div id="colorPalette" class="flex flex-wrap gap-1.5"></div>
+        <div class="flex items-center gap-2">
+          <input id="newItemColorPicker" type="color" value="#2563eb" title="لون مخصص" class="h-9 w-14 rounded border border-slate-300 bg-white p-0.5">
+          <div id="colorPreview" class="flex-1 rounded-xl text-center font-black text-sm py-2 px-2 break-words border border-black/10"></div>
+        </div>
       </div>
+
+      <!-- خيارات إضافية (مقفولة) -->
+      <details id="itemExtras" class="bg-white border border-slate-300 rounded-xl">
+        <summary class="cursor-pointer select-none px-3 py-2.5 text-xs font-extrabold text-slate-700">⚙️ خيارات إضافية (باركود • أسعار الموردين • تزويد المخزون)</summary>
+        <div class="p-2.5 space-y-2.5 border-t border-slate-200">
+          <div>
+            <label class="block text-xs text-slate-600 mb-1">الباركود (اختياري)</label>
+            <div class="flex gap-2">
+              <input id="newItemBarcode" type="text" inputmode="numeric" placeholder="امسح بجهاز الباركود أو الكاميرا..." class="flex-1 min-w-0 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-slate-900 text-xs font-bold">
+              <button id="btnScanItemBarcode" type="button" class="px-3 py-2 rounded-xl bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300 text-xs font-bold whitespace-nowrap">📷 مسح</button>
+            </div>
+          </div>
+          <div id="newItemWarehouseBox" class="hidden bg-amber-50 border border-amber-200 rounded-xl p-2.5 space-y-2">
+            <div class="text-[11px] font-extrabold text-amber-800">📦 مخزن الكراتين (جوه) ← العرض (بره)</div>
+            <div class="flex items-center gap-2">
+              <label class="text-xs text-slate-700 font-bold whitespace-nowrap">في الكراتين (جوه):</label>
+              <input id="newItemWarehouseStock" type="number" step="any" min="0" value="0" class="flex-1 bg-white border border-amber-300 rounded-lg px-2.5 py-1.5 text-slate-900 text-xs font-bold text-center">
+            </div>
+            <div class="flex items-center gap-1.5 pt-1 border-t border-amber-200/70">
+              <span class="text-[11px] font-bold text-slate-600 whitespace-nowrap">طلّع للعرض:</span>
+              <input id="transferQtyInput" type="number" step="any" min="1" value="1" class="w-16 bg-white border border-amber-300 rounded-lg px-2 py-1 text-xs font-extrabold text-center text-slate-900">
+              <button id="btnTransferToShop" type="button" class="flex-1 text-xs font-extrabold bg-amber-400 hover:bg-amber-300 text-slate-950 py-1.5 px-2 rounded-lg">🔄 تحويل للعرض</button>
+            </div>
+          </div>
+          <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 space-y-2">
+            <div class="text-[11px] font-extrabold text-emerald-800">⚡ تزويد المخزون السريع</div>
+            <div class="flex items-center gap-1.5">
+              <input id="quickStockQty" type="number" step="any" min="0" placeholder="الكمية" class="w-20 bg-white border border-emerald-300 rounded-lg px-2 py-1.5 text-xs font-extrabold text-center text-slate-900">
+              <select id="quickStockType" class="flex-1 min-w-0 bg-white border border-emerald-300 rounded-lg px-2 py-1.5 text-xs font-bold text-slate-900">
+                <option value="small">وحدة صغرى</option>
+                <option value="big">وحدة كبرى (× معامل الكرتونة)</option>
+              </select>
+              <button id="btnQuickStockAdd" type="button" class="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs px-3 py-1.5 rounded-lg whitespace-nowrap">➕ زوّد</button>
+            </div>
+            <div id="quickStockHint" class="text-[10px] text-emerald-700 font-bold"></div>
+          </div>
+          <div id="itemSupplierPricesBox" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 space-y-1.5">
+            <div class="text-[11px] font-extrabold text-emerald-800">🚚 كارت أسعار الموردين لهذا الصنف:</div>
+            <div id="itemSupplierPricesList" class="space-y-1 max-h-36 overflow-y-auto text-[11px]"></div>
+          </div>
+        </div>
+      </details>
+
       <div class="flex gap-2 pt-1">
         <button type="submit" class="flex-1 bg-sky-500 hover:bg-sky-400 text-slate-950 font-extrabold py-3 rounded-xl">حفظ الصنف</button>
         <button id="btnDeleteItem" type="button" class="hidden bg-rose-600 hover:bg-rose-500 text-white font-bold px-3.5 py-3 rounded-xl">🗑️ حذف</button>
@@ -1229,6 +1221,53 @@
   <!-- Toast -->
   <div id="toast" class="hidden fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-emerald-500 text-slate-950 font-extrabold px-5 py-2.5 rounded-xl shadow-lg text-sm"></div>
 
+  <script>
+    // ===== Excel helpers: تحميل المكتبة بمصادر بديلة + حفظ الملف بطريقة تشتغل على الموبايل =====
+    var XLSX_SOURCES = [
+      'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+      'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',
+      'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js'
+    ];
+    var xlsxLoading = null;
+    function ensureXLSX() {
+      if (typeof XLSX !== 'undefined') return Promise.resolve(true);
+      if (xlsxLoading) return xlsxLoading;
+      xlsxLoading = new Promise(function (resolve) {
+        var i = 0;
+        (function next() {
+          if (typeof XLSX !== 'undefined') return resolve(true);
+          if (i >= XLSX_SOURCES.length) { xlsxLoading = null; return resolve(false); }
+          var sc = document.createElement('script');
+          sc.src = XLSX_SOURCES[i++];
+          sc.onload = function () { resolve(typeof XLSX !== 'undefined'); };
+          sc.onerror = function () { next(); };
+          document.head.appendChild(sc);
+        })();
+      });
+      return xlsxLoading;
+    }
+    window.addEventListener('load', function () { ensureXLSX(); });
+    function downloadBlob(blob, filename) {
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = filename; a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function () { document.body.removeChild(a); URL.revokeObjectURL(url); }, 2000);
+    }
+    function saveWorkbook(wb, filename) {
+      var out = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      var blob = new Blob([out], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      var isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/i.test(navigator.userAgent));
+      try {
+        if (isIOS && window.File && navigator.canShare) {
+          var f = new File([blob], filename, { type: blob.type });
+          if (navigator.canShare({ files: [f] })) { navigator.share({ files: [f], title: filename }).catch(function () {}); return; }
+        }
+      } catch (e) {}
+      downloadBlob(blob, filename);
+    }
+  </script>
   <script>
     // ===== Supabase (ثابتة في الكود) =====
     var SUPABASE_URL = 'https://kzymrwvwmadtlenlpfcw.supabase.co';
@@ -1440,7 +1479,7 @@
         }
       });
       var filtered = state.items.filter(function (it) {
-        if (inStockOnly && (Number(it.stock) || 0) <= 0) return false;
+        if (inStockOnly && !(it.mix && it.mix.length) && (Number(it.stock) || 0) <= 0) return false;
         var matchCat = activeCat === 'الكل' || (it.cat || 'رف') === activeCat;
         return matchCat && (!q || it.name.indexOf(q) > -1 || (it.barcode && String(it.barcode).indexOf(q) > -1));
       }).sort(function (a, b) {
@@ -1454,21 +1493,25 @@
         var btn = document.createElement('button');
         btn.type = 'button';
         var stk = Number(it.stock) || 0;
-        var stkCls = stk <= 3 ? 'text-rose-600' : 'text-slate-500';
-        var imgHtml = it.img
-          ? '<div class="w-full h-28 sm:h-32 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 mb-2"><img src="' + it.img + '" alt="' + it.name + '" class="w-full h-full object-cover"></div>'
-          : '<div class="w-full h-20 rounded-xl bg-sky-50/80 border border-sky-100 flex items-center justify-center text-3xl mb-2">🧴</div>';
-        btn.className = 'relative tile-press bg-white hover:bg-sky-50/40 border border-slate-200 hover:border-sky-400 rounded-2xl p-2.5 text-center flex flex-col items-center justify-between min-h-[168px] transition shadow-sm';
+        var cs = itemBoxStyle(it);
+        var dark = cs.fg === '#ffffff';
+        var chipBg = dark ? 'rgba(255,255,255,.22)' : 'rgba(0,0,0,.09)';
+        var mix = isMixItem(it);
+        var priceTxt = mix ? 'بالمبلغ 💵' : (fmt(it.sell) + ' ج.م / ' + escHtml(it.unit));
+        var packTxt = (!mix && it.packName && it.packFactor > 0 && it.packSell > 0) ? ('<div class="text-[11px] font-bold opacity-90">' + escHtml(it.packName) + ': ' + fmt(it.packSell) + ' ج.م</div>') : '';
+        var low = !mix && stk <= 3;
+        var stkStyle = low ? 'background:#dc2626;color:#fff' : ('background:' + chipBg);
+        var stkTxt = mix ? 'بيخصم من المكونات' : ((it.cat === 'ادوات نظافة')
+          ? ('العرض: ' + stk.toFixed(stk % 1 === 0 ? 0 : 2) + ' | الكراتين: ' + (Number(it.warehouseStock) || 0))
+          : ('المخزون: ' + stk.toFixed(stk % 1 === 0 ? 0 : 2)));
+        btn.className = 'relative tile-press rounded-2xl p-3 text-center flex flex-col items-center justify-center gap-1.5 min-h-[132px] transition shadow-md border-2 border-black/10';
+        btn.style.background = cs.bg;
+        btn.style.color = cs.fg;
         btn.innerHTML =
-          
-          imgHtml +
-          '<span class="text-sm sm:text-base font-extrabold text-slate-900 leading-snug line-clamp-2">' + it.name + '</span>' +
-          '<div class="mt-1.5 w-full space-y-1">' +
-            '<div class="inline-block bg-emerald-50 border border-emerald-200 rounded-lg px-2.5 py-0.5 text-sm sm:text-base font-black text-emerald-700">' + fmt(it.sell) + ' ج.م <span class="text-[11px] font-bold text-emerald-600">/ ' + it.unit + '</span></div>' +
-            ((it.cat === 'ادوات نظافة')
-              ? ('<div class="text-[11px] font-bold mt-0.5 ' + stkCls + '">العرض: ' + stk.toFixed(stk % 1 === 0 ? 0 : 2) + ' | <span class="text-amber-700">الكراتين: ' + (Number(it.warehouseStock) || 0) + '</span></div>')
-              : ('<div class="text-[11px] font-bold mt-0.5 ' + stkCls + '">المخزون: ' + stk.toFixed(stk % 1 === 0 ? 0 : 2) + '</div>')) +
-          '</div>';
+          '<span class="w-full text-lg sm:text-xl font-black leading-snug break-words">' + escHtml(it.name) + '</span>' +
+          '<div class="px-2.5 py-0.5 rounded-lg text-sm sm:text-base font-black" style="background:' + chipBg + '">' + priceTxt + '</div>' +
+          packTxt +
+          '<div class="text-[11px] font-bold px-2 py-0.5 rounded-md" style="' + stkStyle + '">' + stkTxt + '</div>';
 
         btn.addEventListener('click', function () { openSaleModal(it); });
         grid.appendChild(btn);
@@ -1532,6 +1575,12 @@
       document.getElementById('modalInstaPayBox').classList.add('hidden');
       setSaleUnitType('base');
       setSaleMode('qty');
+      var mixSale = isMixItem(it);
+      document.getElementById('modeQtyBtn').parentElement.classList.toggle('hidden', mixSale);
+      if (mixSale) {
+        setSaleMode('amt');
+        document.getElementById('modalItemPrice').textContent = 'بيع بالمبلغ — بيتوزع على المكونات ويتخصم تلقائي';
+      }
       document.getElementById('saleModal').classList.remove('hidden');
       
     }
@@ -1554,7 +1603,12 @@
         var amt = parseFloat(document.getElementById('modalAmt').value) || 0;
         var calcQ = uPrice > 0 ? (amt / uPrice) : 0;
         var grams = Math.round(calcQ * 1000);
-        document.getElementById('modalCalcQty').textContent = 'الكمية على الميزان: ' + calcQ.toFixed(2) + ' ' + uName + ' (' + grams + ' جم / مل)';
+        if (isMixItem(currentItem)) {
+          var tmpParts = amt > 0 ? mixSplit(currentItem, amt) : [];
+          document.getElementById('modalCalcQty').textContent = (tmpParts && tmpParts.length) ? tmpParts.map(function (p) { return p.name + ': ' + fmt(p.amount) + ' ج.م (' + p.qty.toFixed(2) + ')'; }).join(' + ') : 'اكتب المبلغ';
+        } else {
+          document.getElementById('modalCalcQty').textContent = 'الكمية على الميزان: ' + calcQ.toFixed(2) + ' ' + uName + ' (' + grams + ' جم / مل)';
+        }
         document.getElementById('modalTotal').textContent = fmt(Math.max(0, amt - disc)) + ' ج.م';
       }
     }
@@ -1667,10 +1721,12 @@
       }
       var total = Math.max(0, gross - disc);
       var baseQty = qty * factor;
+      var mixP = null, mixC = 0;
+      if (isMixItem(currentItem)) { mixP = mixSplit(currentItem, gross); if (!mixP) return; mixC = mixCost(mixP); }
       salesCart.push({
         itemId: currentItem.id, itemName: currentItem.name, unit: uName, qty: qty, baseQty: baseQty,
-        sellPrice: uPrice, buyPrice: currentItem.buy * factor, discount: disc,
-        total: total, profit: total - (baseQty * currentItem.buy)
+        sellPrice: uPrice, buyPrice: mixP ? (qty > 0 ? mixC / qty : 0) : currentItem.buy * factor, discount: disc,
+        total: total, profit: mixP ? (total - mixC) : total - (baseQty * currentItem.buy)
       });
       closeSaleModal();
       renderSalesCart();
@@ -1703,6 +1759,8 @@
         var lineDisc = i === 0 ? extraDisc : 0;
         var netLine = Math.max(0, c.total - lineDisc);
         grandTotal += netLine;
+        var itC = state.items.find(function (x) { return x.id === c.itemId; });
+        var mixP = isMixItem(itC) ? mixSplit(itC, c.qty * c.sellPrice) : null;
         var saleObj = {
           id: 'S-' + Date.now() + '-' + i,
           invNo: 'S' + invTs,
@@ -1720,13 +1778,14 @@
           total: netLine,
           profit: c.profit - lineDisc,
           customer: cartCust,
-          payment: payMethod
+          payment: payMethod,
+          mixParts: mixP || undefined
         };
         state.sales.unshift(saleObj);
         syncToSheet(Object.assign({ type: 'sale' }, saleObj));
         recordSaleToShiftLedger(netLine, payMethod);
         var it = state.items.find(function (x) { return x.id === c.itemId; });
-        if (it) it.stock = Number(((Number(it.stock) || 0) - c.baseQty).toFixed(3));
+        if (mixP) deductParts(mixP, 1); else if (it) it.stock = Number(((Number(it.stock) || 0) - c.baseQty).toFixed(3));
       });
       if (cartCust) {
         if (!Array.isArray(state.customers)) state.customers = [];
@@ -1774,6 +1833,8 @@
       var total = Math.max(0, gross - disc);
       var baseQty = qty * factor;
       var profit = total - (baseQty * currentItem.buy);
+      var mixP = null;
+      if (isMixItem(currentItem)) { mixP = mixSplit(currentItem, gross); if (!mixP) return; profit = total - mixCost(mixP); }
       var srObj = {
         id: 'SR-' + Date.now(),
         invNo: 'R' + Date.now(),
@@ -1793,11 +1854,12 @@
         total: -total,
         profit: -profit,
         customer: document.getElementById('modalCustomer').value.trim(),
-        payment: document.getElementById('modalPayment').value
+        payment: document.getElementById('modalPayment').value,
+        mixParts: mixP || undefined
       };
       state.sales.unshift(srObj);
       syncToSheet(Object.assign({ type: 'sale' }, srObj));
-      currentItem.stock = Number(((Number(currentItem.stock) || 0) + baseQty).toFixed(3));
+      if (mixP) deductParts(mixP, -1); else currentItem.stock = Number(((Number(currentItem.stock) || 0) + baseQty).toFixed(3));
       saveState();
       closeSaleModal();
       renderItemsGrid();
@@ -1824,6 +1886,8 @@
       var total = Math.max(0, gross - disc);
       var baseQty = qty * factor;
       var profit = total - (baseQty * currentItem.buy);
+      var mixP = null;
+      if (isMixItem(currentItem)) { mixP = mixSplit(currentItem, gross); if (!mixP) return; profit = total - mixCost(mixP); }
       var custName = document.getElementById('modalCustomer').value.trim();
       var payVal = document.getElementById('modalPayment').value;
       if (payVal === 'إنستا باي') {
@@ -1851,7 +1915,8 @@
         total: total,
         profit: profit,
         customer: custName,
-        payment: payVal
+        payment: payVal,
+        mixParts: mixP || undefined
       };
       state.sales.unshift(sObj);
       syncToSheet(Object.assign({ type: 'sale' }, sObj));
@@ -1869,7 +1934,7 @@
           state.debts.unshift({ id: 'D-' + Date.now(), type: 'receivable', person: custName, amount: total, note: 'آجل من المبيعات' });
         }
       }
-      currentItem.stock = Number(((Number(currentItem.stock) || 0) - baseQty).toFixed(3));
+      if (mixP) deductParts(mixP, 1); else currentItem.stock = Number(((Number(currentItem.stock) || 0) - baseQty).toFixed(3));
       saveState();
       closeSaleModal();
       renderItemsGrid();
@@ -1934,9 +1999,10 @@
               discount: s.discount || 0,
               total: -Math.abs(s.total),
               profit: -s.profit,
-              payment: s.payment
+              payment: s.payment,
+              mixParts: s.mixParts
             });
-            var it = state.items.find(function (x) { return x.id === s.itemId || x.name === s.itemName; });
+            var it = (s.mixParts && s.mixParts.length) ? (deductParts(s.mixParts, -1), null) : state.items.find(function (x) { return x.id === s.itemId || x.name === s.itemName; });
             if (it) {
               var restoreQty = (it.packName === s.unit && it.packFactor > 0) ? (Math.abs(s.qty) * it.packFactor) : Math.abs(s.qty);
               it.stock = Number(((Number(it.stock) || 0) + restoreQty).toFixed(3));
@@ -1963,32 +2029,110 @@
       document.getElementById('recentSalesWrap').classList.toggle('hidden');
     });
 
-    var pendingItemImg = '';
-    function handleItemImageFile(e) {
-      var file = e.target.files && e.target.files[0];
-      if (!file) { pendingItemImg = ''; return; }
-      var reader = new FileReader();
-      reader.onload = function (ev) {
-        var img = new Image();
-        img.onload = function () {
-          var max = 240;
-          var w = img.width, h = img.height;
-          if (w > h && w > max) { h = Math.round(h * max / w); w = max; }
-          else if (h >= w && h > max) { w = Math.round(w * max / h); h = max; }
-          var c = document.createElement('canvas');
-          c.width = w; c.height = h;
-          c.getContext('2d').drawImage(img, 0, 0, w, h);
-          pendingItemImg = c.toDataURL('image/jpeg', 0.7);
-          var prev = document.getElementById('newItemImgPreview');
-          prev.src = pendingItemImg;
-          prev.classList.remove('hidden');
-        };
-        img.src = ev.target.result;
-      };
-      reader.readAsDataURL(file);
+    var pendingItemColor = '';
+    var COLOR_PRESETS = ['#ef4444','#f97316','#f59e0b','#facc15','#84cc16','#22c55e','#166534','#14b8a6','#06b6d4','#0ea5e9','#2563eb','#1e3a8a','#6366f1','#8b5cf6','#d946ef','#ec4899','#f9a8d4','#8b5a2b','#9ca3af','#111827','#ffffff'];
+    function updateColorPreview() {
+      var pv = document.getElementById('colorPreview'); if (!pv) return;
+      var cs = itemBoxStyle({ name: document.getElementById('newItemName').value, color: pendingItemColor });
+      pv.style.background = cs.bg; pv.style.color = cs.fg;
+      pv.textContent = (document.getElementById('newItemName').value.trim() || 'معاينة اسم الصنف') + (pendingItemColor ? '' : ' (تلقائي)');
     }
-    document.getElementById('newItemImg').addEventListener('change', handleItemImageFile);
-    document.getElementById('newItemCam').addEventListener('change', handleItemImageFile);
+    function renderColorPalette() {
+      var box = document.getElementById('colorPalette'); if (!box) return;
+      box.innerHTML = '';
+      COLOR_PRESETS.forEach(function (c) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        var on = pendingItemColor.toLowerCase() === c;
+        b.className = 'w-7 h-7 rounded-full border-2 ' + (on ? 'border-slate-900 ring-2 ring-sky-400' : 'border-slate-300');
+        b.style.background = c;
+        b.addEventListener('click', function () { pendingItemColor = c; document.getElementById('newItemColorPicker').value = c; renderColorPalette(); });
+        box.appendChild(b);
+      });
+      var auto = document.getElementById('btnColorAuto');
+      if (auto) auto.className = 'px-2.5 py-1 rounded-lg text-[11px] font-extrabold border ' + (!pendingItemColor ? 'bg-sky-500 text-slate-950 border-sky-500' : 'border-slate-300 bg-white text-slate-700');
+      updateColorPreview();
+    }
+    document.getElementById('btnColorAuto').addEventListener('click', function () { pendingItemColor = ''; renderColorPalette(); });
+    document.getElementById('newItemColorPicker').addEventListener('input', function () { pendingItemColor = this.value; renderColorPalette(); });
+    document.getElementById('newItemName').addEventListener('input', updateColorPreview);
+
+    // ===== توحيد الحروف العربية + التلوين التلقائي =====
+    function arNorm(s) {
+      return String(s || '').toLowerCase().replace(/[\u064B-\u065F\u0670\u0640]/g, '').replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/\s+/g, ' ').trim();
+    }
+    var COLOR_WORDS = [
+      [['احمر'], '#dc2626'], [['اخضر'], '#16a34a'], [['ازرق'], '#2563eb'], [['اصفر'], '#facc15'],
+      [['بمبي', 'بينك'], '#ec4899'], [['موف', 'بنفسجي'], '#8b5cf6'], [['برتقالي', 'اورانج'], '#f97316'],
+      [['اسود'], '#111827'], [['ابيض'], '#ffffff'], [['لبني'], '#7dd3fc'], [['بني'], '#8b5a2b'], [['كحلي'], '#1e3a8a'],
+      [['ذهبي'], '#d4a017'], [['فضي'], '#cbd5e1'], [['تركواز', 'تركوازي'], '#14b8a6'], [['رمادي'], '#9ca3af']
+    ];
+    function hexFg(hex) {
+      var h = String(hex || '').replace('#', '');
+      if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+      if (h.length !== 6) return '#0f172a';
+      var r = parseInt(h.slice(0, 2), 16), g = parseInt(h.slice(2, 4), 16), b = parseInt(h.slice(4, 6), 16);
+      return ((0.299 * r + 0.587 * g + 0.114 * b) / 255) > 0.62 ? '#0f172a' : '#ffffff';
+    }
+    function itemBoxStyle(it) {
+      var solid = function (hex) { return { bg: hex, fg: hexFg(hex) }; };
+      if (it && it.color) return solid(it.color);
+      var n = arNorm(it && it.name);
+      var toks = n.split(/[\s\-\/()،,.]+/).map(function (t) { return (t.length > 3 && t.indexOf('ال') === 0) ? t.slice(2) : t; });
+      for (var i = 0; i < toks.length; i++) {
+        for (var j = 0; j < COLOR_WORDS.length; j++) {
+          if (COLOR_WORDS[j][0].indexOf(toks[i]) > -1) return solid(COLOR_WORDS[j][1]);
+        }
+      }
+      if (n.indexOf('اوكسي') > -1) return solid('#ec4899');
+      if (n.indexOf('برسيل') > -1) return solid('#166534');
+      if (n.indexOf('باهي') > -1) return solid('#facc15');
+      if (n.indexOf('اريال') > -1) return { bg: 'linear-gradient(135deg,#ffffff 0%,#ffffff 40%,#2563eb 100%)', fg: '#1e3a8a' };
+      if (n.indexOf('زجاج') > -1) return { bg: 'linear-gradient(135deg,#e0f2fe 0%,#38bdf8 100%)', fg: '#0c4a6e' };
+      if (n.indexOf('دهون') > -1) return solid('#111827');
+      if (n.indexOf('خشب') > -1) return solid('#8b5a2b');
+      if (n.indexOf('بابيا') > -1) return solid('#0369a1');
+      if (/فامليا|فاميليا|فاين/.test(n)) return solid('#2563eb');
+      return { bg: '#f1f5f9', fg: '#0f172a' };
+    }
+
+    // ===== أصناف الخلطة المجمعة (بيع بالمبلغ + خصم المكونات) =====
+    function mixSplit(item, gross) {
+      var parts = [], missing = [];
+      (item.mix || []).forEach(function (m) {
+        var comp = null;
+        for (var i = 0; i < m.names.length && !comp; i++) {
+          var nn = arNorm(m.names[i]);
+          comp = state.items.find(function (x) { return x.id !== item.id && arNorm(x.name) === nn; });
+        }
+        if (!comp) { missing.push(m.names[0]); return; }
+        var amt = gross * m.share, sp = Number(comp.sell) || 0;
+        var q = sp > 0 ? amt / sp : 0;
+        parts.push({ itemId: comp.id, name: comp.name, amount: Number(amt.toFixed(2)), qty: Number(q.toFixed(3)), cost: Number((q * (Number(comp.buy) || 0)).toFixed(2)) });
+      });
+      if (missing.length) { showToast('⚠️ مكوّن غير موجود في الأصناف: ' + missing.join('، ')); return null; }
+      return parts;
+    }
+    function mixCost(parts) { return parts.reduce(function (a, p) { return a + p.cost; }, 0); }
+    function deductParts(parts, sign) {
+      parts.forEach(function (p) {
+        var it = state.items.find(function (x) { return x.id === p.itemId; });
+        if (it) it.stock = Number(((Number(it.stock) || 0) - sign * p.qty).toFixed(3));
+      });
+    }
+    function isMixItem(it) { return !!(it && it.mix && it.mix.length); }
+    function ensureMixItems() {
+      var changed = false;
+      function add(o) {
+        try { if (localStorage.getItem('misk_mixdel_' + o.id)) return; } catch (e) {}
+        if (!state.items.some(function (x) { return x.id === o.id; })) { state.items.push(o); changed = true; }
+      }
+      add({ id: 'mix-khalta-klor', name: 'خلطة على كلور', unit: 'جنيه', cat: 'سوايل', buy: 0, sell: 1, stock: 0, img: '', color: '#0891b2', packName: '', packFactor: 0, packSell: 0,
+        mix: [{ names: ['خلطة'], share: 0.5 }, { names: ['كلور'], share: 0.5 }] });
+      add({ id: 'mix-khalta-alwan', name: 'خلطة الوان', unit: 'جنيه', cat: 'سوايل', buy: 0, sell: 1, stock: 0, img: '', color: '#a855f7', packName: '', packFactor: 0, packSell: 0,
+        mix: [{ names: ['فانيش سايب', 'فانيش'], share: 0.25 }, { names: ['كلوركس الوان'], share: 0.25 }, { names: ['خلطة سجاد'], share: 0.25 }, { names: ['برسيل جيل', 'برسيل جل'], share: 0.25 }] });
+      return changed;
+    }
 
     var editingItemId = null;
         function renderItemSupplierPrices(itemName) {
@@ -2046,10 +2190,10 @@
       packBuyManual = false;
       document.getElementById('newItemPackBuy').value = (Number(it.packFactor) > 0 && Number(it.buy) > 0) ? Number((it.buy * it.packFactor).toFixed(2)) : '';
       updatePackBuyHint();
-      pendingItemImg = it.img || '';
-      var prev = document.getElementById('newItemImgPreview');
-      if (pendingItemImg) { prev.src = pendingItemImg; prev.classList.remove('hidden'); }
-      else { prev.classList.add('hidden'); }
+      pendingItemColor = it.color || '';
+      document.getElementById('newItemColorPicker').value = it.color || '#2563eb';
+      renderColorPalette();
+      document.getElementById('itemExtras').open = false;
       renderItemSupplierPrices(it.name);
       document.getElementById('quickStockQty').value = '';
       document.getElementById('quickStockType').value = 'small';
@@ -2150,8 +2294,10 @@
       updatePackBuyHint();
       document.getElementById('newItemWarehouseStock').value = 0;
       document.getElementById('newItemWarehouseBox').classList.toggle('hidden', document.getElementById('newItemCat').value !== 'ادوات نظافة');
-      pendingItemImg = '';
-      document.getElementById('newItemImgPreview').classList.add('hidden');
+      pendingItemColor = '';
+      document.getElementById('itemExtras').open = false;
+      document.getElementById('newItemUnit').value = 'قطعة';
+      renderColorPalette();
       document.getElementById('itemSupplierPricesBox').classList.add('hidden');
       document.getElementById('btnDeleteItem').classList.add('hidden');
       refreshQuickStockUI();
@@ -2162,6 +2308,7 @@
     });
     document.getElementById('btnDeleteItem').addEventListener('click', function () {
       if (!editingItemId) return;
+      if (String(editingItemId).indexOf('mix-') === 0) { try { localStorage.setItem('misk_mixdel_' + editingItemId, '1'); } catch (e) {} }
       state.items = state.items.filter(function (x) { return x.id !== editingItemId; });
       saveState();
       renderItemsGrid();
@@ -2184,7 +2331,7 @@
       var barcode = document.getElementById('newItemBarcode').value.trim();
       var payload = {
         id: editingItemId || ('i' + Date.now()),
-        name: name, unit: unit, cat: cat, buy: buy, sell: sell, stock: stock, img: pendingItemImg, barcode: barcode,
+        name: name, unit: unit, cat: cat, buy: buy, sell: sell, stock: stock, img: '', color: pendingItemColor, mix: ((state.items.find(function (x) { return x.id === editingItemId; }) || {}).mix), barcode: barcode,
         warehouseStock: cat === 'ادوات نظافة' ? (parseFloat(document.getElementById('newItemWarehouseStock').value) || 0) : 0,
         packName: (packName && packFactor > 0) ? packName : '',
         packFactor: (packName && packFactor > 0) ? packFactor : 0,
@@ -2200,9 +2347,8 @@
       renderItemsGrid();
       renderDatalist();
       e.target.reset();
-      pendingItemImg = '';
+      pendingItemColor = '';
       editingItemId = null;
-      document.getElementById('newItemImgPreview').classList.add('hidden');
       document.getElementById('addItemModal').classList.add('hidden');
       showToast('✅ تم حفظ الصنف');
     });
@@ -2251,7 +2397,7 @@
             '<div><label class="p-cost-label block text-slate-500 font-bold mb-0.5">سعر الوحدة الكبيرة</label><input type="number" step="any" min="0" placeholder="0" class="p-pack-cost w-full bg-white border border-sky-400 rounded-lg px-2 py-1.5 text-slate-900 text-xs text-center font-extrabold"></div>' +
           '</div>' +
           '<div class="grid grid-cols-4 gap-1.5 items-center text-[11px] pt-1 border-t border-slate-200">' +
-            '<div class="bg-white border border-slate-200 rounded-lg px-1.5 py-1 text-center"><span class="block text-[10px] text-slate-400">الإجمالي</span><span class="p-row-total font-extrabold text-sky-700">0.00</span></div>' +
+            '<div class="bg-white border border-slate-200 rounded-lg px-1.5 py-1 text-center"><span class="block text-[10px] text-slate-400">الإجمالي (اكتبه)</span><input type="number" step="any" min="0" inputmode="decimal" placeholder="0" class="p-row-total w-full bg-sky-50 border border-sky-300 rounded px-1 py-0.5 text-xs text-center font-extrabold text-sky-700"></div>' +
             '<div class="bg-white border border-slate-200 rounded-lg px-1.5 py-1 text-center"><span class="block text-[10px] text-slate-400">شراء الوحدة</span><span class="p-unit-cost font-extrabold text-amber-600">0.00</span></div>' +
             '<div><label class="block text-[10px] text-slate-500 font-bold mb-0.5">بيع الوحدة</label><input type="number" step="any" min="0" placeholder="0" class="p-sell w-full bg-white border border-slate-300 rounded-lg px-1.5 py-1 text-slate-900 text-xs text-center font-bold"></div>' +
             '<div class="bg-white border border-slate-200 rounded-lg px-1.5 py-1 text-center"><span class="block text-[10px] text-slate-400">الربح %</span><span class="p-margin font-extrabold text-slate-400">—</span></div>' +
@@ -2265,6 +2411,7 @@
           var packCostInp = rowEl.querySelector('.p-pack-cost');
           var sellInp = rowEl.querySelector('.p-sell');
           var typeSel = rowEl.querySelector('.p-unit-type');
+          var totInp = rowEl.querySelector('.p-row-total');
 
           typeSel.addEventListener('change', function () {
             applyUnitTypeUI(rowEl);
@@ -2325,6 +2472,17 @@
               if (!sellInp.value && exact.sell > 0) sellInp.value = exact.sell;
               recalcPurchaseTable();
             }
+          });
+          // كتابة الإجمالي => السيستم يقسمه على الكمية ويطلّع سعر الوحدة الكبيرة والصغيرة
+          totInp.addEventListener('input', function () {
+            var q = parseFloat(qtyInp.value) || 0, t = parseFloat(totInp.value) || 0;
+            if (q > 0) { packCostInp.value = t > 0 ? Number((t / q).toFixed(4)) : ''; delete rowEl.dataset.pendTotal; }
+            else rowEl.dataset.pendTotal = t;
+            recalcPurchaseTable();
+          });
+          qtyInp.addEventListener('input', function () {
+            var q = parseFloat(qtyInp.value) || 0, pt = parseFloat(rowEl.dataset.pendTotal) || 0;
+            if (q > 0 && pt > 0) { packCostInp.value = Number((pt / q).toFixed(4)); delete rowEl.dataset.pendTotal; }
           });
           [qtyInp, packInp, packCostInp, sellInp].forEach(function (el) {
             el.addEventListener('input', recalcPurchaseTable);
@@ -2391,10 +2549,11 @@
         var q = rv.qty, pk = rv.pack, packCost = rv.packCost;
         var sl = parseFloat(tr.querySelector('.p-sell').value) || 0;
         var totalUnits = q * pk;
-        var rc = q * packCost;
-        var unitCost = pk > 0 ? (packCost / pk) : 0;
         var rtCell = tr.querySelector('.p-row-total');
-        if (rtCell) rtCell.textContent = fmt(rc);
+        var rc = q * packCost;
+        if (rtCell && document.activeElement === rtCell && parseFloat(rtCell.value) > 0) rc = parseFloat(rtCell.value);
+        var unitCost = pk > 0 ? (packCost / pk) : 0;
+        if (rtCell && document.activeElement !== rtCell) rtCell.value = rc > 0 ? Number(rc.toFixed(2)) : '';
         var ucCell = tr.querySelector('.p-unit-cost');
         var pNm = tr.querySelector('.p-name').value.trim();
         var exIt = state.items.find(function (x) { return x.name === pNm; });
@@ -2478,7 +2637,8 @@
         var itemName = tr.querySelector('.p-name').value.trim();
         var rv = getPurchaseRowVals(tr);
         var qty = rv.qty, pack = rv.pack, packCost = rv.packCost;
-        var rowTotal = qty * packCost;
+        var totEl = tr.querySelector('.p-row-total');
+        var rowTotal = (totEl && parseFloat(totEl.value) > 0) ? parseFloat(totEl.value) : qty * packCost;
         var sell = parseFloat(tr.querySelector('.p-sell').value) || 0;
         var totalUnits = qty * pack;
         if (itemName && totalUnits > 0 && rowTotal >= 0) {
@@ -3360,10 +3520,7 @@
         lines.push(['مصروف', e.date, e.desc, e.category, 1, e.amount].join(','));
       });
       var blob = new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
-      var a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'misk_report_' + todayStr() + '.csv';
-      a.click();
+      downloadBlob(blob, 'misk_report_' + todayStr() + '.csv');
       showToast('📥 تم تحميل ملف التقرير');
     });
 
@@ -4426,53 +4583,6 @@
     loadSavedBaselines();
     initBaseEditor();
 
-    // Live Camera Capture (bypasses Android gallery picker when supported)
-    var liveCamStream = null;
-    function stopLiveCam() {
-      if (liveCamStream) {
-        liveCamStream.getTracks().forEach(function (t) { t.stop(); });
-        liveCamStream = null;
-      }
-      var v = document.getElementById('liveCamVideo');
-      if (v) v.srcObject = null;
-      document.getElementById('liveCamModal').classList.add('hidden');
-    }
-    document.getElementById('btnOpenLiveCam').addEventListener('click', function () {
-      var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/i.test(navigator.userAgent));
-      // على الموبايل: افتح كاميرا الجهاز مباشرة (من نفس الضغطة)
-      if (isMobile || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.isSecureContext) {
-        document.getElementById('newItemCam').click();
-        return;
-      }
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false })
-        .then(function (stream) {
-          liveCamStream = stream;
-          var v = document.getElementById('liveCamVideo');
-          v.srcObject = stream;
-          document.getElementById('liveCamModal').classList.remove('hidden');
-        })
-        .catch(function () {
-          document.getElementById('newItemCam').click();
-        });
-    });
-    document.getElementById('btnCloseLiveCam').addEventListener('click', stopLiveCam);
-    document.getElementById('btnSnapLiveCam').addEventListener('click', function () {
-      var v = document.getElementById('liveCamVideo');
-      if (!v || !v.videoWidth) return;
-      var maxSide = 480;
-      var w = v.videoWidth, h = v.videoHeight;
-      if (w > h && w > maxSide) { h = Math.round(h * maxSide / w); w = maxSide; }
-      else if (h >= w && h > maxSide) { w = Math.round(w * maxSide / h); h = maxSide; }
-      var c = document.createElement('canvas');
-      c.width = w; c.height = h;
-      c.getContext('2d').drawImage(v, 0, 0, w, h);
-      pendingItemImg = c.toDataURL('image/jpeg', 0.7);
-      var prev = document.getElementById('newItemImgPreview');
-      if (prev) { prev.src = pendingItemImg; prev.classList.remove('hidden'); }
-      stopLiveCam();
-      showToast('📸 تم التقاط صورة الصنف');
-    });
-
     // Barcode Scanner (Hardware USB/Bluetooth Scanner + Phone Camera BarcodeDetector)
     function handleScannedSaleBarcode(code) {
       var clean = String(code || '').trim();
@@ -4688,9 +4798,10 @@
     });
 
     // Excel Export & Import (Replace or Add/Merge)
-    document.getElementById('btnExportItemsXlsx').addEventListener('click', function () {
-      if (typeof XLSX === 'undefined') {
-        showToast('⚠️ تأكد من الاتصال بالإنترنت لتحميل مكتبة الإكسيل');
+    document.getElementById('btnExportItemsXlsx').addEventListener('click', async function () {
+      showToast('⏳ جاري تجهيز ملف الإكسيل...');
+      if (!(await ensureXLSX())) {
+        showToast('⚠️ تعذر تحميل مكتبة الإكسيل — تأكد من الإنترنت وحاول تاني');
         return;
       }
       var rows = state.items.map(function (it, idx) {
@@ -4712,7 +4823,7 @@
       var ws = XLSX.utils.json_to_sheet(rows);
       var wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'الأصناف');
-      XLSX.writeFile(wb, 'misk_items_' + todayStr() + '.xlsx');
+      saveWorkbook(wb, 'misk_items_' + todayStr() + '.xlsx');
       showToast('📥 تم تصدير ' + rows.length + ' صنف لملف إكسيل');
     });
 
@@ -4720,7 +4831,7 @@
       var inp = document.getElementById('importExcelInput');
       var file = inp && inp.files && inp.files[0];
       if (!file) { showToast('⚠️ اختار ملف إكسيل الأول'); return; }
-      if (typeof XLSX === 'undefined') { showToast('⚠️ تأكد من الاتصال بالإنترنت'); return; }
+      if (typeof XLSX === 'undefined') { ensureXLSX(); showToast('⚠️ المكتبة لسه بتتحمل — استنى ثانيتين وجرب تاني'); return; }
 
       var reader = new FileReader();
       reader.onload = function (ev) {
@@ -4860,7 +4971,7 @@
       var inp = document.getElementById('starterExcelInput');
       var file = inp && inp.files && inp.files[0];
       if (!file) { showToast('⚠️ اختار ملف إكسيل البداية الأول'); return; }
-      if (typeof XLSX === 'undefined') { showToast('⚠️ تأكد من الاتصال بالإنترنت'); return; }
+      if (typeof XLSX === 'undefined') { ensureXLSX(); showToast('⚠️ المكتبة لسه بتتحمل — استنى ثانيتين وجرب تاني'); return; }
 
       var reader = new FileReader();
       reader.onload = function (ev) {
@@ -5083,10 +5194,7 @@
         syncUrl: getSyncUrl()
       };
       var blob = new Blob([JSON.stringify(bundle)], { type: 'application/json;charset=utf-8;' });
-      var a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'misk_backup_' + todayStr() + '.json';
-      a.click();
+      downloadBlob(blob, 'misk_backup_' + todayStr() + '.json');
       showToast('💾 تم تحميل النسخة الاحتياطية الكاملة');
     });
 
@@ -5358,6 +5466,7 @@
           if (d.shiftLedger) saveShiftLedger(d.shiftLedger);
         } else {
           state[k] = Array.isArray(d) ? d : [];
+          if (k === 'items') ensureMixItems();
         }
         saveState();
       } finally { sbApplying = false; }
@@ -5531,7 +5640,8 @@
       state.sales.forEach(function (sl) {
         if (!sl.date || !sl.itemName) return;
         var bq = saleBaseQty(sl);
-        var o = m[sl.itemName] || (m[sl.itemName] = { d7: 0, d30: 0 });
+        var o = m[sl.itemName] || (m[sl.itemName] = { d7: 0, d30: 0, cnt: 0, tot: 0 });
+        if (!sl.isReturn) { o.cnt += 1; o.tot += bq; }
         if (sl.date >= d30) o.d30 += bq;
         if (sl.date >= d7) o.d7 += bq;
       });
@@ -5601,21 +5711,21 @@
       updateOrderCountBtn();
 
       var salesMap = getItemSalesMap();
-      function soldOf(it) { return salesMap[it.name] || { d7: 0, d30: 0 }; }
+      function soldOf(it) { return salesMap[it.name] || { d7: 0, d30: 0, cnt: 0, tot: 0 }; }
       function stockOf(it) { return Number(it.stock) || 0; }
 
       var filtered = state.items.filter(function (it) {
         if (catF !== 'الكل' && it.cat !== catF) return false;
-        if (itemsDirLowOnly && stockOf(it) > DIR_LOW_LIMIT) return false;
+        if (itemsDirLowOnly && (it.mix || stockOf(it) > DIR_LOW_LIMIT)) return false;
         if (q && it.name.indexOf(q) === -1 && (!it.barcode || String(it.barcode).indexOf(q) === -1)) return false;
         return true;
       });
 
       var byName = function (a, b) { return String(a.name).localeCompare(String(b.name), 'ar'); };
       if (itemsDirSort === 'sales_desc') {
-        filtered.sort(function (a, b) { return (soldOf(b).d30 - soldOf(a).d30) || (soldOf(b).d7 - soldOf(a).d7) || byName(a, b); });
+        filtered.sort(function (a, b) { return (soldOf(b).d30 - soldOf(a).d30) || (soldOf(b).d7 - soldOf(a).d7) || (soldOf(b).cnt - soldOf(a).cnt) || byName(a, b); });
       } else if (itemsDirSort === 'sales_asc') {
-        filtered.sort(function (a, b) { return (soldOf(a).d30 - soldOf(b).d30) || (soldOf(a).d7 - soldOf(b).d7) || byName(a, b); });
+        filtered.sort(function (a, b) { return (soldOf(a).d30 - soldOf(b).d30) || (soldOf(a).d7 - soldOf(b).d7) || (soldOf(a).cnt - soldOf(b).cnt) || byName(a, b); });
       } else if (itemsDirSort === 'low_first') {
         filtered.sort(function (a, b) {
           var la = stockOf(a) <= DIR_LOW_LIMIT ? 0 : 1, lb = stockOf(b) <= DIR_LOW_LIMIT ? 0 : 1;
@@ -5663,10 +5773,11 @@
             '<div class="bg-slate-50 rounded-lg p-1.5"><span class="block text-[10px] text-slate-500">الربح %</span><strong class="text-sky-700">' + margin + '</strong></div>' +
             '<div class="bg-slate-50 rounded-lg p-1.5"><span class="block text-[10px] text-slate-500">' + (it.cat === 'ادوات نظافة' ? 'عرض/كراتين' : 'المخزون') + '</span><strong class="' + (stockOf(it) <= DIR_LOW_LIMIT ? 'text-rose-600' : 'text-slate-900') + '">' + stockOf(it) + (it.cat === 'ادوات نظافة' ? ('/' + (Number(it.warehouseStock) || 0)) : '') + '</strong></div>' +
           '</div>' +
-          '<div class="grid grid-cols-3 gap-1.5 text-center">' +
+          '<div class="grid grid-cols-4 gap-1.5 text-center">' +
             '<div class="bg-indigo-50 rounded-lg p-1.5"><span class="block text-[10px] text-indigo-600">مباع آخر 7 أيام</span><strong class="text-indigo-800">' + qf(sold.d7) + '</strong></div>' +
             '<div class="bg-indigo-50 rounded-lg p-1.5"><span class="block text-[10px] text-indigo-600">مباع آخر 30 يوم</span><strong class="text-indigo-800">' + qf(sold.d30) + '</strong></div>' +
             '<div class="bg-indigo-50 rounded-lg p-1.5"><span class="block text-[10px] text-indigo-600">معدل/يوم</span><strong class="text-indigo-800">' + (sold.d30 > 0 ? (sold.d30 / 30).toFixed(2) : '—') + '</strong></div>' +
+            '<div class="bg-fuchsia-50 rounded-lg p-1.5"><span class="block text-[10px] text-fuchsia-700">عدد المبيعات</span><strong class="text-fuchsia-800">' + sold.cnt + ' عملية</strong></div>' +
           '</div>' +
           (it.packName ? '<div class="text-[11px] font-bold text-indigo-700 bg-indigo-50 rounded-lg px-2 py-1">📦 ' + it.packName + ': ' + it.packFactor + ' ' + it.unit + ' (بسعر ' + fmt(it.packSell) + ' ج.م)</div>' : '') +
           '<div class="flex flex-wrap items-center gap-1 pt-1 border-t border-slate-100"><span class="text-[10px] font-bold text-slate-500">الموردون:</span> ' + supHtml + '</div>';
@@ -5694,7 +5805,7 @@
       renderItemsDirectory();
     });
     document.getElementById('btnDirWaLow').addEventListener('click', function () {
-      var lows = state.items.filter(function (it) { return (Number(it.stock) || 0) <= 3; });
+      var lows = state.items.filter(function (it) { return !it.mix && (Number(it.stock) || 0) <= 3; });
       if (lows.length === 0) { showToast('لا توجد نواقص حالياً'); return; }
       var msg = '📦 *نواقص محل مسك للمنظفات* (' + todayStr() + '):\n' + lows.slice(0, 50).map(function (it, i) {
         var sups = getItemSupplierStats(it.name);
@@ -5726,10 +5837,10 @@
         lines.map(function (l, i) { return (i + 1) + '- ' + l.name + ' — الكمية: ' + l.qty + (l.small ? ' وحدة' : (l.pack > 1 ? (' (× ' + l.pack + ' وحدة)') : '')); }).join('\n');
       window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
     });
-    document.getElementById('btnExportOrderXlsx').addEventListener('click', function () {
+    document.getElementById('btnExportOrderXlsx').addEventListener('click', async function () {
       var lines = collectPurchaseOrderLines();
       if (lines.length === 0) { showToast('⚠️ اكتب صنف واحد على الأقل في الطلبية'); return; }
-      if (typeof XLSX === 'undefined') { showToast('⚠️ تأكد من الاتصال بالإنترنت'); return; }
+      if (!(await ensureXLSX())) { showToast('⚠️ تعذر تحميل مكتبة الإكسيل — تأكد من الإنترنت'); return; }
       var sup = document.getElementById('pSupplier').value;
       var rows = lines.map(function (l, i) {
         return { 'م': i + 1, 'المورد': sup, 'اسم الصنف': l.name, 'نوع الوحدة': l.small ? 'صغرى' : 'كبرى', 'الكمية': l.qty, 'عدد الوحدات': l.pack, 'إجمالي القطع': l.totalUnits, 'التكلفة المتوقعة': l.estCost };
@@ -5737,7 +5848,7 @@
       var ws = XLSX.utils.json_to_sheet(rows);
       var wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'طلب شراء');
-      XLSX.writeFile(wb, 'misk_order_' + sup + '_' + todayStr() + '.xlsx');
+      saveWorkbook(wb, 'misk_order_' + sup + '_' + todayStr() + '.xlsx');
       showToast('📥 تم تحميل ملف طلب الشراء');
     });
 
@@ -6229,6 +6340,8 @@
     if (document.getElementById('purchaseTableBody') && document.getElementById('purchaseTableBody').children.length === 0) {
       addPurchaseRows(2);
     }
+    if (ensureMixItems()) saveState();
+    renderColorPalette();
     renderCatBar();
     renderItemsGrid();
     renderSalesLog();
