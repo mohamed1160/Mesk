@@ -217,9 +217,8 @@
       </div>
 
       <!-- Category Filter Pills -->
-      <div class="flex items-start gap-2">
+      <div id="catFilterBar" class="flex flex-wrap items-center gap-1.5 w-full">
         <button id="btnToggleInStockOnly" type="button" class="px-3 py-1.5 rounded-full text-xs font-extrabold border border-slate-300 bg-white text-slate-700 whitespace-nowrap transition">📦 المتوفر فقط</button>
-        <div id="catFilterBar" class="flex-1 flex flex-wrap gap-1.5"></div>
       </div>
       <!-- Big Item Tiles Grid -->
       <div id="itemsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
@@ -1215,6 +1214,10 @@
         <button id="btnCloseStmtModal" type="button" class="text-slate-500 hover:text-slate-900 text-xl font-bold px-2">✕</button>
       </div>
       <div id="stmtBody" class="space-y-2 overflow-y-auto flex-1 text-xs"></div>
+      <div class="flex gap-2 pt-1">
+        <button id="btnStmtShareImg" type="button" class="flex-1 bg-sky-600 hover:bg-sky-500 text-white font-extrabold py-2 rounded-xl text-xs">🖼️ مشاركة كصورة</button>
+        <button id="btnStmtShareTxt" type="button" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2 rounded-xl text-xs">📲 نص واتساب</button>
+      </div>
     </div>
   </div>
 
@@ -1468,7 +1471,9 @@
       var cats = ['الكل'].concat(getAllCats());
       if (cats.indexOf(activeCat) === -1) activeCat = 'الكل';
       var bar = document.getElementById('catFilterBar');
+      var stockBtn = document.getElementById('btnToggleInStockOnly');
       bar.innerHTML = '';
+      if (stockBtn) bar.appendChild(stockBtn);
       cats.forEach(function (c) {
         var b = document.createElement('button');
         b.type = 'button';
@@ -2943,7 +2948,9 @@
       document.getElementById('statementModal').classList.add('hidden');
     });
 
+    var stmtCtx = null;
     function openStatement(kind, name) {
+      stmtCtx = { kind: kind, name: name };
       var titleEl = document.getElementById('stmtTitle');
       var subEl = document.getElementById('stmtSub');
       var bodyEl = document.getElementById('stmtBody');
@@ -6021,6 +6028,7 @@
             '</div>' +
             '<div class="flex gap-2">' +
               '<button type="button" data-act="wa" data-key="' + escHtml(inv.key) + '" class="flex-1 bg-emerald-600 text-white font-bold py-2 rounded-xl text-[11px]">📲 واتساب</button>' +
+              '<button type="button" data-act="img" data-key="' + escHtml(inv.key) + '" class="flex-1 bg-sky-600 text-white font-bold py-2 rounded-xl text-[11px]">🖼️ مشاركة كصورة</button>' +
               '<button type="button" data-act="print" data-key="' + escHtml(inv.key) + '" class="flex-1 bg-slate-700 text-white font-bold py-2 rounded-xl text-[11px]">🖨️ طباعة</button>' +
             '</div>' +
           '</div></details>';
@@ -6043,6 +6051,7 @@
       var btn = e.target.closest('button[data-act]'); if (!btn) return;
       var inv = siCache[btn.getAttribute('data-key')]; if (!inv) return;
       if (btn.getAttribute('data-act') === 'wa') window.open('https://wa.me/?text=' + encodeURIComponent(saleInvoiceText(inv)), '_blank');
+      else if (btn.getAttribute('data-act') === 'img') shareSaleInvoiceImage(inv);
       else saleInvoicePrint(inv);
     });
 
@@ -6150,6 +6159,7 @@
               inv.payments.map(function (pm) { return '<div class="flex justify-between"><span>' + pm.date + (pm.time ? ' • ' + pm.time : '') + '</span><b>' + fmt(pm.amount) + ' ج.م</b></div>'; }).join('') + '</div>' : '') +
             '<div class="flex gap-2">' +
               '<button type="button" data-act="wa" data-key="' + escHtml(inv.key) + '" class="flex-1 bg-emerald-600 text-white font-bold py-2 rounded-xl text-[11px]">📲 واتساب</button>' +
+              '<button type="button" data-act="img" data-key="' + escHtml(inv.key) + '" class="flex-1 bg-sky-600 text-white font-bold py-2 rounded-xl text-[11px]">🖼️ مشاركة كصورة</button>' +
               '<button type="button" data-act="print" data-key="' + escHtml(inv.key) + '" class="flex-1 bg-slate-700 text-white font-bold py-2 rounded-xl text-[11px]">🖨️ طباعة</button>' +
             '</div>' +
           '</div></details>';
@@ -6172,6 +6182,7 @@
       var btn = e.target.closest('button[data-act]'); if (!btn) return;
       var inv = piCache[btn.getAttribute('data-key')]; if (!inv) return;
       if (btn.getAttribute('data-act') === 'wa') window.open('https://wa.me/?text=' + encodeURIComponent(purchaseInvoiceText(inv)), '_blank');
+      else if (btn.getAttribute('data-act') === 'img') sharePurchaseInvoiceImage(inv);
       else purchaseInvoicePrint(inv);
     });
     function showInvView(mode) {
@@ -6384,6 +6395,154 @@
         try { navigator.serviceWorker.register('/sw.js').catch(function () {}); } catch (e) {}
       });
     }
+  </script>
+
+  <script>
+    // ===== مشاركة الفاتورة / كشف الحساب كصورة PNG =====
+    var SHOP_NAME = 'مسك للمنظفات';
+    function rrect(c, x, y, w, h, r) {
+      c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
+      c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
+    }
+    // doc = {title, meta:[..], cols:[{h,w,align}], rows:[[..]], totals:[{label,value,color}]}
+    function drawDocCanvas(doc) {
+      var W = 720, pad = 28, rowH = 38, headH = 150;
+      var tableH = (doc.rows.length + 1) * rowH;
+      var totH = doc.totals.length * 44 + 20;
+      var H = headH + 70 + tableH + totH + 70;
+      var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+      var c = cv.getContext('2d');
+      var F = "'Cairo', Tahoma, Arial, sans-serif";
+      c.fillStyle = '#ffffff'; c.fillRect(0, 0, W, H);
+      var g = c.createLinearGradient(0, 0, W, 0); g.addColorStop(0, '#0284c7'); g.addColorStop(1, '#0ea5e9');
+      c.fillStyle = g; c.fillRect(0, 0, W, headH);
+      c.fillStyle = '#ffffff'; c.beginPath(); c.arc(W - pad - 36, 56, 36, 0, Math.PI * 2); c.fill();
+      c.font = '36px ' + F; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = '#0369a1'; c.fillText('🧴', W - pad - 36, 58);
+      c.direction = 'rtl'; c.textAlign = 'right'; c.fillStyle = '#ffffff';
+      c.font = '800 28px ' + F; c.fillText(SHOP_NAME, W - pad - 84, 46);
+      c.font = '700 20px ' + F; c.fillText(doc.title, W - pad - 84, 82);
+      c.font = '600 16px ' + F; c.fillStyle = '#e0f2fe';
+      c.fillText(doc.meta.join('   •   '), W - pad, 126);
+      // table
+      var y = headH + 30, tw = W - pad * 2;
+      var totalW = doc.cols.reduce(function (a, b) { return a + b.w; }, 0);
+      var xs = [], acc = W - pad;
+      doc.cols.forEach(function (col) { var cw = tw * col.w / totalW; xs.push({ right: acc, left: acc - cw, w: cw }); acc -= cw; });
+      c.fillStyle = '#f1f5f9'; rrect(c, pad, y, tw, rowH, 10); c.fill();
+      c.fillStyle = '#0f172a'; c.font = '800 15px ' + F; c.textBaseline = 'middle';
+      doc.cols.forEach(function (col, i) { c.textAlign = i === 0 ? 'right' : 'center'; c.fillText(col.h, i === 0 ? xs[i].right - 10 : (xs[i].left + xs[i].right) / 2, y + rowH / 2); });
+      y += rowH;
+      doc.rows.forEach(function (r, ri) {
+        if (ri % 2 === 1) { c.fillStyle = '#f8fafc'; c.fillRect(pad, y, tw, rowH); }
+        c.fillStyle = '#1e293b'; c.font = '600 15px ' + F;
+        r.forEach(function (v, i) {
+          var txt = String(v), maxW = xs[i].w - 14;
+          while (c.measureText(txt).width > maxW && txt.length > 1) txt = txt.slice(0, -1);
+          if (txt !== String(v)) txt += '…';
+          c.textAlign = i === 0 ? 'right' : 'center';
+          c.fillText(txt, i === 0 ? xs[i].right - 10 : (xs[i].left + xs[i].right) / 2, y + rowH / 2);
+        });
+        c.strokeStyle = '#e2e8f0'; c.lineWidth = 1; c.beginPath(); c.moveTo(pad, y + rowH); c.lineTo(W - pad, y + rowH); c.stroke();
+        y += rowH;
+      });
+      y += 20;
+      doc.totals.forEach(function (t) {
+        c.fillStyle = '#f0f9ff'; rrect(c, pad, y, tw, 38, 10); c.fill();
+        c.textAlign = 'right'; c.fillStyle = '#334155'; c.font = '700 17px ' + F; c.fillText(t.label, W - pad - 14, y + 20);
+        c.textAlign = 'left'; c.fillStyle = t.color || '#0f172a'; c.font = '800 20px ' + F; c.fillText(t.value, pad + 14, y + 20);
+        y += 44;
+      });
+      c.textAlign = 'center'; c.fillStyle = '#94a3b8'; c.font = '600 14px ' + F;
+      c.fillText('شكراً لتعاملكم معنا — ' + SHOP_NAME, W / 2, H - 28);
+      return cv;
+    }
+    function shareDocImage(doc, filename, phone, fallbackText) {
+      var go = function () {
+        var cv = drawDocCanvas(doc);
+        cv.toBlob(function (blob) {
+          if (!blob) { showToast('⚠️ تعذر إنشاء الصورة'); return; }
+          // 1) WebView (Android Studio): JavascriptInterface باسم Android أو AndroidBridge
+          var br = window.AndroidBridge || window.Android;
+          if (br && typeof br.shareImage === 'function') {
+            var rd = new FileReader();
+            rd.onload = function () { try { br.shareImage(String(rd.result).split(',')[1], String(phone || ''), filename); } catch (e) { fallback(); } };
+            rd.readAsDataURL(blob); return;
+          }
+          // 2) Web Share API
+          try {
+            var f = new File([blob], filename + '.png', { type: 'image/png' });
+            if (navigator.canShare && navigator.canShare({ files: [f] })) {
+              navigator.share({ files: [f], title: doc.title }).catch(function () {}); return;
+            }
+          } catch (e) {}
+          // 3) تنزيل الصورة
+          downloadBlob(blob, filename + '.png');
+          showToast('⬇️ تم حفظ الصورة — ابعتها من المعرض');
+        }, 'image/png');
+      };
+      var fallback = function () {
+        if (fallbackText) window.open('https://wa.me/' + (phone || '') + '?text=' + encodeURIComponent(fallbackText), '_blank');
+      };
+      if (document.fonts && document.fonts.load) { document.fonts.load('700 16px Cairo').then(go, go); } else go();
+    }
+    function shareSaleInvoiceImage(inv) {
+      shareDocImage({
+        title: 'فاتورة ' + (inv.isReturn ? 'مرتجع ' : 'بيع ') + '#' + inv.no,
+        meta: [inv.date + (inv.time ? ' ' + inv.time : '')].concat(inv.customer ? ['العميل: ' + inv.customer] : []).concat(['الدفع: ' + inv.payment]),
+        cols: [{ h: 'الصنف', w: 4 }, { h: 'الكمية', w: 2 }, { h: 'السعر', w: 1.6 }, { h: 'الإجمالي', w: 2 }],
+        rows: inv.lines.map(function (l) { return [l.itemName, Math.abs(l.qty) + ' ' + (l.unit || ''), fmt(l.sellPrice), fmt(Math.abs(l.total))]; }),
+        totals: (inv.discount > 0 ? [{ label: 'الخصم', value: fmt(inv.discount) + ' ج.م', color: '#e11d48' }] : [])
+          .concat([{ label: 'الإجمالي', value: fmt(Math.abs(inv.total)) + ' ج.م', color: '#059669' }])
+      }, 'invoice-' + inv.no, '', saleInvoiceText(inv));
+    }
+    function sharePurchaseInvoiceImage(inv) {
+      shareDocImage({
+        title: 'فاتورة ' + (inv.isReturn ? 'مرتجع شراء ' : 'شراء ') + '#' + inv.no,
+        meta: [inv.date + (inv.time ? ' ' + inv.time : ''), 'المورد: ' + inv.supplier],
+        cols: [{ h: 'الصنف', w: 4 }, { h: 'الكمية', w: 2 }, { h: 'سعر الوحدة', w: 1.8 }, { h: 'الإجمالي', w: 2 }],
+        rows: inv.lines.map(function (l) { return [l.itemName, Math.abs(l.qty) + ' ' + (l.unit || ''), fmt(l.costPrice), fmt(Math.abs(l.totalCost))]; }),
+        totals: [
+          { label: 'الإجمالي', value: fmt(Math.abs(inv.total)) + ' ج.م', color: '#0f172a' },
+          { label: 'المدفوع', value: fmt(inv.paid) + ' ج.م', color: '#059669' },
+          { label: 'الباقي', value: fmt(inv.remaining) + ' ج.م', color: inv.remaining > 0 ? '#e11d48' : '#059669' }
+        ]
+      }, 'purchase-' + inv.no, '', purchaseInvoiceText(inv));
+    }
+    function stmtDoc() {
+      if (!stmtCtx) return null;
+      var name = stmtCtx.name, rows, totals;
+      if (stmtCtx.kind === 'supplier') {
+        var invs = state.purchases.filter(function (p) { return p.supplier === name; });
+        var tot = 0;
+        rows = invs.map(function (inv) {
+          var t = Number(inv.totalCost) || 0; tot += t;
+          var d = Array.isArray(inv.items) ? inv.items.map(function (i) { return i.itemName; }).join('، ') : (inv.itemName || '');
+          return [inv.date, d, (inv.isReturn ? '-' : '') + fmt(Math.abs(t))];
+        });
+        totals = [{ label: 'إجمالي المشتريات', value: fmt(tot) + ' ج.م', color: '#0f172a' }];
+        return { title: 'كشف حساب المورد: ' + name, meta: ['بتاريخ ' + todayStr(), invs.length + ' فاتورة'],
+          cols: [{ h: 'التاريخ', w: 2 }, { h: 'البيان', w: 4 }, { h: 'المبلغ', w: 2 }], rows: rows, totals: totals };
+      }
+      var sls = state.sales.filter(function (s) { return s.customer === name; });
+      var totS = 0;
+      rows = sls.map(function (sl) {
+        var t = Number(sl.total) || 0; totS += t;
+        return [dtStr(sl), (sl.isReturn ? '[مرتجع] ' : '') + sl.itemName + ' × ' + Math.abs(sl.qty), fmt(t)];
+      });
+      return { title: 'كشف حساب العميل: ' + name, meta: ['بتاريخ ' + todayStr(), sls.length + ' عملية'],
+        cols: [{ h: 'التاريخ', w: 2.2 }, { h: 'البيان', w: 4 }, { h: 'المبلغ', w: 1.8 }], rows: rows,
+        totals: [{ label: 'الإجمالي', value: fmt(totS) + ' ج.م', color: '#0f172a' }] };
+    }
+    document.getElementById('btnStmtShareImg').addEventListener('click', function () {
+      var d = stmtDoc(); if (!d) return;
+      if (!d.rows.length) { showToast('⚠️ لا توجد حركات في الكشف'); return; }
+      shareDocImage(d, 'statement-' + stmtCtx.name, '', d.title + '\n' + d.rows.map(function (r) { return r.join(' | '); }).join('\n') + '\n' + d.totals[0].label + ': ' + d.totals[0].value);
+    });
+    document.getElementById('btnStmtShareTxt').addEventListener('click', function () {
+      var d = stmtDoc(); if (!d) return;
+      var msg = '📄 *' + d.title + '*\n' + d.rows.map(function (r) { return r.join(' | '); }).join('\n') + '\n💰 ' + d.totals[0].label + ': ' + d.totals[0].value;
+      window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+    });
   </script>
 </body>
 </html>
