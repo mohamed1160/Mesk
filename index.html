@@ -390,6 +390,7 @@
         </div>
 
         <div id="pOrderActionsBox" class="hidden grid grid-cols-2 gap-2">
+          <button id="btnOrderImage" type="button" class="col-span-2 bg-sky-700 hover:bg-sky-600 text-white font-extrabold py-3 px-3 rounded-xl text-sm">🖼️ صورة الطلبية للمورد (بدون أسعار) — معاينة ومشاركة</button>
           <button id="btnSendOrderWa" type="button" class="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-2.5 px-3 rounded-xl text-xs">📲 إرسال الطلبية واتساب</button>
           <button id="btnExportOrderXlsx" type="button" class="bg-sky-600 hover:bg-sky-500 text-white font-extrabold py-2.5 px-3 rounded-xl text-xs">📥 تصدير الطلبية Excel</button>
         </div>
@@ -654,6 +655,25 @@
           <p class="text-[11px] text-slate-500">إدارة الحسابات، الربط مع جوجل شيت، ومرجع الإكسيل</p>
         </div>
       </div>
+      <!-- لوجو المحل على الفواتير -->
+      <div class="bg-white border border-sky-200 shadow-sm rounded-2xl p-4 space-y-3">
+        <div>
+          <h3 class="text-sm font-bold text-sky-700">🖼️ لوجو المحل (على الفواتير)</h3>
+          <p class="text-[11px] text-slate-500">الصورة بتظهر في أعلى الفاتورة وكشف الحساب وطلب الشراء. بتتحفظ على الجهاز ده بس.</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="w-20 h-20 rounded-full bg-sky-50 border-4 border-cyan-300 flex items-center justify-center overflow-hidden shrink-0">
+            <img id="logoPreviewImg" alt="" class="hidden w-full h-full object-contain bg-white">
+            <span id="logoPreviewPh" class="text-3xl">🧴</span>
+          </div>
+          <div class="flex-1 grid grid-cols-1 gap-2">
+            <button id="btnLogoUpload" type="button" class="bg-sky-600 hover:bg-sky-500 text-white font-extrabold py-2.5 rounded-xl text-xs">📷 رفع / تغيير اللوجو</button>
+            <button id="btnLogoDelete" type="button" class="hidden bg-rose-50 border border-rose-200 text-rose-700 font-extrabold py-2 rounded-xl text-xs">🗑️ حذف اللوجو</button>
+          </div>
+        </div>
+        <input id="logoFileInput" type="file" accept="image/*" class="hidden">
+      </div>
+
       <!-- Edit Excel Baseline Numbers -->
       <div class="bg-white border border-sky-200 shadow-sm rounded-2xl p-4 space-y-3">
         <div class="flex flex-wrap items-center justify-between gap-2">
@@ -6398,151 +6418,475 @@
   </script>
 
   <script>
-    // ===== مشاركة الفاتورة / كشف الحساب كصورة PNG =====
-    var SHOP_NAME = 'مسك للمنظفات';
+    // ===== فاتورة / كشف حساب / طلب شراء كصورة PNG (تصميم أزرق مائي + معاينة + حفظ + واتساب) =====
+    var SHOP_NAME = 'مسك للمنظفات والورقيات';
+    var SHOP_SLOGAN = 'نظافة بيتك بأعلى جودة وأقل سعر';
+    var PAY_NUMBER = '01555894299';
+    var PAY_METHODS = 'إنستاباي / محفظة';
+    var LOGO_KEY = 'misk_shop_logo_v1';
+    var DOC_F = "'Cairo', Tahoma, Arial, sans-serif";
+    var C_DARK = '#0369a1', C_MID = '#0284c7', C_LIGHT = '#22d3ee';
+
     function rrect(c, x, y, w, h, r) {
       c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
       c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
     }
-    // doc = {title, meta:[..], cols:[{h,w,align}], rows:[[..]], totals:[{label,value,color}]}
-    function drawDocCanvas(doc) {
-      var W = 720, pad = 28, rowH = 38, headH = 150;
-      var tableH = (doc.rows.length + 1) * rowH;
-      var totH = doc.totals.length * 44 + 20;
-      var H = headH + 70 + tableH + totH + 70;
-      var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
-      var c = cv.getContext('2d');
-      var F = "'Cairo', Tahoma, Arial, sans-serif";
-      c.fillStyle = '#ffffff'; c.fillRect(0, 0, W, H);
-      var g = c.createLinearGradient(0, 0, W, 0); g.addColorStop(0, '#0284c7'); g.addColorStop(1, '#0ea5e9');
-      c.fillStyle = g; c.fillRect(0, 0, W, headH);
-      c.fillStyle = '#ffffff'; c.beginPath(); c.arc(W - pad - 36, 56, 36, 0, Math.PI * 2); c.fill();
-      c.font = '36px ' + F; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = '#0369a1'; c.fillText('🧴', W - pad - 36, 58);
-      c.direction = 'rtl'; c.textAlign = 'right'; c.fillStyle = '#ffffff';
-      c.font = '800 28px ' + F; c.fillText(SHOP_NAME, W - pad - 84, 46);
-      c.font = '700 20px ' + F; c.fillText(doc.title, W - pad - 84, 82);
-      c.font = '600 16px ' + F; c.fillStyle = '#e0f2fe';
-      c.fillText(doc.meta.join('   •   '), W - pad, 126);
-      // table
-      var y = headH + 30, tw = W - pad * 2;
-      var totalW = doc.cols.reduce(function (a, b) { return a + b.w; }, 0);
-      var xs = [], acc = W - pad;
-      doc.cols.forEach(function (col) { var cw = tw * col.w / totalW; xs.push({ right: acc, left: acc - cw, w: cw }); acc -= cw; });
-      c.fillStyle = '#f1f5f9'; rrect(c, pad, y, tw, rowH, 10); c.fill();
-      c.fillStyle = '#0f172a'; c.font = '800 15px ' + F; c.textBaseline = 'middle';
-      doc.cols.forEach(function (col, i) { c.textAlign = i === 0 ? 'right' : 'center'; c.fillText(col.h, i === 0 ? xs[i].right - 10 : (xs[i].left + xs[i].right) / 2, y + rowH / 2); });
-      y += rowH;
-      doc.rows.forEach(function (r, ri) {
-        if (ri % 2 === 1) { c.fillStyle = '#f8fafc'; c.fillRect(pad, y, tw, rowH); }
-        c.fillStyle = '#1e293b'; c.font = '600 15px ' + F;
-        r.forEach(function (v, i) {
-          var txt = String(v), maxW = xs[i].w - 14;
-          while (c.measureText(txt).width > maxW && txt.length > 1) txt = txt.slice(0, -1);
-          if (txt !== String(v)) txt += '…';
-          c.textAlign = i === 0 ? 'right' : 'center';
-          c.fillText(txt, i === 0 ? xs[i].right - 10 : (xs[i].left + xs[i].right) / 2, y + rowH / 2);
+    // تقسيم النص على أسطر حسب العرض (بيحترم \n وبيكسر الكلمة الطويلة)
+    function wrapText(c, text, maxW) {
+      var out = [];
+      String(text == null ? '' : text).split('\n').forEach(function (para) {
+        var words = para.split(/\s+/).filter(Boolean), cur = '';
+        if (!words.length) { out.push(''); return; }
+        words.forEach(function (w) {
+          var t = cur ? cur + ' ' + w : w;
+          if (c.measureText(t).width <= maxW) { cur = t; return; }
+          if (cur) out.push(cur);
+          cur = '';
+          if (c.measureText(w).width > maxW) {
+            var part = '';
+            for (var i = 0; i < w.length; i++) {
+              if (c.measureText(part + w[i]).width > maxW && part) { out.push(part); part = w[i]; } else part += w[i];
+            }
+            cur = part;
+          } else cur = w;
         });
-        c.strokeStyle = '#e2e8f0'; c.lineWidth = 1; c.beginPath(); c.moveTo(pad, y + rowH); c.lineTo(W - pad, y + rowH); c.stroke();
-        y += rowH;
+        if (cur) out.push(cur);
       });
-      y += 20;
-      doc.totals.forEach(function (t) {
-        c.fillStyle = '#f0f9ff'; rrect(c, pad, y, tw, 38, 10); c.fill();
-        c.textAlign = 'right'; c.fillStyle = '#334155'; c.font = '700 17px ' + F; c.fillText(t.label, W - pad - 14, y + 20);
-        c.textAlign = 'left'; c.fillStyle = t.color || '#0f172a'; c.font = '800 20px ' + F; c.fillText(t.value, pad + 14, y + 20);
-        y += 44;
+      return out.length ? out : [''];
+    }
+    function fitFont(c, text, weight, maxSize, minSize, maxW) {
+      var s = maxSize;
+      c.font = weight + ' ' + s + 'px ' + DOC_F;
+      while (s > minSize && c.measureText(String(text)).width > maxW) { s -= 2; c.font = weight + ' ' + s + 'px ' + DOC_F; }
+      return s;
+    }
+
+    // ---------- اللوجو (بيتخزن على الجهاز بس) ----------
+    function getShopLogo() { try { return localStorage.getItem(LOGO_KEY) || ''; } catch (e) { return ''; } }
+    function loadLogoImg() {
+      return new Promise(function (res) {
+        var d = getShopLogo();
+        if (!d) { res(null); return; }
+        var im = new Image();
+        im.onload = function () { res(im); };
+        im.onerror = function () { res(null); };
+        im.src = d;
       });
-      c.textAlign = 'center'; c.fillStyle = '#94a3b8'; c.font = '600 14px ' + F;
-      c.fillText('شكراً لتعاملكم معنا — ' + SHOP_NAME, W / 2, H - 28);
+    }
+    function resizeLogoFile(file, cb) {
+      var rd = new FileReader();
+      rd.onerror = function () { cb(null); };
+      rd.onload = function () {
+        var im = new Image();
+        im.onerror = function () { cb(null); };
+        im.onload = function () {
+          var S = 320, cv = document.createElement('canvas'); cv.width = S; cv.height = S;
+          var c = cv.getContext('2d');
+          var k = Math.min(S / im.width, S / im.height);
+          var w = im.width * k, h = im.height * k;
+          c.drawImage(im, (S - w) / 2, (S - h) / 2, w, h);
+          try { cb(cv.toDataURL('image/png')); } catch (e) { cb(null); }
+        };
+        im.src = rd.result;
+      };
+      rd.readAsDataURL(file);
+    }
+
+    // ---------- رسم المستند ----------
+    // doc = { title, partyLabel, party, dateTime, meta:[..], cols:[{h,w,color}], rows:[[..]],
+    //         totals:[{label,value,color,main}], note }
+    function drawDocCanvas(doc, logoImg) {
+      var W = 720, pad = 24, tw = W - pad * 2, F = DOC_F, TAU = Math.PI * 2;
+      var m = document.createElement('canvas').getContext('2d');
+      m.direction = 'rtl';
+
+      var totalW = doc.cols.reduce(function (a, b) { return a + b.w; }, 0), cols = [], acc = W - pad;
+      doc.cols.forEach(function (col) {
+        var cw = tw * col.w / totalW;
+        cols.push({ right: acc, left: acc - cw, w: cw, cx: acc - cw / 2 }); acc -= cw;
+      });
+      var lineH = 36, thH = 64;
+      m.font = '800 26px ' + F;
+      var rows = doc.rows.map(function (r) {
+        var maxL = 1;
+        var cells = r.map(function (v, i) {
+          var ls = wrapText(m, v, cols[i].w - 24);
+          if (ls.length > 3) { ls = ls.slice(0, 3); ls[2] = ls[2] + '…'; }
+          if (ls.length > maxL) maxL = ls.length;
+          return ls;
+        });
+        return { cells: cells, h: Math.max(66, maxL * lineH + 26) };
+      });
+      var totals = doc.totals || [];
+      var hasMeta = !!(doc.meta && doc.meta.length);
+      m.font = '700 24px ' + F;
+      var noteLines = doc.note ? wrapText(m, doc.note, tw - 20) : [];
+
+      var headerH = 256, barH = 10, titleH = 86, footerH = 132;
+      var cardH = 124 + (hasMeta ? 52 : 0);
+      var tableH = thH + rows.reduce(function (a, r) { return a + r.h; }, 0);
+      var totalsH = totals.reduce(function (a, t) { return a + (t.main ? 82 : 60) + 10; }, 0);
+      var noteH = noteLines.length ? noteLines.length * 34 + 30 : 0;
+      var H = headerH + barH + titleH + cardH + 24 + tableH + 26 + totalsH + noteH + footerH;
+
+      var S = Math.min(2, 16000 / H, Math.sqrt(14000000 / (W * H)));
+      var cv = document.createElement('canvas'); cv.width = Math.round(W * S); cv.height = Math.round(H * S);
+      var c = cv.getContext('2d'); c.scale(S, S);
+      c.textBaseline = 'middle';
+
+      // خلفية بيضا
+      c.fillStyle = '#ffffff'; c.fillRect(0, 0, W, H);
+
+      // ===== الهيدر =====
+      c.save(); c.beginPath(); c.rect(0, 0, W, headerH); c.clip();
+      var hg = c.createLinearGradient(W, 0, 0, 0); hg.addColorStop(0, C_DARK); hg.addColorStop(1, C_MID);
+      c.fillStyle = hg; c.fillRect(0, 0, W, headerH);
+      c.fillStyle = 'rgba(34,211,238,0.22)'; c.beginPath(); c.arc(40, 20, 120, 0, TAU); c.fill();
+      c.fillStyle = 'rgba(255,255,255,0.08)'; c.beginPath(); c.arc(230, 250, 95, 0, TAU); c.fill();
+      c.restore();
+      var bg = c.createLinearGradient(W, 0, 0, 0); bg.addColorStop(0, C_MID); bg.addColorStop(1, C_LIGHT);
+      c.fillStyle = bg; c.fillRect(0, headerH, W, barH);
+
+      // لوجو
+      var lr = 64, lcx = W - pad - lr, lcy = 92;
+      c.fillStyle = '#ffffff'; c.beginPath(); c.arc(lcx, lcy, lr, 0, TAU); c.fill();
+      c.strokeStyle = C_LIGHT; c.lineWidth = 5; c.beginPath(); c.arc(lcx, lcy, lr, 0, TAU); c.stroke();
+      if (logoImg) {
+        c.save(); c.beginPath(); c.arc(lcx, lcy, lr - 6, 0, TAU); c.clip();
+        var box = (lr - 6) * 2, k = Math.min(box / logoImg.width, box / logoImg.height);
+        c.drawImage(logoImg, lcx - logoImg.width * k / 2, lcy - logoImg.height * k / 2, logoImg.width * k, logoImg.height * k);
+        c.restore();
+      } else {
+        c.font = '60px ' + F; c.textAlign = 'center'; c.fillStyle = C_DARK; c.fillText('🧴', lcx, lcy + 3);
+      }
+      // الاسم والشعار
+      var tx = lcx - lr - 20, avail = tx - pad;
+      c.direction = 'rtl'; c.textAlign = 'right'; c.fillStyle = '#ffffff';
+      fitFont(c, SHOP_NAME, 900, 44, 26, avail); c.fillText(SHOP_NAME, tx, 68);
+      c.fillStyle = '#e0f2fe'; fitFont(c, SHOP_SLOGAN, 700, 26, 16, avail); c.fillText(SHOP_SLOGAN, tx, 116);
+      // شريط رقم الدفع
+      var py = 172, ph = 62;
+      c.fillStyle = '#ffffff'; rrect(c, pad, py, tw, ph, ph / 2); c.fill();
+      var segs = [
+        { t: 'رقم الدفع', f: '700 24px ' + F, col: C_MID, dir: 'rtl' },
+        { t: PAY_NUMBER, f: '900 34px ' + F, col: C_DARK, dir: 'ltr' },
+        { t: '•', f: '900 26px ' + F, col: C_LIGHT, dir: 'rtl' },
+        { t: PAY_METHODS, f: '700 24px ' + F, col: C_MID, dir: 'rtl' }
+      ], gap = 14, totW = 0;
+      segs.forEach(function (s) { c.font = s.f; c.direction = s.dir; s.w = c.measureText(s.t).width; totW += s.w; });
+      totW += gap * (segs.length - 1);
+      var sx = W / 2 + totW / 2;
+      c.textAlign = 'right';
+      segs.forEach(function (s) { c.font = s.f; c.direction = s.dir; c.fillStyle = s.col; c.fillText(s.t, sx, py + ph / 2 + 1); sx -= s.w + gap; });
+      c.direction = 'rtl';
+
+      var y = headerH + barH;
+
+      // ===== العنوان =====
+      c.textAlign = 'right'; c.fillStyle = C_DARK;
+      fitFont(c, doc.title, 900, 42, 26, tw); c.fillText(doc.title, W - pad, y + 46);
+      c.fillStyle = C_LIGHT; rrect(c, W - pad - 72, y + 74, 72, 6, 3); c.fill();
+      y += titleH;
+
+      // ===== كارت البيانات =====
+      c.fillStyle = '#f0f9ff'; rrect(c, pad, y, tw, cardH, 22); c.fill();
+      c.strokeStyle = '#bae6fd'; c.lineWidth = 2; c.stroke();
+      var rx = W - pad - 24;
+      c.textAlign = 'right'; c.fillStyle = C_MID; c.font = '700 22px ' + F; c.fillText(doc.partyLabel || 'الاسم', rx, y + 32);
+      c.fillStyle = '#0f172a'; fitFont(c, doc.party, 900, 38, 22, tw * 0.56); c.fillText(doc.party, rx, y + 80);
+      var lx = pad + 24;
+      c.textAlign = 'left'; c.fillStyle = C_MID; c.font = '700 22px ' + F; c.fillText('التاريخ والساعة', lx, y + 32);
+      c.direction = 'ltr'; c.fillStyle = '#0f172a'; fitFont(c, doc.dateTime, 800, 26, 16, tw * 0.36); c.fillText(doc.dateTime, lx, y + 80);
+      c.direction = 'rtl';
+      if (hasMeta) {
+        c.strokeStyle = '#bae6fd'; c.lineWidth = 2; c.beginPath(); c.moveTo(pad + 22, y + 112); c.lineTo(W - pad - 22, y + 112); c.stroke();
+        var mt = doc.meta.join('   •   ');
+        c.textAlign = 'center'; c.fillStyle = C_DARK; fitFont(c, mt, 800, 25, 15, tw - 50); c.fillText(mt, W / 2, y + 142);
+      }
+      y += cardH + 24;
+
+      // ===== الجدول =====
+      var tY = y;
+      c.save(); rrect(c, pad, tY, tw, tableH, 18); c.clip();
+      var tg = c.createLinearGradient(W - pad, 0, pad, 0); tg.addColorStop(0, C_DARK); tg.addColorStop(1, C_MID);
+      c.fillStyle = tg; c.fillRect(pad, tY, tw, thH);
+      c.fillStyle = '#ffffff'; c.font = '900 25px ' + F;
+      doc.cols.forEach(function (col, i) {
+        c.textAlign = i === 0 ? 'right' : 'center';
+        c.fillText(col.h, i === 0 ? cols[i].right - 14 : cols[i].cx, tY + thH / 2 + 1);
+      });
+      var ry = tY + thH;
+      rows.forEach(function (r, ri) {
+        c.fillStyle = ri % 2 === 0 ? '#ffffff' : '#f0f9ff'; c.fillRect(pad, ry, tw, r.h);
+        c.font = '800 26px ' + F;
+        r.cells.forEach(function (ls, i) {
+          c.fillStyle = doc.cols[i].color || '#0f172a';
+          c.textAlign = i === 0 ? 'right' : 'center';
+          var x = i === 0 ? cols[i].right - 14 : cols[i].cx;
+          var sy = ry + (r.h - ls.length * lineH) / 2 + lineH / 2 + 1;
+          ls.forEach(function (ln, li) { c.fillText(ln, x, sy + li * lineH); });
+        });
+        c.strokeStyle = '#bae6fd'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(pad, ry + r.h); c.lineTo(W - pad, ry + r.h); c.stroke();
+        ry += r.h;
+      });
+      c.strokeStyle = '#dbeafe'; c.lineWidth = 1.5;
+      for (var ci = 1; ci < cols.length; ci++) { c.beginPath(); c.moveTo(cols[ci].right, tY + thH); c.lineTo(cols[ci].right, tY + tableH); c.stroke(); }
+      c.restore();
+      c.strokeStyle = '#7dd3fc'; c.lineWidth = 2; rrect(c, pad, tY, tw, tableH, 18); c.stroke();
+      y = tY + tableH + 26;
+
+      // ===== الإجماليات =====
+      totals.forEach(function (t) {
+        if (t.main) {
+          var mg = c.createLinearGradient(W - pad, 0, pad, 0); mg.addColorStop(0, C_DARK); mg.addColorStop(1, C_MID);
+          c.fillStyle = mg; rrect(c, pad, y, tw, 82, 22); c.fill();
+          c.textAlign = 'right'; c.fillStyle = '#ffffff'; c.font = '900 31px ' + F; c.fillText(t.label, W - pad - 26, y + 42);
+          c.textAlign = 'left'; fitFont(c, t.value, 900, 44, 26, tw * 0.55); c.fillText(t.value, pad + 26, y + 42);
+          y += 82 + 10;
+        } else {
+          c.fillStyle = '#e0f2fe'; rrect(c, pad, y, tw, 60, 18); c.fill();
+          c.textAlign = 'right'; c.fillStyle = '#0c4a6e'; c.font = '800 26px ' + F; c.fillText(t.label, W - pad - 24, y + 31);
+          c.textAlign = 'left'; c.fillStyle = t.color || '#0f172a'; c.font = '900 30px ' + F; c.fillText(t.value, pad + 24, y + 31);
+          y += 60 + 10;
+        }
+      });
+
+      if (noteLines.length) {
+        c.textAlign = 'center'; c.fillStyle = '#475569'; c.font = '700 24px ' + F;
+        noteLines.forEach(function (ln, i) { c.fillText(ln, W / 2, y + 30 + i * 34); });
+      }
+
+      // ===== الفوتر =====
+      var fy = H - footerH;
+      var fg = c.createLinearGradient(W - pad, 0, pad, 0); fg.addColorStop(0, C_DARK); fg.addColorStop(1, C_LIGHT);
+      c.fillStyle = fg; rrect(c, pad, fy + 8, tw, 5, 3); c.fill();
+      c.textAlign = 'center';
+      c.fillStyle = C_DARK; c.font = '900 29px ' + F; c.fillText('شكراً لتعاملكم معنا 💙', W / 2, fy + 52);
+      c.fillStyle = C_MID; c.font = '800 24px ' + F; c.fillText(SHOP_NAME, W / 2, fy + 90);
+      c.fillStyle = '#64748b'; c.font = '700 21px ' + F; c.fillText(SHOP_SLOGAN, W / 2, fy + 118);
       return cv;
     }
-    function shareDocImage(doc, filename, phone, fallbackText) {
-      var go = function () {
-        var cv = drawDocCanvas(doc);
-        cv.toBlob(function (blob) {
-          if (!blob) { showToast('⚠️ تعذر إنشاء الصورة'); return; }
-          // 1) WebView (Android Studio): JavascriptInterface باسم Android أو AndroidBridge
-          var br = window.AndroidBridge || window.Android;
-          if (br && typeof br.shareImage === 'function') {
-            var rd = new FileReader();
-            rd.onload = function () { try { br.shareImage(String(rd.result).split(',')[1], String(phone || ''), filename); } catch (e) { fallback(); } };
-            rd.readAsDataURL(blob); return;
-          }
-          // 2) Web Share API
-          try {
-            var f = new File([blob], filename + '.png', { type: 'image/png' });
-            if (navigator.canShare && navigator.canShare({ files: [f] })) {
-              navigator.share({ files: [f], title: doc.title }).catch(function () {}); return;
-            }
-          } catch (e) {}
-          // 3) تنزيل الصورة
-          downloadBlob(blob, filename + '.png');
-          showToast('⬇️ تم حفظ الصورة — ابعتها من المعرض');
-        }, 'image/png');
-      };
-      var fallback = function () {
-        if (fallbackText) window.open('https://wa.me/' + (phone || '') + '?text=' + encodeURIComponent(fallbackText), '_blank');
-      };
-      if (document.fonts && document.fonts.load) { document.fonts.load('700 16px Cairo').then(go, go); } else go();
+
+    function renderDocBlob(doc) {
+      return new Promise(function (resolve) {
+        var fontsP = (document.fonts && document.fonts.load)
+          ? Promise.all([700, 800, 900].map(function (w) { return document.fonts.load(w + ' 24px Cairo', 'مسك'); })).catch(function () {})
+          : Promise.resolve();
+        Promise.all([fontsP, loadLogoImg()]).then(function (r) {
+          var cv = drawDocCanvas(doc, r[1]);
+          cv.toBlob(function (b) { resolve(b); }, 'image/png');
+        }).catch(function () { resolve(null); });
+      });
     }
+
+    // ---------- نافذة المعاينة ----------
+    var _pv = null;
+    function ensurePreviewModal() {
+      if (document.getElementById('docPreviewModal')) return;
+      var m = document.createElement('div');
+      m.id = 'docPreviewModal'; m.setAttribute('dir', 'rtl');
+      m.style.cssText = 'display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:300;background:rgba(15,23,42,0.92);flex-direction:column;font-family:inherit;';
+      m.innerHTML =
+        '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;color:#fff;">' +
+          '<div id="dpvTitle" style="font-weight:900;font-size:16px;"></div>' +
+          '<button id="dpvClose" type="button" style="color:#fff;font-size:22px;font-weight:900;padding:2px 12px;">✕</button>' +
+        '</div>' +
+        '<div style="flex:1;overflow:auto;padding:4px 12px 14px;display:flex;justify-content:center;-webkit-overflow-scrolling:touch;">' +
+          '<img id="dpvImg" alt="" style="width:100%;max-width:540px;height:auto;align-self:flex-start;border-radius:14px;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,0.4);">' +
+        '</div>' +
+        '<div style="display:flex;gap:10px;padding:12px 14px calc(12px + env(safe-area-inset-bottom,0px));background:#0f172a;">' +
+          '<button id="dpvSave" type="button" style="flex:1;background:' + C_DARK + ';color:#fff;font-weight:900;font-size:16px;padding:14px 8px;border-radius:14px;">💾 حفظ الصورة</button>' +
+          '<button id="dpvShare" type="button" style="flex:1;background:#16a34a;color:#fff;font-weight:900;font-size:16px;padding:14px 8px;border-radius:14px;">📲 مشاركة واتساب</button>' +
+        '</div>';
+      document.body.appendChild(m);
+      var t = document.getElementById('toast'); if (t) t.style.zIndex = '400';
+      document.getElementById('dpvClose').addEventListener('click', closeDocPreview);
+      document.getElementById('dpvSave').addEventListener('click', savePreviewImage);
+      document.getElementById('dpvShare').addEventListener('click', sharePreviewImage);
+    }
+    function showDocPreview(blob, doc, filename, phone, fallbackText) {
+      ensurePreviewModal();
+      if (_pv && _pv.url) { try { URL.revokeObjectURL(_pv.url); } catch (e) {} }
+      var file = null;
+      try { file = new File([blob], filename + '.png', { type: 'image/png' }); } catch (e) {}
+      _pv = { url: URL.createObjectURL(blob), blob: blob, file: file, filename: filename, phone: phone || '', fallbackText: fallbackText || '', title: doc.title };
+      document.getElementById('dpvImg').src = _pv.url;
+      document.getElementById('dpvTitle').textContent = doc.title;
+      document.getElementById('docPreviewModal').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+    function closeDocPreview() {
+      var m = document.getElementById('docPreviewModal'); if (m) m.style.display = 'none';
+      document.body.style.overflow = '';
+      if (_pv && _pv.url) { try { URL.revokeObjectURL(_pv.url); } catch (e) {} _pv.url = ''; }
+    }
+    function blobToBase64(blob, cb) {
+      var rd = new FileReader();
+      rd.onload = function () { cb(String(rd.result).split(',')[1]); };
+      rd.readAsDataURL(blob);
+    }
+    function savePreviewImage() {
+      if (!_pv || !_pv.blob) return;
+      var br = window.AndroidBridge || window.Android;
+      if (br && typeof br.saveImage === 'function') {
+        blobToBase64(_pv.blob, function (b64) {
+          try { br.saveImage(b64, _pv.filename); showToast('✅ تم حفظ الصورة في المعرض'); }
+          catch (e) { downloadBlob(_pv.blob, _pv.filename + '.png'); showToast('⬇️ تم تنزيل الصورة'); }
+        });
+        return;
+      }
+      downloadBlob(_pv.blob, _pv.filename + '.png');
+      showToast('⬇️ تم حفظ الصورة');
+    }
+    function sharePreviewImage() {
+      if (!_pv || !_pv.blob) return;
+      var pv = _pv;
+      // 1) WebView أندرويد: Share Intent بالصورة مباشرة (JavascriptInterface باسم AndroidBridge أو Android)
+      var br = window.AndroidBridge || window.Android;
+      if (br && typeof br.shareImage === 'function') {
+        blobToBase64(pv.blob, function (b64) {
+          try { br.shareImage(b64, String(pv.phone || ''), pv.filename); }
+          catch (e) { if (pv.fallbackText) window.open('https://wa.me/' + (pv.phone || '') + '?text=' + encodeURIComponent(pv.fallbackText), '_blank'); }
+        });
+        return;
+      }
+      // 2) Web Share API (الموبايل / المتصفح)
+      try {
+        if (pv.file && navigator.canShare && navigator.canShare({ files: [pv.file] })) {
+          navigator.share({ files: [pv.file], title: pv.title }).catch(function () {}); return;
+        }
+      } catch (e) {}
+      // 3) مفيش مشاركة ملفات: نزّل الصورة وابعتها من المعرض
+      downloadBlob(pv.blob, pv.filename + '.png');
+      showToast('⬇️ اتحفظت الصورة — ابعتها من الواتساب (المعرض)');
+    }
+    function shareDocImage(doc, filename, phone, fallbackText) {
+      showToast('⏳ جاري تجهيز الصورة...');
+      renderDocBlob(doc).then(function (blob) {
+        if (!blob) { showToast('⚠️ تعذر إنشاء الصورة'); return; }
+        showDocPreview(blob, doc, filename, phone, fallbackText);
+      });
+    }
+
+    // ---------- فاتورة بيع ----------
     function shareSaleInvoiceImage(inv) {
+      var disc = inv.discount > 0, totals = [];
+      if (disc) {
+        totals.push({ label: 'الإجمالي قبل الخصم', value: fmt(Math.abs(inv.gross)) + ' ج.م' });
+        totals.push({ label: 'الخصم', value: fmt(inv.discount) + ' ج.م', color: '#e11d48' });
+      }
+      totals.push({ label: disc ? 'الصافي' : 'الإجمالي', value: fmt(Math.abs(inv.total)) + ' ج.م', main: true });
       shareDocImage({
         title: 'فاتورة ' + (inv.isReturn ? 'مرتجع ' : 'بيع ') + '#' + inv.no,
-        meta: [inv.date + (inv.time ? ' ' + inv.time : '')].concat(inv.customer ? ['العميل: ' + inv.customer] : []).concat(['الدفع: ' + inv.payment]),
-        cols: [{ h: 'الصنف', w: 4 }, { h: 'الكمية', w: 2 }, { h: 'السعر', w: 1.6 }, { h: 'الإجمالي', w: 2 }],
+        partyLabel: 'العميل', party: inv.customer || 'عميل نقدي',
+        dateTime: inv.date + (inv.time ? '  ' + inv.time : ''),
+        meta: inv.payment ? ['الدفع: ' + inv.payment] : [],
+        cols: [{ h: 'الصنف', w: 4.2 }, { h: 'الكمية', w: 2.3 }, { h: 'السعر', w: 1.9 }, { h: 'الإجمالي', w: 2.3, color: C_DARK }],
         rows: inv.lines.map(function (l) { return [l.itemName, Math.abs(l.qty) + ' ' + (l.unit || ''), fmt(l.sellPrice), fmt(Math.abs(l.total))]; }),
-        totals: (inv.discount > 0 ? [{ label: 'الخصم', value: fmt(inv.discount) + ' ج.م', color: '#e11d48' }] : [])
-          .concat([{ label: 'الإجمالي', value: fmt(Math.abs(inv.total)) + ' ج.م', color: '#059669' }])
+        totals: totals
       }, 'invoice-' + inv.no, '', saleInvoiceText(inv));
     }
+    // ---------- فاتورة شراء ----------
     function sharePurchaseInvoiceImage(inv) {
       shareDocImage({
         title: 'فاتورة ' + (inv.isReturn ? 'مرتجع شراء ' : 'شراء ') + '#' + inv.no,
-        meta: [inv.date + (inv.time ? ' ' + inv.time : ''), 'المورد: ' + inv.supplier],
-        cols: [{ h: 'الصنف', w: 4 }, { h: 'الكمية', w: 2 }, { h: 'سعر الوحدة', w: 1.8 }, { h: 'الإجمالي', w: 2 }],
+        partyLabel: 'المورد', party: inv.supplier,
+        dateTime: inv.date + (inv.time ? '  ' + inv.time : ''),
+        meta: [],
+        cols: [{ h: 'الصنف', w: 4.2 }, { h: 'الكمية', w: 2.3 }, { h: 'سعر الوحدة', w: 2.1 }, { h: 'الإجمالي', w: 2.3, color: C_DARK }],
         rows: inv.lines.map(function (l) { return [l.itemName, Math.abs(l.qty) + ' ' + (l.unit || ''), fmt(l.costPrice), fmt(Math.abs(l.totalCost))]; }),
         totals: [
-          { label: 'الإجمالي', value: fmt(Math.abs(inv.total)) + ' ج.م', color: '#0f172a' },
+          { label: 'الإجمالي', value: fmt(Math.abs(inv.total)) + ' ج.م', main: true },
           { label: 'المدفوع', value: fmt(inv.paid) + ' ج.م', color: '#059669' },
           { label: 'الباقي', value: fmt(inv.remaining) + ' ج.م', color: inv.remaining > 0 ? '#e11d48' : '#059669' }
         ]
       }, 'purchase-' + inv.no, '', purchaseInvoiceText(inv));
     }
+    // ---------- كشف حساب عميل / مورد ----------
+    var STMT_MAX_ROWS = 80;
     function stmtDoc() {
       if (!stmtCtx) return null;
-      var name = stmtCtx.name, rows, totals;
-      if (stmtCtx.kind === 'supplier') {
-        var invs = state.purchases.filter(function (p) { return p.supplier === name; });
-        var tot = 0;
-        rows = invs.map(function (inv) {
+      var name = stmtCtx.name, isSup = stmtCtx.kind === 'supplier', all, rows, tot = 0;
+      if (isSup) {
+        all = state.purchases.filter(function (p) { return p.supplier === name; });
+        rows = all.map(function (inv) {
           var t = Number(inv.totalCost) || 0; tot += t;
           var d = Array.isArray(inv.items) ? inv.items.map(function (i) { return i.itemName; }).join('، ') : (inv.itemName || '');
           return [inv.date, d, (inv.isReturn ? '-' : '') + fmt(Math.abs(t))];
         });
-        totals = [{ label: 'إجمالي المشتريات', value: fmt(tot) + ' ج.م', color: '#0f172a' }];
-        return { title: 'كشف حساب المورد: ' + name, meta: ['بتاريخ ' + todayStr(), invs.length + ' فاتورة'],
-          cols: [{ h: 'التاريخ', w: 2 }, { h: 'البيان', w: 4 }, { h: 'المبلغ', w: 2 }], rows: rows, totals: totals };
+      } else {
+        all = state.sales.filter(function (s) { return s.customer === name; });
+        rows = all.map(function (sl) {
+          var t = Number(sl.total) || 0; tot += t;
+          var tm = saleTime(sl);
+          return [sl.date + (tm ? '\n' + tm : ''), (sl.isReturn ? '[مرتجع] ' : '') + sl.itemName + ' × ' + Math.abs(sl.qty), fmt(t)];
+        });
       }
-      var sls = state.sales.filter(function (s) { return s.customer === name; });
-      var totS = 0;
-      rows = sls.map(function (sl) {
-        var t = Number(sl.total) || 0; totS += t;
-        return [dtStr(sl), (sl.isReturn ? '[مرتجع] ' : '') + sl.itemName + ' × ' + Math.abs(sl.qty), fmt(t)];
-      });
-      return { title: 'كشف حساب العميل: ' + name, meta: ['بتاريخ ' + todayStr(), sls.length + ' عملية'],
-        cols: [{ h: 'التاريخ', w: 2.2 }, { h: 'البيان', w: 4 }, { h: 'المبلغ', w: 1.8 }], rows: rows,
-        totals: [{ label: 'الإجمالي', value: fmt(totS) + ' ج.م', color: '#0f172a' }] };
+      var meta = [all.length + (isSup ? ' فاتورة' : ' عملية')];
+      if (rows.length > STMT_MAX_ROWS) { rows = rows.slice(-STMT_MAX_ROWS); meta.push('المعروض: آخر ' + STMT_MAX_ROWS + ' حركة'); }
+      return {
+        title: isSup ? 'كشف حساب مورد' : 'كشف حساب عميل',
+        partyLabel: isSup ? 'المورد' : 'العميل', party: name,
+        dateTime: todayStr() + '  ' + timeStr(new Date()), meta: meta,
+        cols: [{ h: 'التاريخ', w: 2.4 }, { h: 'البيان', w: 4.4 }, { h: 'المبلغ', w: 2.2, color: C_DARK }],
+        rows: rows,
+        totals: [{ label: isSup ? 'إجمالي المشتريات' : 'إجمالي المبيعات', value: fmt(tot) + ' ج.م', main: true }]
+      };
+    }
+    function stmtPlain(d) {
+      return d.title + ': ' + d.party + '\n' + d.rows.map(function (r) { return r.join(' | ').replace(/\n/g, ' '); }).join('\n') + '\n' + d.totals[0].label + ': ' + d.totals[0].value;
     }
     document.getElementById('btnStmtShareImg').addEventListener('click', function () {
       var d = stmtDoc(); if (!d) return;
       if (!d.rows.length) { showToast('⚠️ لا توجد حركات في الكشف'); return; }
-      shareDocImage(d, 'statement-' + stmtCtx.name, '', d.title + '\n' + d.rows.map(function (r) { return r.join(' | '); }).join('\n') + '\n' + d.totals[0].label + ': ' + d.totals[0].value);
+      shareDocImage(d, 'statement-' + stmtCtx.name, '', stmtPlain(d));
     });
     document.getElementById('btnStmtShareTxt').addEventListener('click', function () {
       var d = stmtDoc(); if (!d) return;
-      var msg = '📄 *' + d.title + '*\n' + d.rows.map(function (r) { return r.join(' | '); }).join('\n') + '\n💰 ' + d.totals[0].label + ': ' + d.totals[0].value;
+      var msg = '📄 *' + d.title + ': ' + d.party + '*\n' + d.rows.map(function (r) { return r.join(' | ').replace(/\n/g, ' '); }).join('\n') + '\n💰 ' + d.totals[0].label + ': ' + d.totals[0].value;
       window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
     });
+    // ---------- طلب شراء للمورد (أصناف وكميات بس — من غير أسعار) ----------
+    document.getElementById('btnOrderImage').addEventListener('click', function () {
+      var lines = collectPurchaseOrderLines();
+      if (lines.length === 0) { showToast('⚠️ اكتب صنف واحد على الأقل في الطلبية'); return; }
+      var sel = document.getElementById('pSupplier'), sup = sel && sel.value ? sel.value : 'غير محدد';
+      shareDocImage({
+        title: 'طلب شراء بضاعة',
+        partyLabel: 'المورد', party: sup,
+        dateTime: todayStr() + '  ' + timeStr(new Date()),
+        meta: [lines.length + ' صنف مطلوب'],
+        cols: [{ h: 'م', w: 1 }, { h: 'الصنف', w: 5.6 }, { h: 'الكمية', w: 2.8, color: C_DARK }],
+        rows: lines.map(function (l, i) { return [String(i + 1), l.name, l.qty + (l.small ? ' وحدة' : (l.pack > 1 ? ' (× ' + l.pack + ')' : ''))]; }),
+        totals: [{ label: 'عدد الأصناف', value: String(lines.length), main: true }],
+        note: 'برجاء تجهيز الأصناف والكميات الموضحة أعلاه.'
+      }, 'order-' + sup + '-' + todayStr(),
+      '', '📝 *طلب شراء بضاعة - ' + SHOP_NAME + '*\n📅 ' + todayStr() + '\n🚚 المورد: ' + sup + '\n' +
+        lines.map(function (l, i) { return (i + 1) + '- ' + l.name + ' — الكمية: ' + l.qty; }).join('\n'));
+    });
+
+    // ---------- لوجو المحل (الإعدادات) ----------
+    function refreshLogoUI() {
+      var d = getShopLogo(), img = document.getElementById('logoPreviewImg'), phd = document.getElementById('logoPreviewPh'), del = document.getElementById('btnLogoDelete');
+      if (!img) return;
+      if (d) { img.src = d; img.classList.remove('hidden'); phd.classList.add('hidden'); del.classList.remove('hidden'); }
+      else { img.removeAttribute('src'); img.classList.add('hidden'); phd.classList.remove('hidden'); del.classList.add('hidden'); }
+    }
+    document.getElementById('btnLogoUpload').addEventListener('click', function () { document.getElementById('logoFileInput').click(); });
+    document.getElementById('logoFileInput').addEventListener('change', function (ev) {
+      var f = ev.target.files && ev.target.files[0]; ev.target.value = '';
+      if (!f) return;
+      resizeLogoFile(f, function (data) {
+        if (!data) { showToast('⚠️ تعذر قراءة الصورة'); return; }
+        try { localStorage.setItem(LOGO_KEY, data); } catch (e) { showToast('⚠️ مفيش مساحة كفاية لحفظ اللوجو'); return; }
+        refreshLogoUI(); showToast('✅ تم حفظ اللوجو — هيظهر على الفواتير');
+      });
+    });
+    document.getElementById('btnLogoDelete').addEventListener('click', function () {
+      try { localStorage.removeItem(LOGO_KEY); } catch (e) {}
+      refreshLogoUI(); showToast('🗑️ تم حذف اللوجو');
+    });
+    refreshLogoUI();
   </script>
 </body>
 </html>
