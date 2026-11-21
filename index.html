@@ -41,6 +41,10 @@
       display: none !important;
     }
 
+    #mainNav { position:fixed; left:0; right:0; bottom:0; z-index:60; padding-bottom:env(safe-area-inset-bottom); }
+    body { padding-bottom:calc(74px + env(safe-area-inset-bottom)); }
+    #itemsGrid img { flex-shrink:0; }
+    #moreMenu.hidden { display:none !important; }
   </style>
 </head>
 <body class="min-h-screen">
@@ -90,52 +94,19 @@
     </div>
   </header>
 
-  <!-- Top Navigation (below header so free host bottom banners never cover it) -->
-  <nav id="mainNav" class="bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
+  <!-- Bottom Navigation -->
+  <nav id="mainNav" class="bg-white/95 backdrop-blur border-t border-slate-200 shadow-sm">
     <div class="max-w-4xl mx-auto grid grid-cols-5 gap-0.5 px-1">
-      <button type="button" data-tab="sales" class="nav-btn py-1.5 flex flex-col items-center gap-0.5 text-sky-600 font-bold">
-        <span class="text-lg">🛒</span>
-        <span class="text-[10px]">المبيعات</span>
-      </button>
-      <button type="button" data-tab="invoices" class="nav-btn py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
-        <span class="text-lg">🧾</span>
-        <span class="text-[10px]">الفواتير</span>
-      </button>
-      <button type="button" data-tab="purchases" class="nav-btn py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
-        <span class="text-lg">🚚</span>
-        <span class="text-[10px]">المشتريات</span>
-      </button>
-      <button type="button" data-tab="expenses" class="nav-btn py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
-        <span class="text-lg">💸</span>
-        <span class="text-[10px]">المصروفات</span>
-      </button>
-      <button type="button" data-tab="debts" class="nav-btn py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
-        <span class="text-lg">📒</span>
-        <span class="text-[10px]">الديون</span>
-      </button>
-      <button type="button" data-tab="stats" class="nav-btn py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
-        <span class="text-lg">📊</span>
-        <span class="text-[10px]">الإحصائيات</span>
-      </button>
-      <button type="button" data-tab="mirror" class="nav-btn py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
-        <span class="text-lg">🪞</span>
-        <span class="text-[10px]">المراية</span>
-      </button>
-      <button type="button" data-tab="growth" class="nav-btn py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
-        <span class="text-lg">📈</span>
-        <span class="text-[10px]">النمو</span>
-      </button>
-      <button type="button" data-tab="settings" class="nav-btn py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
-        <span class="text-lg">⚙️</span>
-        <span class="text-[10px]">الإعدادات</span>
-      </button>
-      <button type="button" data-tab="items" class="nav-btn py-1.5 flex flex-col items-center gap-0.5 text-slate-500">
-        <span class="text-lg">📦</span>
-        <span class="text-[10px]">الأصناف</span>
-      </button>
+      <button type="button" data-tab="sales" class="nav-btn py-1.5 flex flex-col items-center gap-0.5 text-sky-600 font-bold"><span class="text-lg">🛒</span><span class="text-[10px]">المبيعات</span></button>
+      <button type="button" data-tab="invoices" class="nav-btn py-1.5 flex flex-col items-center gap-0.5 text-slate-500"><span class="text-lg">🧾</span><span class="text-[10px]">الفواتير</span></button>
+      <button type="button" data-tab="items" class="nav-btn py-1.5 flex flex-col items-center gap-0.5 text-slate-500"><span class="text-lg">📦</span><span class="text-[10px]">الأصناف</span></button>
+      <button type="button" data-tab="mirror" class="nav-btn py-1.5 flex flex-col items-center gap-0.5 text-slate-500"><span class="text-lg">🪞</span><span class="text-[10px]">المراية</span></button>
+      <button type="button" data-tab="more" class="nav-btn py-1.5 flex flex-col items-center gap-0.5 text-slate-500"><span class="text-lg">⋯</span><span class="text-[10px]">المزيد</span></button>
+    </div>
+    <div id="moreMenu" class="hidden fixed bottom-[58px] right-2 left-2 z-40 max-w-4xl mx-auto bg-white border border-slate-200 rounded-2xl shadow-xl p-2 grid grid-cols-3 gap-2">
+      <button type="button" data-tab="purchases" class="nav-btn bg-slate-50 rounded-xl p-2 text-xs">🚚 المشتريات</button><button type="button" data-tab="expenses" class="nav-btn bg-slate-50 rounded-xl p-2 text-xs">💸 المصروفات</button><button type="button" data-tab="debts" class="nav-btn bg-slate-50 rounded-xl p-2 text-xs">📒 الديون</button><button type="button" data-tab="stats" class="nav-btn bg-slate-50 rounded-xl p-2 text-xs">📊 الإحصائيات</button><button type="button" data-tab="growth" class="nav-btn bg-slate-50 rounded-xl p-2 text-xs">📈 النمو</button><button type="button" data-tab="settings" class="nav-btn bg-slate-50 rounded-xl p-2 text-xs">⚙️ الإعدادات</button>
     </div>
   </nav>
-  </div>
 
   <main class="max-w-4xl mx-auto p-4 space-y-5">
 
@@ -162,7 +133,7 @@
       </div>
       <div id="salesQuickBar" class="sticky top-[112px] z-20 bg-white border border-amber-200 rounded-xl px-2 py-2"><div class="text-[10px] font-extrabold text-amber-800 mb-1">⚡ أسرع الأصناف</div><div id="salesQuickItems" class="flex gap-1.5 overflow-x-auto no-scrollbar"></div></div>
       <button id="btnUndoLastSale" type="button" class="w-full bg-rose-50 border border-rose-200 text-rose-700 rounded-xl px-3 py-2 text-xs font-extrabold">↩️ تراجع عن آخر بيعة</button>
-      <div class="flex gap-2"><button id="btnSalesView" type="button" class="px-3 py-2 rounded-xl bg-slate-100 border text-xs font-bold">▦ مربعات</button>
+      <div class="flex gap-2">
         <input id="salesSearch" type="text" placeholder="🔍 ابحث عن صنف..." class="flex-1 min-w-0 bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-400 text-sm">
         <button id="btnOpenAddItem" type="button" class="bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold px-3.5 py-2.5 rounded-xl whitespace-nowrap text-sm transition">
           + صنف
@@ -219,11 +190,11 @@
       </div>
 
       <!-- Category Filter Pills -->
-      <div id="catFilterBar" class="flex flex-wrap items-center gap-1.5 w-full">
+      <div id="catFilterBar" class="flex flex-nowrap items-center gap-1.5 w-full overflow-x-auto no-scrollbar">
         <button id="btnToggleInStockOnly" type="button" class="px-3 py-1.5 rounded-full text-xs font-extrabold border border-slate-300 bg-white text-slate-700 whitespace-nowrap transition">📦 المتوفر فقط</button>
       </div>
       <!-- Big Item Tiles Grid -->
-      <div id="itemsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
+      <div id="itemsGrid" class="grid grid-cols-3 gap-2"></div>
 
       <!-- Collapsible Recent Sales Log -->
       <div class="pt-1">
@@ -545,7 +516,7 @@
           <div class="text-xs font-black text-emerald-900">💰 كسبت كام؟ (صافي ربح المحل بعد المصروفات التشغيلية)</div>
           <div id="lossItemsWarning" class="hidden bg-rose-50 border border-rose-300 rounded-xl p-3 text-xs text-rose-800"></div><div id="profitQuickCards" class="grid grid-cols-1 sm:grid-cols-3 gap-2"></div>
         </div>
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="kpiCards"></div>
+        <div class="grid grid-cols-3 gap-2" id="kpiCards"></div>
         <div class="grid grid-cols-3 gap-2.5" id="ratioCards"></div>
         <div class="bg-white border border-slate-200 shadow-sm rounded-2xl p-4">
           <h3 class="text-sm font-extrabold text-rose-600 mb-2">توزيع المصروفات</h3>
@@ -1069,7 +1040,7 @@
   <!-- Modal: Add New Item -->
   <div id="addItemModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
     <form id="addItemForm" class="bg-white border border-slate-300 rounded-2xl p-4 w-full max-w-xl max-h-[92vh] overflow-y-auto space-y-3 my-auto">
-      <h3 id="addItemModalTitle" class="text-base font-extrabold text-sky-600">إضافة صنف جديد للمربعات</h3><div class="bg-indigo-50 border border-indigo-200 rounded-xl p-2.5 space-y-2"><label class="text-xs font-bold">نوع الصنف<select id="newItemType" class="block w-full mt-1 border rounded-lg p-2"><option value="normal">صنف عادي</option><option value="bundle">عرض / بوكس مجمع</option></select></label><div id="bundleEditor" class="hidden space-y-2"><div class="text-[11px] text-indigo-800">حدد مكونات البوكس والكمية الثابتة من كل صنف.</div><div id="bundleRows" class="space-y-1"></div><button id="btnAddBundleComponent" type="button" class="px-2 py-1.5 bg-indigo-600 text-white rounded-lg text-xs">+ مكوّن</button></div></div>
+      <h3 id="addItemModalTitle" class="text-base font-extrabold text-sky-600">إضافة صنف جديد للمربعات</h3><div class="bg-indigo-50 border border-indigo-200 rounded-xl p-2.5 space-y-2"><label class="text-xs font-bold">نوع الصنف<select id="newItemType" class="block w-full mt-1 border rounded-lg p-2"><option value="normal">صنف عادي</option><option value="bundle">عرض / بوكس مجمع</option></select></label><div id="bundleEditor" class="hidden space-y-2"><div class="text-[11px] text-indigo-800">حدد مكونات البوكس والكمية الثابتة من كل صنف.</div><div id="bundleRows" class="space-y-1"></div><div class="grid grid-cols-2 gap-2 text-[11px]"><div class="bg-white rounded-lg p-2">تكلفة المكونات: <b id="bundleCostPreview" class="text-sky-700">0.00</b> ج.م</div><div class="bg-white rounded-lg p-2">الربح بالجنيه: <b id="bundleProfitPreview" class="text-emerald-700">0.00</b> ج.م</div></div><button id="btnAddBundleComponent" type="button" class="px-2 py-1.5 bg-indigo-600 text-white rounded-lg text-xs">+ مكوّن</button></div></div>
 
       <!-- 1) الاسم والقسم -->
       <div class="grid grid-cols-5 gap-2">
@@ -1502,6 +1473,9 @@
     document.querySelectorAll('.nav-btn').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var target = btn.getAttribute('data-tab');
+        var moreMenu=document.getElementById('moreMenu');
+        if(target==='more'){moreMenu.classList.toggle('hidden');return;}
+        if(moreMenu)moreMenu.classList.add('hidden');
         ['sales', 'invoices', 'items', 'purchases', 'expenses', 'debts', 'stats', 'mirror', 'growth', 'settings'].forEach(function (t) {
           document.getElementById('tab-' + t).classList.toggle('hidden', t !== target);
         });
@@ -1563,9 +1537,8 @@
       });
     }
 
-    var salesViewMode=localStorage.getItem('misk_sales_view_v1')||'list';
-    function setSalesView(){var g=document.getElementById('itemsGrid'),b=document.getElementById('btnSalesView');if(g)g.className=salesViewMode==='list'?'grid grid-cols-1 gap-2':'grid grid-cols-2 sm:grid-cols-3 gap-3';if(b)b.textContent=salesViewMode==='list'?'▦ مربعات':'☷ قائمة';}
-    document.getElementById('btnSalesView').addEventListener('click',function(){salesViewMode=salesViewMode==='list'?'grid':'list';localStorage.setItem('misk_sales_view_v1',salesViewMode);setSalesView();renderItemsGrid();});
+    var salesViewMode='grid';
+    function setSalesView(){var g=document.getElementById('itemsGrid');if(g)g.className='grid grid-cols-3 gap-2';}
     // Render Items Grid
     function renderItemsGrid() {
       setSalesView();
@@ -1603,18 +1576,18 @@
         var low = !it.noStock && !isMixItem(it) && stk <= itemMinStock(it);
         var stkStyle = low ? 'background:#dc2626;color:#fff' : ('background:' + chipBg);
         var stkTxt = it.noStock ? 'بدون مخزون' : (mix ? 'بيخصم من المكونات' : ((it.bundle&&it.bundle.length)?'يخصم مكونات البوكس':('المخزون: ' + stk.toFixed(stk % 1 === 0 ? 0 : 2))));
-        btn.className = 'relative w-full rounded-xl p-3 text-center flex '+(salesViewMode==='list'?'flex-row justify-between min-h-[64px] gap-2':'flex-col items-center justify-center gap-1.5 min-h-[132px]')+' border border-black/10';
+        btn.className = 'relative w-full rounded-xl p-2 text-center flex flex-col items-center justify-center gap-1.5 min-h-[132px] border border-black/10';
         btn.style.background = cs.bg;
         btn.style.color = cs.fg;
         btn.innerHTML =
-          (it.img ? '<img src="' + it.img + '" alt="" class="w-16 h-16 rounded-xl object-contain bg-white/90 p-1">' : '') +
+          (it.img ? '<img src="' + it.img + '" alt="" class="w-full h-20 rounded-lg object-contain bg-white/90 p-1">' : '') +
           '<span class="w-full text-lg sm:text-xl font-black leading-snug break-words">' + escHtml(it.name) + '</span>' +
           '<div class="px-2.5 py-0.5 rounded-lg text-sm sm:text-base font-black" style="background:' + chipBg + '">' + priceTxt + '</div>' +
           packTxt +
           '<div class="text-[11px] font-bold px-2 py-0.5 rounded-md" style="' + stkStyle + '">' + stkTxt + '</div>';
 
         btn.addEventListener('click', function () { var search=document.getElementById('salesSearch'); if(search&&search.value){search.value='';renderItemsGrid();} openSaleModal(it); });
-        var itemCard=document.createElement('div');itemCard.className='relative '+(salesViewMode==='list'?'w-full':'');
+        var itemCard=document.createElement('div');itemCard.className='relative';
         itemCard.appendChild(btn);
         if(getShiftMode()==='night'){var edit=document.createElement('button');edit.type='button';edit.className='sales-edit-item-btn absolute top-1 left-1 z-10 rounded-lg bg-white/90 border border-slate-300 px-2 py-1 text-xs font-bold text-slate-800';edit.textContent='✏️';edit.title='تعديل الصنف';edit.addEventListener('click',function(e){e.stopPropagation();openEditItemModal(it);});itemCard.appendChild(edit);}
         grid.appendChild(itemCard);
@@ -1700,7 +1673,7 @@
         setSaleMode('amt');
         document.getElementById('modalItemPrice').textContent = 'بيع بالمبلغ — بيتوزع على المكونات ويتخصم تلقائي';
       } else if(it.bundle&&it.bundle.length){document.getElementById('modalItemPrice').textContent='سعر البوكس: '+fmt(it.sell)+' ج.م — الكمية بعدد البوكسات';}
-      var pref=getSalePrefs(it);if(!mixSale&&!bundleSale){setSaleUnitType(pref.unit==='pack'&&hasPack?'pack':'base');setSaleMode(pref.mode==='amt'?'amt':'qty');if(saleMode==='qty'){var sug=pref.unit==='pack'?pref.maxQtyPack:pref.maxQtyBase;if(sug>0)document.getElementById('modalQty').value=sug;}else if(pref.maxAmount>0)document.getElementById('modalAmt').value=pref.maxAmount;}updateWeightDefault();
+      if(!mixSale&&!bundleSale){setSaleUnitType('base');setSaleMode('qty');document.getElementById('modalQty').value='1';document.getElementById('modalAmt').value='';}updateWeightDefault();
       document.getElementById('saleModal').classList.remove('hidden');
       
     }
@@ -1844,7 +1817,7 @@
       var total = Math.max(0, gross - disc);
       var baseQty = qty * factor;var actualStockQty=Number(document.getElementById('modalActualStockQty').value)||baseQty;if(isWeightItem(currentItem)&&actualStockQty<=0)actualStockQty=baseQty+scaleExtraBase(currentItem);
       var mixP = null, mixC = 0;
-      if (isMixItem(currentItem)) { mixP = mixSplit(currentItem, gross); if (!mixP) return; mixC = mixCost(mixP); }
+      if (isMixItem(currentItem)) { mixP = mixSplit(currentItem, gross, qty); if (!mixP) return; mixC = mixCost(mixP); }
       salesCart.push({
         itemId: currentItem.id, itemName: currentItem.name, unit: uName, qty: qty, baseQty: baseQty,actualStockQty:actualStockQty,weightExtra:Math.max(0,actualStockQty-baseQty),saleMode:saleMode,saleUnitType:saleUnitType,saleAmount:gross,
         sellPrice: uPrice, buyPrice: mixP ? (qty > 0 ? mixC / qty : 0) : (qty>0?currentItem.buy*actualStockQty/qty:currentItem.buy*factor),stockBuyPrice:Number(currentItem.buy)||0,mixCostPerUnit:mixP?(qty>0?mixC/qty:0):undefined, discount: disc,
@@ -1884,7 +1857,7 @@
         var netLine = Math.max(0, c.total - lineDisc);
         grandTotal += netLine;
         var itC = state.items.find(function (x) { return x.id === c.itemId; });
-        var mixP = isMixItem(itC) ? mixSplit(itC, c.qty * c.sellPrice) : null;var linePaid=Math.min(advanceRemaining,netLine);advanceRemaining-=linePaid;
+        var mixP = isMixItem(itC) ? mixSplit(itC, c.qty * c.sellPrice, c.qty) : null;var linePaid=Math.min(advanceRemaining,netLine);advanceRemaining-=linePaid;
         var saleObj = {
           id: 'S-' + Date.now() + '-' + i,
           invoiceId: 'S' + invTs,
@@ -1961,7 +1934,7 @@
       var baseQty = qty * factor;var actualStockQty=Number(document.getElementById('modalActualStockQty').value)||baseQty;
       var profit = total - (actualStockQty * currentItem.buy);
       var mixP = null;
-      if (isMixItem(currentItem)) { mixP = mixSplit(currentItem, gross); if (!mixP) return; profit = total - mixCost(mixP); }
+      if (isMixItem(currentItem)) { mixP = mixSplit(currentItem, gross, qty); if (!mixP) return; profit = total - mixCost(mixP); }
       var srObj = {
         id: 'SR-' + Date.now(),
         invNo: 'R' + Date.now(),
@@ -2016,7 +1989,7 @@
       var baseQty = qty * factor;var actualStockQty=Number(document.getElementById('modalActualStockQty').value)||baseQty;if(isWeightItem(currentItem)&&actualStockQty<=0)actualStockQty=baseQty+scaleExtraBase(currentItem);
       var profit = total - (actualStockQty * currentItem.buy);
       var mixP = null;
-      if (isMixItem(currentItem)) { mixP = mixSplit(currentItem, gross); if (!mixP) return; profit = total - mixCost(mixP); }
+      if (isMixItem(currentItem)) { mixP = mixSplit(currentItem, gross, qty); if (!mixP) return; profit = total - mixCost(mixP); }
       var custName = document.getElementById('modalCustomer').value.trim();
       var custPhone = document.getElementById('modalCustomerPhone').value.trim();
       if(custPhone)rememberCustomerPhone(custName,custPhone);
@@ -2204,6 +2177,9 @@
     function arNorm(s) {
       return String(s || '').toLowerCase().replace(/[\u064B-\u065F\u0670\u0640]/g, '').replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/\s+/g, ' ').trim();
     }
+    function findItemByIdOrUniqueName(id,name){if(id){return state.items.find(function(it){return String(it.id)===String(id);})||null;}var key=arNorm(name),matches=state.items.filter(function(it){return key&&arNorm(it.name)===key;});return matches.length===1?matches[0]:null;}
+    function itemRecordBelongsTo(row,item){return !!item&&(row.itemId?String(row.itemId)===String(item.id):findItemByIdOrUniqueName('',row.itemName)===item);}
+    function purchaseLineBelongsToItem(line,item){return !!item&&(line.itemId?String(line.itemId)===String(item.id):findItemByIdOrUniqueName('',line.itemName)===item);}
     var COLOR_WORDS = [
       [['احمر'], '#dc2626'], [['اخضر'], '#16a34a'], [['ازرق'], '#2563eb'], [['اصفر'], '#facc15'],
       [['بمبي', 'بينك'], '#ec4899'], [['موف', 'بنفسجي'], '#8b5cf6'], [['برتقالي', 'اورانج'], '#f97316'],
@@ -2240,9 +2216,9 @@
     }
 
     // ===== أصناف الخلطة المجمعة (بيع بالمبلغ + خصم المكونات) =====
-    function mixSplit(item, gross) {
+    function mixSplit(item, gross, bundleUnits) {
       var parts = [], missing = [];
-      if(item&&item.bundle&&item.bundle.length){var units=Number(item.sell)>0?Number(gross)/(Number(item.sell)||1):0;item.bundle.forEach(function(m){var comp=state.items.find(function(x){return x.id===m.itemId;})||state.items.find(function(x){return arNorm(x.name)===arNorm(m.name);});if(!comp){missing.push(m.name||'مكوّن');return;}var q=Number(m.qty||0)*units,cost=q*(Number(comp.buy)||0);parts.push({itemId:comp.id,name:comp.name,amount:Number((units*(Number(item.sell)||0)).toFixed(2)),qty:Number(q.toFixed(3)),cost:Number(cost.toFixed(2))});});if(missing.length){showToast('⚠️ مكوّن غير موجود في العرض: '+missing.join('، '));return null;}return parts;}
+      if(item&&item.bundle&&item.bundle.length){var units=bundleUnits!==undefined&&bundleUnits!==null&&Number.isFinite(Number(bundleUnits))?Number(bundleUnits):(Number(item.sell)>0?Number(gross)/(Number(item.sell)||1):0);item.bundle.forEach(function(m){var comp=state.items.find(function(x){return x.id===m.itemId;})||state.items.find(function(x){return arNorm(x.name)===arNorm(m.name);});if(!comp){missing.push(m.name||'مكوّن');return;}var q=Number(m.qty||0)*units,cost=q*(Number(comp.buy)||0);parts.push({itemId:comp.id,name:comp.name,amount:Number((units*(Number(item.sell)||0)).toFixed(2)),qty:Number(q.toFixed(3)),cost:Number(cost.toFixed(2))});});if(missing.length){showToast('⚠️ مكوّن غير موجود في العرض: '+missing.join('، '));return null;}return parts;}
       (item.mix || []).forEach(function (m) {
         var comp = null;
         for (var i = 0; i < m.names.length && !comp; i++) {
@@ -2283,16 +2259,17 @@
     }
 
     var editingItemId = null;
-        function renderItemSupplierPrices(itemName) {
+        function renderItemSupplierPrices(item) {
       var list = document.getElementById('itemSupplierPricesList');
       if (!list) return;
+      var itemName=item&&item.name||'';
       var bySup = {};
       state.purchases.forEach(function (p) {
         if (p.isReturn) return;
         var sup = p.supplier || 'غير محدد';
-        var lines = Array.isArray(p.items) ? p.items : [{ itemName: p.itemName, qty: p.qty, costPrice: p.costPrice, totalCost: p.totalCost }];
+        var lines = Array.isArray(p.items) ? p.items : [{ itemId:p.itemId||'', itemName: p.itemName, qty: p.qty, costPrice: p.costPrice, totalCost: p.totalCost }];
         lines.forEach(function (ln) {
-          if (ln.itemName === itemName) {
+          if (purchaseLineBelongsToItem(ln, itemName)) {
             var q = Number(ln.qty) || 0;
             var uc = Number(ln.costPrice) || (q > 0 ? (Number(ln.totalCost) / q) : 0);
             if (!bySup[sup]) {
@@ -2352,12 +2329,13 @@
       document.getElementById('newItemColorPicker').value = it.color || '#2563eb';
       renderColorPalette();
       document.getElementById('itemExtras').open = false;
-      renderItemSupplierPrices(it.name);
+      renderItemSupplierPrices(it);
       document.getElementById('quickStockQty').value = '';
       document.getElementById('quickStockType').value = 'small';
       refreshQuickStockUI();
       document.getElementById('itemSupplierPricesBox').classList.remove('hidden');
       document.getElementById('btnDeleteItem').classList.remove('hidden');
+      updateBundleCostPreview();
       document.getElementById('addItemModal').classList.remove('hidden');
     }
 
@@ -2450,9 +2428,10 @@
       reader.onload=function(){var source=new Image();source.onload=function(){var cv=document.createElement('canvas'),scale=Math.min(1,200/Math.max(source.width,source.height));cv.width=Math.round(source.width*scale);cv.height=Math.round(source.height*scale);cv.getContext('2d').drawImage(source,0,0,cv.width,cv.height);pendingItemImage=cv.toDataURL('image/jpeg',0.78);var img=document.getElementById('newItemImagePreview');img.src=pendingItemImage;img.classList.remove('hidden');};source.src=String(reader.result||'');};reader.readAsDataURL(file);
     });
     // Add New Item
-    function addBundleComponentRow(data){var box=document.getElementById('bundleRows'),row=document.createElement('div');row.className='grid grid-cols-[1fr_90px_auto] gap-1';var opts=state.items.filter(function(x){return !x.noStock&&!isMixItem(x);}).map(function(x){return '<option value="'+escHtml(x.id)+'">'+escHtml(x.name)+'</option>';}).join('');row.innerHTML='<select class="bundle-component border rounded-lg p-1 text-xs"><option value="">اختر الصنف</option>'+opts+'</select><input class="bundle-qty border rounded-lg p-1 text-center text-xs" type="number" min="0.001" step="any" placeholder="الكمية" value="'+(data&&data.qty||1)+'"><button type="button" class="bundle-remove text-rose-600 px-2">✕</button>';if(data){row.querySelector('.bundle-component').value=data.itemId||'';}row.querySelector('.bundle-remove').onclick=function(){row.remove();};box.appendChild(row);}
-    function setBundleEditor(item){var sel=document.getElementById('newItemType'),box=document.getElementById('bundleEditor');sel.value=item&&item.bundle&&item.bundle.length?'bundle':'normal';box.classList.toggle('hidden',sel.value!=='bundle');var rows=document.getElementById('bundleRows');rows.innerHTML='';(item&&item.bundle||[]).forEach(function(x){addBundleComponentRow(x);});}
-    document.getElementById('newItemType').addEventListener('change',function(){document.getElementById('bundleEditor').classList.toggle('hidden',this.value!=='bundle');if(this.value==='bundle'&&document.getElementById('newItemCat').value!=='العروض')document.getElementById('newItemCat').value='العروض';});
+    function updateBundleCostPreview(){var active=document.getElementById('newItemType').value==='bundle',buyEl=document.getElementById('newItemBuy'),cost=0;if(active){document.querySelectorAll('#bundleRows .bundle-component').forEach(function(sel){var it=state.items.find(function(x){return x.id===sel.value;}),qty=Number(sel.parentElement.querySelector('.bundle-qty').value)||0;if(it)cost+=qty*(Number(it.buy)||0);});buyEl.value=Number(cost.toFixed(2));}buyEl.readOnly=active;buyEl.classList.toggle('bg-slate-100',active);var costEl=document.getElementById('bundleCostPreview'),profitEl=document.getElementById('bundleProfitPreview'),profit=(Number(document.getElementById('newItemSell').value)||0)-cost;if(costEl)costEl.textContent=fmt(cost);if(profitEl){profitEl.textContent=fmt(profit);profitEl.className=profit>=0?'text-emerald-700':'text-rose-700';}}
+    function addBundleComponentRow(data){var box=document.getElementById('bundleRows'),row=document.createElement('div');row.className='grid grid-cols-[1fr_90px_auto] gap-1';var opts=state.items.filter(function(x){return !x.noStock&&!isMixItem(x);}).map(function(x){return '<option value="'+escHtml(x.id)+'">'+escHtml(x.name)+'</option>';}).join('');row.innerHTML='<select class="bundle-component border rounded-lg p-1 text-xs"><option value="">اختر الصنف</option>'+opts+'</select><input class="bundle-qty border rounded-lg p-1 text-center text-xs" type="number" min="0.001" step="any" placeholder="الكمية" value="'+(data&&data.qty||1)+'"><button type="button" class="bundle-remove text-rose-600 px-2">✕</button>';if(data){row.querySelector('.bundle-component').value=data.itemId||'';}row.querySelector('.bundle-component').addEventListener('change',updateBundleCostPreview);row.querySelector('.bundle-qty').addEventListener('input',updateBundleCostPreview);row.querySelector('.bundle-remove').onclick=function(){row.remove();updateBundleCostPreview();};box.appendChild(row);updateBundleCostPreview();}
+    function setBundleEditor(item){var sel=document.getElementById('newItemType'),box=document.getElementById('bundleEditor');sel.value=item&&item.bundle&&item.bundle.length?'bundle':'normal';box.classList.toggle('hidden',sel.value!=='bundle');var rows=document.getElementById('bundleRows');rows.innerHTML='';(item&&item.bundle||[]).forEach(function(x){addBundleComponentRow(x);});updateBundleCostPreview();}
+    document.getElementById('newItemType').addEventListener('change',function(){document.getElementById('bundleEditor').classList.toggle('hidden',this.value!=='bundle');if(this.value==='bundle'&&document.getElementById('newItemCat').value!=='العروض')document.getElementById('newItemCat').value='العروض';updateBundleCostPreview();});
     document.getElementById('btnAddBundleComponent').addEventListener('click',function(){addBundleComponentRow();});
     function openNewItemModal() {
       editingItemId = null;
@@ -2472,6 +2451,7 @@
       document.getElementById('itemSupplierPricesBox').classList.add('hidden');
       document.getElementById('btnDeleteItem').classList.add('hidden');
       refreshQuickStockUI();
+      updateBundleCostPreview();
       document.getElementById('addItemModal').classList.remove('hidden');
     }
     document.getElementById('btnOpenAddItem').addEventListener('click', openNewItemModal);
@@ -2495,6 +2475,7 @@
       e.preventDefault();
       if(gateNightAction('🔐 حفظ تعديل الصنف',function(){document.getElementById('addItemForm').requestSubmit();}))return;
       var name = document.getElementById('newItemName').value.trim();
+      var duplicateItem=state.items.find(function(x){return x.id!==editingItemId&&arNorm(x.name)===arNorm(name);});if(duplicateItem){showToast('⚠️ اسم الصنف موجود بالفعل: '+duplicateItem.name);document.getElementById('newItemName').focus();return;}
       var buy = parseFloat(document.getElementById('newItemBuy').value) || 0;
       var sell = parseFloat(document.getElementById('newItemSell').value) || 0;
       var stock = parseFloat(document.getElementById('newItemStock').value) || 0;
@@ -2504,7 +2485,7 @@
       var packName = document.getElementById('newItemPackName').value.trim();
       var packFactor = parseFloat(document.getElementById('newItemPackFactor').value) || 0;
       var packSell = parseFloat(document.getElementById('newItemPackSell').value) || 0;
-      var bundleType=document.getElementById('newItemType').value==='bundle',bundle=[],badBundle=false;if(bundleType&&sell<=0){showToast('⚠️ سعر بيع البوكس لازم يكون أكبر من صفر');return;}if(bundleType){document.querySelectorAll('#bundleRows .bundle-component').forEach(function(sel){var id=sel.value,q=Number(sel.parentElement.querySelector('.bundle-qty').value)||0,it=state.items.find(function(x){return x.id===id;});if(!id||q<=0||!it)badBundle=true;else bundle.push({itemId:id,name:it.name,qty:q});});if(!bundle.length||badBundle){showToast('⚠️ أكمل اختيار كل مكونات البوكس وكمياتها');return;}}
+      var bundleType=document.getElementById('newItemType').value==='bundle',bundle=[],badBundle=false;if(bundleType&&sell<=0){showToast('⚠️ سعر بيع البوكس لازم يكون أكبر من صفر');return;}if(bundleType){document.querySelectorAll('#bundleRows .bundle-component').forEach(function(sel){var id=sel.value,q=Number(sel.parentElement.querySelector('.bundle-qty').value)||0,it=state.items.find(function(x){return x.id===id;});if(!id||q<=0||!it)badBundle=true;else bundle.push({itemId:id,name:it.name,qty:q});});if(!bundle.length||badBundle){showToast('⚠️ أكمل اختيار كل مكونات البوكس وكمياتها');return;}buy=Number(bundle.reduce(function(total,m){var comp=state.items.find(function(x){return x.id===m.itemId;});return total+(Number(m.qty)||0)*(Number(comp&&comp.buy)||0);},0).toFixed(2));document.getElementById('newItemBuy').value=buy;}
       var payload = {
         id: editingItemId || ('i' + Date.now()),
         name: name, unit: unit, cat: cat, buy: buy, sell: sell, stock: stock, minStock: document.getElementById('newItemMinStock').value===''?3:Math.max(0,Number(document.getElementById('newItemMinStock').value)||0), img: pendingItemImage || ((state.items.find(function(x){return x.id===editingItemId;})||{}).img||''), color: pendingItemColor, mix: ((state.items.find(function (x) { return x.id === editingItemId; }) || {}).mix), bundle: bundleType?bundle:undefined,
@@ -2593,7 +2574,7 @@
 
           typeSel.addEventListener('change', function () {
             applyUnitTypeUI(rowEl);
-            var ex = state.items.find(function (x) { return x.name === nameInp.value.trim(); });
+            var ex = getPurchaseRowItem(rowEl);
             if (ex) {
               var small = typeSel.value === 'small';
               if (!small && !packInp.value) packInp.value = (ex.packFactor && ex.packFactor > 0) ? ex.packFactor : 1;
@@ -2604,17 +2585,18 @@
 
           function showSuggestions() {
             var q = nameInp.value.trim();
-            var matches = state.items.filter(function (x) { return !q || x.name.indexOf(q) > -1; }).slice(0, 12);
+            var matches = state.items.filter(function (x) { return !q || arNorm(x.name).indexOf(arNorm(q)) > -1; }).slice(0, 12);
             if (matches.length === 0) { sugBox.classList.add('hidden'); return; }
             sugBox.innerHTML = '';
             matches.forEach(function (it) {
               var opt = document.createElement('button');
               opt.type = 'button';
               opt.className = 'w-full text-right px-2.5 py-2 text-xs text-slate-900 hover:bg-sky-500/20 border-b border-slate-200/60 flex justify-between items-center';
-              opt.innerHTML = '<span class="font-bold">' + it.name + '</span><span class="text-[10px] text-emerald-600">' + it.buy + ' ج.م</span>';
+              opt.innerHTML = '<span class="font-bold">' + escHtml(it.name) + ' <small class="text-slate-500">(' + escHtml(it.cat||'') + ' · ' + escHtml(it.id) + ')</small></span><span class="text-[10px] text-emerald-600">' + it.buy + ' ج.م</span>';
               opt.addEventListener('mousedown', function (ev) {
                 ev.preventDefault();
                 nameInp.value = it.name;
+                rowEl.dataset.itemId = it.id;
                 if (!qtyInp.value) qtyInp.value = 1;
                 packInp.value = (it.packFactor && it.packFactor > 0) ? (it.packFactor * (Number(it.cartonPacks)||1)) : 1;
                 sellInp.value = it.sell || '';
@@ -2635,6 +2617,7 @@
           }
           nameInp.addEventListener('focus', showSuggestions);
           nameInp.addEventListener('input', function () {
+            var linked=findItemByIdOrUniqueName(rowEl.dataset.itemId,'');if(!linked||arNorm(linked.name)!==arNorm(nameInp.value))delete rowEl.dataset.itemId;
             showSuggestions();
             var allRows = document.querySelectorAll('#purchaseTableBody .p-row');
             if (allRows.length > 0 && rowEl === allRows[allRows.length - 1] && nameInp.value.trim().length > 0) {
@@ -2643,7 +2626,8 @@
           });
           nameInp.addEventListener('blur', function () {
             setTimeout(function () { sugBox.classList.add('hidden'); }, 150);
-            var exact = state.items.find(function (x) { return x.name === nameInp.value.trim(); });
+            var exact = getPurchaseRowItem(rowEl);
+            if(!exact&&state.items.filter(function(x){return arNorm(x.name)===arNorm(nameInp.value);}).length>1)showToast('⚠️ الاسم متكرر؛ اختر الصنف المطلوب من القائمة لتحديده بالـ ID');
             if (exact) {
               if (!qtyInp.value) qtyInp.value = 1;
               if (!packInp.value) packInp.value = (exact.packFactor && exact.packFactor > 0) ? (exact.packFactor * (Number(exact.cartonPacks)||1)) : 1;
@@ -2690,17 +2674,18 @@
         packCost: parseFloat(tr.querySelector('.p-pack-cost').value) || 0
       };
     }
+    function getPurchaseRowItem(tr){var name=tr.querySelector('.p-name').value.trim(),linked=findItemByIdOrUniqueName(tr.dataset.itemId,name);return linked&&arNorm(linked.name)===arNorm(name)?linked:null;}
 
     function checkCheaperSupplierForRow(rowEl) {
       var alertEl = rowEl.querySelector('.p-cheaper-alert');
       if (!alertEl) return;
-      var itemName = rowEl.querySelector('.p-name').value.trim();
+      var item = getPurchaseRowItem(rowEl), itemName = rowEl.querySelector('.p-name').value.trim();
       var curSup = document.getElementById('pSupplier').value;
       if (!itemName || typeof getItemSupplierStats !== 'function') {
         alertEl.classList.add('hidden');
         return;
       }
-      var sups = getItemSupplierStats(itemName);
+      var sups = getItemSupplierStats(item || itemName);
       if (sups.length === 0) {
         alertEl.classList.add('hidden');
         return;
@@ -2734,7 +2719,7 @@
         if (rtCell && document.activeElement !== rtCell) rtCell.value = rc > 0 ? Number(rc.toFixed(2)) : '';
         var ucCell = tr.querySelector('.p-unit-cost');
         var pNm = tr.querySelector('.p-name').value.trim();
-        var exIt = state.items.find(function (x) { return x.name === pNm; });
+        var exIt = getPurchaseRowItem(tr);
         if (exIt && exIt.buy > 0 && unitCost > exIt.buy) {
           ucCell.innerHTML = '<span class="text-rose-500 font-black">' + fmt(unitCost) + ' ⬆️</span><div class="text-[9px] text-rose-400">كان ' + fmt(exIt.buy) + '</div>';
         } else {
@@ -2822,8 +2807,9 @@
         var totalUnits = qty * pack;
         if (itemName && totalUnits > 0 && rowTotal >= 0) {
           var unitCost = Number((rowTotal / totalUnits).toFixed(2));
+          var purchaseItem=getPurchaseRowItem(tr);
           itemsList.push({
-            itemName: itemName, unit: 'وحدة', qty: totalUnits, packFactor: pack, packQty: qty,
+            itemId: purchaseItem ? purchaseItem.id : '', itemName: purchaseItem ? purchaseItem.name : itemName, unit: 'وحدة', qty: totalUnits, packFactor: pack, packQty: qty,
             costPrice: unitCost, expectedSellPrice: sell,
             totalCost: rowTotal, expectedProfit: sell > 0 ? ((totalUnits * sell) - rowTotal) : 0
           });
@@ -2833,6 +2819,8 @@
         showToast('اكتب صنف واحد وكميته على الأقل');
         return;
       }
+      var ambiguousPurchase=itemsList.find(function(line){return !line.itemId&&state.items.filter(function(it){return arNorm(it.name)===arNorm(line.itemName);}).length>1;});if(ambiguousPurchase){showToast('⚠️ اختر الصنف من القائمة لتحديده بالـ ID: '+ambiguousPurchase.itemName);return;}
+      var purchaseKeys={};for(var pi=0;pi<itemsList.length;pi++){var pl=itemsList[pi],pk=pl.itemId?'id:'+pl.itemId:'name:'+arNorm(pl.itemName);if(purchaseKeys[pk]){showToast('⚠️ الصنف مكرر في الفاتورة؛ اجمع كميته في صف واحد: '+pl.itemName);return;}purchaseKeys[pk]=true;}
 
       var isRet = purchaseMode === 'return';
       var sign = isRet ? -1 : 1;
@@ -2842,8 +2830,9 @@
 
       var priceBefore = [];
       var signedItems = itemsList.map(function (line) {
-        var existing = state.items.find(function (x) { return x.name === line.itemName; });
-        if (!isRet && !priceBefore.some(function (x) { return x.name === line.itemName; })) priceBefore.push({ id: existing ? existing.id : '', name: line.itemName, buyBefore: existing ? Number(existing.buy)||0 : 0, sellBefore: existing ? Number(existing.sell)||0 : 0, wasNew: !existing });
+        var existing = findItemByIdOrUniqueName(line.itemId,line.itemName);
+        if(existing)line.itemId=existing.id;
+        if (!isRet && !priceBefore.some(function (x) { return existing ? x.id===existing.id : (!x.id&&arNorm(x.name)===arNorm(line.itemName)); })) priceBefore.push({ id: existing ? existing.id : '', name: line.itemName, buyBefore: existing ? Number(existing.buy)||0 : 0, sellBefore: existing ? Number(existing.sell)||0 : 0, wasNew: !existing });
         if (existing) {
           if (!isRet) {
             existing.buy = line.costPrice;
@@ -2858,8 +2847,9 @@
           }
         } else if (!isRet) {
           var hasPk = line.packFactor > 1;
+          line.itemId = line.itemId || ('i' + Date.now() + Math.floor(Math.random() * 1000));
           state.items.push({
-            id: 'i' + Date.now() + Math.floor(Math.random() * 1000),
+            id: line.itemId,
             name: line.itemName, unit: 'قطعة', cat: 'اخرى',
             buy: line.costPrice, sell: line.expectedSellPrice, stock: line.qty, img: '',
             packName: hasPk ? 'كرتونة' : '',
@@ -2868,7 +2858,7 @@
           });
         }
         return {
-          itemName: line.itemName, unit: existing ? existing.unit : line.unit, qty: line.qty * sign,
+          itemId: line.itemId || (existing&&existing.id) || '', itemName: existing ? existing.name : line.itemName, unit: existing ? existing.unit : line.unit, qty: line.qty * sign,
           packQty: line.packQty * sign, packFactor: line.packFactor,
           costPrice: line.costPrice, expectedSellPrice: line.expectedSellPrice,
           totalCost: line.totalCost * sign, expectedProfit: line.expectedProfit * sign
@@ -2948,12 +2938,12 @@
         if (!p.isReturn) {
           row.querySelector('.ret-purch-btn').addEventListener('click', function () {
             var rItems = Array.isArray(p.items) ? p.items.map(function (x) {
-              var ex = state.items.find(function (it) { return it.name === x.itemName; });
+              var ex = findItemByIdOrUniqueName(x.itemId,x.itemName);
               if (ex) ex.stock = Number(((Number(ex.stock) || 0) - Math.abs(x.qty)).toFixed(3));
-              return { itemName: x.itemName, unit: x.unit, qty: -Math.abs(x.qty), costPrice: x.costPrice, expectedSellPrice: x.expectedSellPrice, totalCost: -Math.abs(x.totalCost), expectedProfit: -x.expectedProfit };
+              return { itemId:x.itemId||(ex&&ex.id)||'', itemName: x.itemName, unit: x.unit, qty: -Math.abs(x.qty), costPrice: x.costPrice, expectedSellPrice: x.expectedSellPrice, totalCost: -Math.abs(x.totalCost), expectedProfit: -x.expectedProfit };
             }) : [];
             if (!Array.isArray(p.items) && p.itemName) {
-              var ex1 = state.items.find(function (it) { return it.name === p.itemName; });
+              var ex1 = findItemByIdOrUniqueName(p.itemId,p.itemName);
               if (ex1) ex1.stock = Number(((Number(ex1.stock) || 0) - Math.abs(p.qty)).toFixed(3));
             }
             state.purchases.unshift({
@@ -3518,16 +3508,15 @@
       var rateD7 = dateNDaysAgo(6), rateD30 = dateNDaysAgo(29), rate7 = {}, rate30 = {};
       state.sales.forEach(function (sl) {
         if (!sl.date || !sl.itemName) return;
+        var linkedItem=findItemByIdOrUniqueName(sl.itemId,sl.itemName);if(!linkedItem)return;var itemKey=linkedItem.id;
         var bq = saleBaseQty(sl);
-        if (sl.date >= rateD30) rate30[sl.itemName] = (rate30[sl.itemName] || 0) + bq;
-        if (sl.date >= rateD7) rate7[sl.itemName] = (rate7[sl.itemName] || 0) + bq;
+        if (sl.date >= rateD30) rate30[itemKey] = (rate30[itemKey] || 0) + bq;
+        if (sl.date >= rateD7) rate7[itemKey] = (rate7[itemKey] || 0) + bq;
       });
       // Item rates sorted by revenue
       var itemStats = state.items.map(function (it) {
-        var qtySold = fSales.filter(function (s) { return s.itemName === it.name; }).reduce(function (a, b) { return a + b.qty; }, 0);
-        var rev = fSales.filter(function (s) { return s.itemName === it.name; }).reduce(function (a, b) { return a + b.total; }, 0);
-        var prof = fSales.filter(function (s) { return s.itemName === it.name; }).reduce(function (a, b) { return a + b.profit; }, 0);
-        return { name: it.name, unit: it.unit, sold: qtySold, stock: Number(it.stock) || 0, onhand: Number(it.stock) || 0, rev: rev, prof: prof, wk: rate7[it.name] || 0, mo: rate30[it.name] || 0 };
+        var itemSales=fSales.filter(function(s){return itemRecordBelongsTo(s,it);}),qtySold=itemSales.reduce(function(a,b){return a+(Number(b.qty)||0);},0),rev=itemSales.reduce(function(a,b){return a+(Number(b.total)||0);},0),prof=itemSales.reduce(function(a,b){return a+(Number(b.profit)||0);},0);
+        return { id:it.id, name: it.name, unit: it.unit, sold: qtySold, stock: Number(it.stock) || 0, onhand: Number(it.stock) || 0, rev: rev, prof: prof, wk: rate7[it.id] || 0, mo: rate30[it.id] || 0 };
       }).filter(function (st) {
         var q = (document.getElementById('statsItemSearch') ? document.getElementById('statsItemSearch').value.trim() : '');
         return !q || st.name.indexOf(q) > -1;
@@ -4853,8 +4842,9 @@
       }
     });
     document.getElementById('newItemCat').addEventListener('change', function (e) {
-      document.getElementById('newItemWarehouseBox').classList.add('hidden');var bundle=this.value==='العروض';document.getElementById('newItemType').value=bundle?'bundle':'normal';document.getElementById('bundleEditor').classList.toggle('hidden',!bundle);
+      document.getElementById('newItemWarehouseBox').classList.add('hidden');var bundle=this.value==='العروض';document.getElementById('newItemType').value=bundle?'bundle':'normal';document.getElementById('bundleEditor').classList.toggle('hidden',!bundle);updateBundleCostPreview();
     });
+    document.getElementById('newItemSell').addEventListener('input',updateBundleCostPreview);
     document.getElementById('btnTransferToShop').addEventListener('click', function () {
       var wh = parseFloat(document.getElementById('newItemWarehouseStock').value) || 0;
       var sh = parseFloat(document.getElementById('newItemStock').value) || 0;
@@ -5689,26 +5679,12 @@
 
     // Shared Item Supplier Stats & Items Directory (#tab-items) + Purchase Order Export
     function ensurePurchaseArchive(){if(!state.purchaseArchive)state.purchaseArchive={days:[],prices:{}};if(!Array.isArray(state.purchaseArchive.days))state.purchaseArchive.days=[];if(!state.purchaseArchive.prices)state.purchaseArchive.prices={};}
-    function prunePurchaseInvoices(){ensurePurchaseArchive();var cutoff=dateNDaysAgo(30),keep=[];state.purchases.forEach(function(inv){if(!inv.date||inv.date>=cutoff){keep.push(inv);return;}var ar=state.purchaseArchive,day=ar.days.find(function(d){return d.date===inv.date;});if(!day){day={date:inv.date,totalCost:0,paidAmount:0,count:0,suppliers:{}};ar.days.push(day);}var sup=inv.supplier||'غير محدد',total=Number(inv.totalCost)||0,paid=inv.isReturn?-Math.abs(total):Number(inv.paidAmount);if(!Number.isFinite(paid))paid=total;day.totalCost+=total;day.paidAmount+=paid;day.count++;if(!day.suppliers[sup])day.suppliers[sup]={total:0,paid:0,count:0};day.suppliers[sup].total+=total;day.suppliers[sup].paid+=paid;day.suppliers[sup].count++;var lines=Array.isArray(inv.items)?inv.items:[{itemName:inv.itemName,qty:inv.qty,costPrice:inv.costPrice,totalCost:inv.totalCost}];lines.forEach(function(ln){if(!ln.itemName)return;var map=ar.prices[ln.itemName]||(ar.prices[ln.itemName]={}),old=map[sup],price=Number(ln.costPrice)||(Number(ln.qty)?Number(ln.totalCost)/Number(ln.qty):0);if(!old||String(inv.date)>=String(old.date))map[sup]={supplier:sup,price:price,date:inv.date,unit:ln.unit||'',qty:Number(ln.qty)||0};});});state.purchases=keep;state.purchaseArchive.days.sort(function(a,b){return a.date.localeCompare(b.date);});}
-    function getItemSupplierStats(itemName) {
-      var bySup = {};
-      state.purchases.forEach(function (p) {
-        if (p.isReturn) return;
-        var sup = p.supplier || 'غير محدد';
-        var lines = Array.isArray(p.items) ? p.items : [{ itemName: p.itemName, qty: p.qty, costPrice: p.costPrice, totalCost: p.totalCost }];
-        lines.forEach(function (ln) {
-          if (ln.itemName === itemName) {
-            var q = Number(ln.qty) || 0;
-            var uc = Number(ln.costPrice) || (q > 0 ? (Number(ln.totalCost) / q) : 0);
-            if (!bySup[sup]) bySup[sup] = { supplier: sup, lastPrice: uc, lastDate: p.date || '', minPrice: uc, maxPrice: uc, count: 0 };
-            bySup[sup].count += 1;
-            if (uc > 0 && uc < bySup[sup].minPrice) bySup[sup].minPrice = uc;
-            if (uc > 0 && uc > bySup[sup].maxPrice) bySup[sup].maxPrice = uc;
-          }
-        });
-      });
-      ensurePurchaseArchive();var arch=state.purchaseArchive.prices[itemName]||{};Object.keys(arch).forEach(function(sup){var r=arch[sup],old=bySup[sup];if(!old)bySup[sup]={supplier:sup,lastPrice:Number(r.price)||0,lastDate:r.date||'',minPrice:Number(r.price)||0,maxPrice:Number(r.price)||0,count:0};else if(String(r.date)>String(old.lastDate)){old.lastPrice=Number(r.price)||0;old.lastDate=r.date||'';}});
-      return Object.keys(bySup).map(function (k) { return bySup[k]; }).sort(function (a, b) { return a.lastPrice - b.lastPrice; });
+    function prunePurchaseInvoices(){ensurePurchaseArchive();var cutoff=dateNDaysAgo(30),keep=[];state.purchases.forEach(function(inv){if(!inv.date||inv.date>=cutoff){keep.push(inv);return;}var ar=state.purchaseArchive,day=ar.days.find(function(d){return d.date===inv.date;});if(!day){day={date:inv.date,totalCost:0,paidAmount:0,count:0,suppliers:{}};ar.days.push(day);}var sup=inv.supplier||'غير محدد',total=Number(inv.totalCost)||0,paid=inv.isReturn?-Math.abs(total):Number(inv.paidAmount);if(!Number.isFinite(paid))paid=total;day.totalCost+=total;day.paidAmount+=paid;day.count++;if(!day.suppliers[sup])day.suppliers[sup]={total:0,paid:0,count:0};day.suppliers[sup].total+=total;day.suppliers[sup].paid+=paid;day.suppliers[sup].count++;var lines=Array.isArray(inv.items)?inv.items:[{itemId:inv.itemId||'',itemName:inv.itemName,qty:inv.qty,costPrice:inv.costPrice,totalCost:inv.totalCost}];lines.forEach(function(ln){if(!ln.itemName)return;var priceKey=ln.itemId||ln.itemName,map=ar.prices[priceKey]||(ar.prices[priceKey]={}),old=map[sup],price=Number(ln.costPrice)||(Number(ln.qty)?Number(ln.totalCost)/Number(ln.qty):0);if(!old||String(inv.date)>=String(old.date))map[sup]={supplier:sup,price:price,date:inv.date,unit:ln.unit||'',qty:Number(ln.qty)||0};});});state.purchases=keep;state.purchaseArchive.days.sort(function(a,b){return a.date.localeCompare(b.date);});}
+    function getItemSupplierStats(itemOrName) {
+      var item=typeof itemOrName==='object'?itemOrName:findItemByIdOrUniqueName('',itemOrName),itemName=item?item.name:String(itemOrName||''),bySup={};
+      state.purchases.forEach(function(p){if(p.isReturn)return;var sup=p.supplier||'غير محدد',lines=Array.isArray(p.items)?p.items:[{itemId:p.itemId||'',itemName:p.itemName,qty:p.qty,costPrice:p.costPrice,totalCost:p.totalCost}];lines.forEach(function(ln){var match=item?purchaseLineBelongsToItem(ln,item):arNorm(ln.itemName)===arNorm(itemName);if(!match)return;var q=Number(ln.qty)||0,uc=Number(ln.costPrice)||(q>0?Number(ln.totalCost)/q:0),old=bySup[sup];if(!old)bySup[sup]={supplier:sup,lastPrice:uc,lastDate:p.date||'',minPrice:uc,maxPrice:uc,count:0};bySup[sup].count++;if(uc>0&&uc<bySup[sup].minPrice)bySup[sup].minPrice=uc;if(uc>old.maxPrice)bySup[sup].maxPrice=uc;if(String(p.date||'')>=String(old.lastDate||'')){old.lastPrice=uc;old.lastDate=p.date||'';}});});
+      ensurePurchaseArchive();var prices=state.purchaseArchive.prices||{},arch=item?(prices[item.id]||((findItemByIdOrUniqueName('',item.name)===item)?prices[item.name]:{})||{}):(prices[itemName]||{});Object.keys(arch).forEach(function(sup){var r=arch[sup],old=bySup[sup];if(!old)bySup[sup]={supplier:sup,lastPrice:Number(r.price)||0,lastDate:r.date||'',minPrice:Number(r.price)||0,maxPrice:Number(r.price)||0,count:0};else if(String(r.date)>String(old.lastDate)){old.lastPrice=Number(r.price)||0;old.lastDate=r.date||'';}});
+      return Object.keys(bySup).map(function(k){return bySup[k];}).sort(function(a,b){return a.lastPrice-b.lastPrice;});
     }
 
     // ===== أرخص مورد + طلب الصنف + معدل البيع =====
@@ -5718,7 +5694,7 @@
       return sups.length > 0 ? sups[0] : null;
     }
     function cheapestBadgeHtml(it) {
-      var c = cheapestSupplierOf(it.name);
+      var c = cheapestSupplierOf(it);
       if (!c) return '<span class="text-[10px] text-slate-400">لا يوجد سعر مورد مسجل</span>';
       var packTxt = (Number(it.packFactor) > 1) ? (' <span class="text-[10px] font-bold text-indigo-700">(' + escHtml(it.packName || 'الكبرى') + ': ' + fmt(c.lastPrice * it.packFactor) + ')</span>') : '';
       return '<span class="inline-block px-2 py-0.5 rounded-lg text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">🏆 ' + escHtml(c.supplier) + ': ' + fmt(c.lastPrice) + ' ج.م/' + escHtml(it.unit || 'وحدة') + '</span>' + packTxt;
@@ -5766,7 +5742,7 @@
         row.querySelector('.p-qty').value = 1;
         row.querySelector('.p-pack').value = hasPk ? (it.packFactor * (Number(it.cartonPacks)||1)) : 1;
         row.querySelector('.p-sell').value = it.sell || '';
-        var cs = cheapestSupplierOf(it.name);
+        var cs = cheapestSupplierOf(it);
         var unitPrice = cs ? cs.lastPrice : (Number(it.buy) || 0);
         row.querySelector('.p-pack-cost').value = unitPrice > 0 ? Number((unitPrice * (hasPk ? it.packFactor : 1)).toFixed(2)) : '';
         applyUnitTypeUI(row);
@@ -5835,7 +5811,7 @@
 
       list.innerHTML = '';
       filtered.forEach(function (it) {
-        var sups = getItemSupplierStats(it.name);
+        var sups = getItemSupplierStats(it);
         var margin = (it.buy > 0 && it.sell > 0) ? (((it.sell - it.buy) / it.buy) * 100).toFixed(1) + '%' : '—';
         var sold = soldOf(it);
         var supHtml = sups.length > 0
@@ -5906,11 +5882,11 @@
       var lows = state.items.filter(function (it) { return !it.noStock && !isMixItem(it) && (Number(it.stock) || 0) <= itemMinStock(it); });
       if (lows.length === 0) { showToast('لا توجد نواقص حالياً'); return; }
       var msg = '📦 *نواقص محل مسك للمنظفات* (' + todayStr() + '):\n' + lows.slice(0, 50).map(function (it, i) {
-        var sups = getItemSupplierStats(it.name);
+        var sups = getItemSupplierStats(it);
         var cheapStr = sups.length > 0 ? (' — الأرخص: ' + sups[0].supplier + ' (' + fmt(sups[0].lastPrice) + ' ج.م)') : (it.buy > 0 ? (' — آخر شراء: ' + fmt(it.buy) + ' ج.م') : '');
         return (i + 1) + '- ' + it.name + ' (المتبقي: ' + (Number(it.stock) || 0) + ')' + cheapStr;
       }).join('\n');
-      var groups={}; lows.forEach(function(it){var ps=getItemSupplierStats(it.name),sup=ps.length?ps[0].supplier:'';if(sup){(groups[sup]||(groups[sup]=[])).push(it);}});
+      var groups={}; lows.forEach(function(it){var ps=getItemSupplierStats(it),sup=ps.length?ps[0].supplier:'';if(sup){(groups[sup]||(groups[sup]=[])).push(it);}});
       var target=Object.keys(groups).filter(function(n){return getPartyPhone('supplier',n);}).sort(function(a,b){return groups[b].length-groups[a].length;})[0];
       if(!target){showToast('⚠️ سجّل رقم واتساب لمورد من كروت الموردين');return;}
       var supplierMsg='📦 *نواقص محل مسك للمنظفات* ('+todayStr()+')\n🚚 المورد: '+target+'\n'+groups[target].map(function(it){return '• '+it.name+' — المتبقي: '+(Number(it.stock)||0);}).join('\n');
@@ -6084,7 +6060,7 @@
       if(requireDeletePin('🔐 حذف فاتورة الشراء',function(){deletePurchaseInvoiceRecord(p);}))return false;
       if(!p)return false;
       (Array.isArray(p.items)?p.items:([{itemName:p.itemName,qty:p.qty}])).forEach(function(line){
-        var it=state.items.find(function(x){return x.name===line.itemName;});
+        var it=findItemByIdOrUniqueName(line.itemId,line.itemName);
         if(it&&!it.noStock)it.stock=Number(((Number(it.stock)||0)-(Number(line.qty)||0)).toFixed(3));
       });
       if(!p.isReturn){
@@ -6118,7 +6094,7 @@
     function openInvoiceEditor(type,inv){if(gateNightAction('🔐 تعديل الفاتورة',function(){openInvoiceEditor(type,inv);}))return;var raw=type==='sale'?saleRowsForInvoice(inv):state.purchases.find(function(p){return String(p.id)===String(inv.key);});if(!raw)return;var lines=type==='sale'?raw:(Array.isArray(raw.items)?raw.items:[{itemName:raw.itemName,unit:raw.unit,qty:raw.qty,costPrice:raw.costPrice,expectedSellPrice:raw.expectedSellPrice||0,totalCost:raw.totalCost}]);if(type==='purchase'&&!Array.isArray(raw.items))raw.items=lines;invoiceEditContext={type:type,raw:raw,lines:lines};var heading=type==='sale'?'تعديل فاتورة بيع #'+inv.no:'تعديل فاتورة شراء #'+inv.no;var rows=lines.map(function(l,i){return invoiceEditRowHtml(l,i,type);}).join('');var details=type==='purchase'?'<label class="text-xs">المبلغ المدفوع: <input id="editInvoicePaid" type="number" step="any" min="0" class="border rounded-lg p-1 w-28" value="'+Math.max(0,raw.paidAmount!==undefined?Number(raw.paidAmount)||0:Math.abs(Number(raw.totalCost)||0))+'"></label>':'';showActivity(heading,'<div class="space-y-3"><div class="overflow-x-auto"><table class="w-full text-xs text-right"><thead><tr><th class="p-1">الصنف</th><th class="p-1">الكمية</th><th class="p-1">سعر الوحدة</th>'+(type==='sale'?'<th class="p-1">سعر الشراء</th>':'')+'</tr></thead><tbody>'+rows+'</tbody></table></div>'+details+'<div class="flex justify-end gap-2"><button id="invoiceEditCancel" type="button" class="px-3 py-2 bg-slate-100 rounded-lg text-xs">إلغاء</button><button id="invoiceEditSave" type="button" class="px-3 py-2 bg-emerald-600 text-white rounded-lg text-xs font-bold">حفظ التعديل</button></div></div>');var modal=document.getElementById('activityModal');modal.querySelector('#invoiceEditCancel').onclick=function(){modal.classList.add('hidden');};modal.querySelector('#invoiceEditSave').onclick=saveInvoiceEdits;}
     function changeDebtBalance(type,person,delta,note){if(!person||Math.abs(delta)<0.005)return;var d=(state.debts||[]).find(function(x){return x.type===type&&x.person===person;});if(!d&&delta>0){state.debts.unshift({id:'D-'+Date.now()+Math.floor(Math.random()*1000),type:type,person:person,amount:Number(delta.toFixed(2)),note:note||''});return;}if(d){d.amount=Number(Math.max(0,(Number(d.amount)||0)+delta).toFixed(2));if(d.amount<=0.004)state.debts=state.debts.filter(function(x){return x.id!==d.id;});}}
     function adjustPostedShift(row,delta){if(!delta||row.payment==='آجل / عميل')return;var key=shiftOf(row),date=row.date||todayStr(),led=getShiftLedger();if(date===todayStr()&&key==='am'&&!row.shiftPosted)led.amSales=Number(Math.max(0,led.amSales+delta).toFixed(2));else if(date===todayStr()&&key==='pm'&&!row.shiftPosted)led.pmSales=Number(Math.max(0,led.pmSales+delta).toFixed(2));else{var sh=key==='am'?'صباحي':'ليلي',c=led.closedShifts.find(function(x){return x.date===date&&String(x.shift||'').indexOf(sh)>-1;});if(c){c.sales=Number(Math.max(0,(Number(c.sales)||0)+delta).toFixed(2));c.net=Number((c.sales-(Number(c.cashOut)||0)).toFixed(2));}}saveShiftLedger(led);}
-    function saveInvoiceEdits(){var c=invoiceEditContext;if(!c)return;var type=c.type,raw=c.raw,lines=c.lines,modal=document.getElementById('activityModal'),qtyInputs=modal.querySelectorAll('[data-f="qty"]'),priceInputs=modal.querySelectorAll('[data-f="price"]'),buyInputs=modal.querySelectorAll('[data-f="buyPrice"]');if(type==='sale'){var creditDelta=0;lines.forEach(function(row,i){var qty=Math.max(0,Number(qtyInputs[i].value)||0),price=Math.max(0,Number(priceInputs[i].value)||0),sign=row.isReturn?-1:1,discount=Number(row.discount)||0,it=state.items.find(function(x){return x.id===row.itemId;})||state.items.find(function(x){return x.name===row.itemName;});var oldTotal=Number(row.total)||0,oldBase=Math.abs(Number(row.baseQty)||saleBaseQty(row)),oldParts=row.mixParts||[],newBase=qty*((it&&it.packName===row.unit&&it.packFactor>0)?it.packFactor:1),gross=qty*price,newParts=it&&isMixItem(it)?mixSplit(it,it.bundle&&it.bundle.length?qty*(Number(it.sell)||price):gross):null;if(newParts===null&&it&&isMixItem(it))return;if(oldParts.length)deductParts(oldParts,row.isReturn?1:-1);else if(it&&!it.noStock)it.stock=Number(((Number(it.stock)||0)+(row.isReturn?-oldBase:oldBase)).toFixed(3));if(newParts&&newParts.length)deductParts(newParts,row.isReturn?-1:1);else if(it&&!it.noStock)it.stock=Number(((Number(it.stock)||0)+(row.isReturn?newBase:-newBase)).toFixed(3));var factor=(it&&it.packName===row.unit&&it.packFactor>0)?Number(it.packFactor):1,total=sign*Math.max(0,gross-discount),buy=buyInputs[i]?Math.max(0,Number(buyInputs[i].value)||0):((it?Number(it.buy)||0:0)*factor),profit=sign*(Math.max(0,gross-discount)-(newParts?mixCost(newParts):qty*buy));row.qty=sign*qty;row.baseQty=sign*newBase;row.sellPrice=price;row.buyPrice=Number(buy.toFixed(4));row.total=Number(total.toFixed(2));row.profit=Number(profit.toFixed(2));row.mixParts=newParts||undefined;creditDelta+=row.payment&&row.payment.indexOf('آجل')>-1?(row.total-oldTotal):0;adjustPostedShift(row,row.total-oldTotal);syncToSheet(Object.assign({type:'sale'},row));});if(raw.length&&raw[0].payment&&raw[0].payment.indexOf('آجل')>-1)changeDebtBalance('receivable',raw[0].customer,creditDelta,'تعديل فاتورة بيع');}else{var oldRemaining=Number(raw.remainingAmount)||0,oldDebtPerson=raw.supplier,paidInput=modal.querySelector('#editInvoicePaid'),paid=paidInput?Math.max(0,Number(paidInput.value)||0):Number(raw.paidAmount)||0;var signedTotal=0,expected=0;lines.forEach(function(row,i){var qty=Math.max(0,Number(qtyInputs[i].value)||0),price=Math.max(0,Number(priceInputs[i].value)||0),oldQty=Number(row.qty)||0,sign=raw.isReturn?-1:1,it=state.items.find(function(x){return x.name===row.itemName;});row.qty=Number((sign*qty).toFixed(3));row.costPrice=price;row.totalCost=Number((sign*qty*price).toFixed(2));signedTotal+=row.totalCost;if(it){if(!it.noStock)it.stock=Number(((Number(it.stock)||0)+(row.qty-oldQty)).toFixed(3));if(!raw.isReturn)it.buy=price;}var sell=Number(row.expectedSellPrice)||0;row.expectedProfit=Number((sign*qty*(sell-price)).toFixed(2));expected+=row.expectedProfit;});raw.totalCost=Number(signedTotal.toFixed(2));raw.paidAmount=paid;raw.remainingAmount=raw.isReturn?0:Math.max(0,Math.abs(raw.totalCost)-raw.paidAmount-(Number(raw.settled)||0));raw.expectedProfit=expected;changeDebtBalance('payable',oldDebtPerson,(Number(raw.remainingAmount)||0)-oldRemaining,'تعديل فاتورة شراء');syncToSheet(Object.assign({type:'purchase'},raw));}modal.classList.add('hidden');invoiceEditContext=null;saveState();renderItemsGrid();renderItemsDirectory();renderSalesLog();renderPurchasesLog();renderDebts();renderStats();renderMirror();renderGrowth();renderSalesInvoices();renderPurchaseInvoices();refreshShiftBanner();setTimeout(pushCloudSnapshot,200);showToast('✅ تم حفظ تعديل الفاتورة');}
+    function saveInvoiceEdits(){var c=invoiceEditContext;if(!c)return;var type=c.type,raw=c.raw,lines=c.lines,modal=document.getElementById('activityModal'),qtyInputs=modal.querySelectorAll('[data-f="qty"]'),priceInputs=modal.querySelectorAll('[data-f="price"]'),buyInputs=modal.querySelectorAll('[data-f="buyPrice"]');if(type==='sale'){var creditDelta=0;lines.forEach(function(row,i){var qty=Math.max(0,Number(qtyInputs[i].value)||0),price=Math.max(0,Number(priceInputs[i].value)||0),sign=row.isReturn?-1:1,discount=Number(row.discount)||0,it=findItemByIdOrUniqueName(row.itemId,row.itemName);var oldTotal=Number(row.total)||0,oldBase=Math.abs(Number(row.baseQty)||saleBaseQty(row)),oldParts=row.mixParts||[],newBase=qty*((it&&it.packName===row.unit&&it.packFactor>0)?it.packFactor:1),gross=qty*price,newParts=it&&isMixItem(it)?mixSplit(it,it.bundle&&it.bundle.length?qty*(Number(it.sell)||price):gross):null;if(newParts===null&&it&&isMixItem(it))return;if(oldParts.length)deductParts(oldParts,row.isReturn?1:-1);else if(it&&!it.noStock)it.stock=Number(((Number(it.stock)||0)+(row.isReturn?-oldBase:oldBase)).toFixed(3));if(newParts&&newParts.length)deductParts(newParts,row.isReturn?-1:1);else if(it&&!it.noStock)it.stock=Number(((Number(it.stock)||0)+(row.isReturn?newBase:-newBase)).toFixed(3));var factor=(it&&it.packName===row.unit&&it.packFactor>0)?Number(it.packFactor):1,total=sign*Math.max(0,gross-discount),buy=buyInputs[i]?Math.max(0,Number(buyInputs[i].value)||0):((it?Number(it.buy)||0:0)*factor),profit=sign*(Math.max(0,gross-discount)-(newParts?mixCost(newParts):qty*buy));row.qty=sign*qty;row.baseQty=sign*newBase;row.sellPrice=price;row.buyPrice=Number(buy.toFixed(4));row.total=Number(total.toFixed(2));row.profit=Number(profit.toFixed(2));row.mixParts=newParts||undefined;creditDelta+=row.payment&&row.payment.indexOf('آجل')>-1?(row.total-oldTotal):0;adjustPostedShift(row,row.total-oldTotal);syncToSheet(Object.assign({type:'sale'},row));});if(raw.length&&raw[0].payment&&raw[0].payment.indexOf('آجل')>-1)changeDebtBalance('receivable',raw[0].customer,creditDelta,'تعديل فاتورة بيع');}else{var oldRemaining=Number(raw.remainingAmount)||0,oldDebtPerson=raw.supplier,paidInput=modal.querySelector('#editInvoicePaid'),paid=paidInput?Math.max(0,Number(paidInput.value)||0):Number(raw.paidAmount)||0;var signedTotal=0,expected=0;lines.forEach(function(row,i){var qty=Math.max(0,Number(qtyInputs[i].value)||0),price=Math.max(0,Number(priceInputs[i].value)||0),oldQty=Number(row.qty)||0,sign=raw.isReturn?-1:1,it=state.items.find(function(x){return x.name===row.itemName;});row.qty=Number((sign*qty).toFixed(3));row.costPrice=price;row.totalCost=Number((sign*qty*price).toFixed(2));signedTotal+=row.totalCost;if(it){if(!it.noStock)it.stock=Number(((Number(it.stock)||0)+(row.qty-oldQty)).toFixed(3));if(!raw.isReturn)it.buy=price;}var sell=Number(row.expectedSellPrice)||0;row.expectedProfit=Number((sign*qty*(sell-price)).toFixed(2));expected+=row.expectedProfit;});raw.totalCost=Number(signedTotal.toFixed(2));raw.paidAmount=paid;raw.remainingAmount=raw.isReturn?0:Math.max(0,Math.abs(raw.totalCost)-raw.paidAmount-(Number(raw.settled)||0));raw.expectedProfit=expected;changeDebtBalance('payable',oldDebtPerson,(Number(raw.remainingAmount)||0)-oldRemaining,'تعديل فاتورة شراء');syncToSheet(Object.assign({type:'purchase'},raw));}modal.classList.add('hidden');invoiceEditContext=null;saveState();renderItemsGrid();renderItemsDirectory();renderSalesLog();renderPurchasesLog();renderDebts();renderStats();renderMirror();renderGrowth();renderSalesInvoices();renderPurchaseInvoices();refreshShiftBanner();setTimeout(pushCloudSnapshot,200);showToast('✅ تم حفظ تعديل الفاتورة');}
     function showItemMovement(item){var buys=state.purchases.flatMap(function(p){return (Array.isArray(p.items)?p.items:[{itemName:p.itemName,qty:p.qty,costPrice:p.costPrice}]).filter(function(l){return l.itemName===item.name;}).map(function(l){return {date:p.date,supplier:p.supplier,price:Number(l.costPrice)||0,qty:Number(l.qty)||0,id:p.id};});}).sort(function(a,b){return String(b.date).localeCompare(String(a.date));});var sells=state.sales.filter(function(x){return x.itemName===item.name;}).sort(function(a,b){return invTsOf(b)-invTsOf(a);});var rowsBuy=buys.map(function(x){return '<tr><td>'+escHtml(x.date||'')+'</td><td>'+escHtml(x.supplier||'')+'</td><td>'+fmt(x.price)+' ج.م</td><td>'+x.qty+'</td></tr>';}).join('')||'<tr><td colspan="4">لا يوجد شراء مسجل</td></tr>';var rowsSell=sells.map(function(x){return '<tr><td>'+escHtml(x.date||'')+' '+escHtml(invTimeOf(x))+'</td><td>'+fmt(x.sellPrice||0)+' ج.م</td><td>'+Math.abs(Number(x.qty)||0)+'</td><td>'+fmt(x.total||0)+' ج.م</td></tr>';}).join('')||'<tr><td colspan="4">لا يوجد بيع مسجل</td></tr>';var logs=(state.stockLog||[]).filter(function(x){return x.itemId===item.id||x.itemName===item.name;}).slice().reverse().map(function(x){return '<tr><td>'+escHtml(x.date+' '+(x.time||''))+'</td><td>'+fmt(x.before)+'</td><td>'+fmt(x.after)+'</td><td>'+(x.after-x.before>0?'+':'')+fmt(x.after-x.before)+'</td></tr>';}).join('')||'<tr><td colspan="4">لا توجد تعديلات يدوية مسجلة بعد</td></tr>';var table=function(title,heads,body){return '<h4 class="font-bold text-slate-800 mt-3">'+title+'</h4><div class="overflow-x-auto"><table class="w-full text-xs text-right"><thead><tr>'+heads.map(function(h){return '<th class="p-1">'+h+'</th>';}).join('')+'</tr></thead><tbody>'+body+'</tbody></table></div>';};showActivity('حركة الصنف: '+item.name,table('آخر 3 أسعار شراء',['التاريخ','المورد','سعر الشراء','الكمية'],rowsBuy.split('</tr>').slice(0,4).join('</tr>'))+table('آخر 3 أسعار بيع',['التاريخ','السعر','الكمية','الإجمالي'],sells.slice(0,3).map(function(x){return '<tr><td>'+escHtml(x.date)+' '+escHtml(invTimeOf(x))+'</td><td>'+fmt(x.sellPrice||0)+'</td><td>'+Math.abs(x.qty||0)+'</td><td>'+fmt(x.total||0)+'</td></tr>';}).join('')||'<tr><td colspan="4">لا يوجد بيع مسجل</td></tr>')+table('حركة الشراء',['التاريخ','المورد','سعر الوحدة','الكمية'],rowsBuy)+table('حركة البيع',['التاريخ','السعر','الكمية','الإجمالي'],rowsSell)+table('تعديلات المخزون اليدوية',['التاريخ','قبل','بعد','الفرق'],logs));}
     function showPartyStatement(kind,name){var isSup=kind==='supplier',purchases=(state.purchases||[]).filter(function(p){return isSup&&p.supplier===name;}),sales=(state.sales||[]).filter(function(x){return !isSup&&x.customer===name;}),logs=(state.debtLog||[]).filter(function(x){return x.person===name&&(isSup?x.type==='payable':x.type==='receivable');});var bought=purchases.filter(function(p){return !p.isReturn;}).reduce(function(a,p){return a+Math.abs(Number(p.totalCost)||0);},0),paid=purchases.filter(function(p){return !p.isReturn;}).reduce(function(a,p){return a+(Number(p.paidAmount)||0)+(Number(p.settled)||0);},0),sold=sales.filter(function(x){return !x.isReturn;}).reduce(function(a,x){return a+Number(x.total||0);},0),received=sales.filter(function(x){return !x.isReturn&&!(x.payment||'').includes('آجل');}).reduce(function(a,x){return a+Number(x.total||0);},0)+sales.filter(function(x){return !x.isReturn&&(x.payment||'').includes('آجل');}).reduce(function(a,x){return a+Number(x.paidNow||0);},0)+logs.filter(function(x){return x.type==='receivable';}).reduce(function(a,x){return a+Number(x.amount||0);},0),debt=state.debts.find(function(d){return d.person===name&&d.type===(isSup?'payable':'receivable');}),rows=[];purchases.forEach(function(p){rows.push({date:p.date,what:(p.isReturn?'مرتجع شراء':'فاتورة شراء')+' #'+String(p.id).slice(-6),amount:p.totalCost,detail:'مدفوع '+fmt(p.paidAmount||0)+' • متبقي '+fmt(p.remainingAmount||0)});(p.payments||[]).forEach(function(x){rows.push({date:x.date,what:'سداد للمورد',amount:-Number(x.amount||0),detail:''});});});sales.forEach(function(x){rows.push({date:x.date,what:(x.isReturn?'مرتجع بيع':'فاتورة بيع')+' #'+String(x.invNo||x.id).slice(-6),amount:x.total,detail:(x.payment||'')+(Number(x.paidNow)>0?' • مدفوع '+fmt(x.paidNow)+' • متبقي '+fmt(x.dueAmount):'')});});logs.forEach(function(x){rows.push({date:x.date,what:isSup?'سداد دين مورد':'تحصيل من عميل',amount:-Number(x.amount||0),detail:x.note||''});});ensurePurchaseArchive();if(isSup)state.purchaseArchive.days.forEach(function(d){var z=d.suppliers&&d.suppliers[name];if(z){bought+=Number(z.total)||0;paid+=Number(z.paid)||0;rows.push({date:d.date,what:'ملخص فواتير شراء مؤرشفة ('+(z.count||0)+')',amount:z.total,detail:'المدفوع '+fmt(z.paid)});}});
       if(!isSup&&debt&&Number(debt.openingBalance)>0)rows.push({date:debt.createdAt||'',what:'رصيد بداية قبل النظام',amount:Number(debt.openingBalance),detail:'رصيد افتتاحي'});rows.sort(function(a,b){return String(b.date).localeCompare(String(a.date));});var tr=rows.map(function(x){return '<tr class="border-t"><td class="p-1">'+escHtml(x.date||'')+'</td><td class="p-1">'+escHtml(x.what)+'</td><td class="p-1">'+fmt(x.amount)+' ج.م</td><td class="p-1">'+escHtml(x.detail)+'</td></tr>';}).join('')||'<tr><td colspan="4">لا توجد حركات</td></tr>';var headline=isSup?'<div class="grid grid-cols-3 gap-2 text-xs"><div class="p-2 bg-amber-50 rounded-lg">اشتريت: <b>'+fmt(bought)+'</b></div><div class="p-2 bg-emerald-50 rounded-lg">دفعت: <b>'+fmt(paid)+'</b></div><div class="p-2 bg-rose-50 rounded-lg">عليّ حالياً: <b>'+fmt(debt?debt.amount:0)+'</b></div></div>':'<div class="grid grid-cols-3 gap-2 text-xs"><div class="p-2 bg-sky-50 rounded-lg">اشترى: <b>'+fmt(sold)+'</b></div><div class="p-2 bg-emerald-50 rounded-lg">دفع نقداً: <b>'+fmt(received)+'</b></div><div class="p-2 bg-rose-50 rounded-lg">باقي عليه: <b>'+fmt(debt?debt.amount:0)+'</b></div></div>';var phone=getPartyPhone(isSup?'supplier':'customer',name);showActivity('كشف حساب '+(isSup?'المورد: ':'العميل: ')+name,'<div class="flex gap-2 mb-2"><input id="statementPhone" type="tel" value="'+escHtml(phone)+'" placeholder="رقم واتساب" class="flex-1 border rounded-lg px-2 py-1.5 text-xs"><button id="statementPhoneSave" class="border rounded-lg px-2 text-xs">حفظ الرقم</button><button id="statementWhatsApp" class="bg-emerald-600 text-white rounded-lg px-2 text-xs">واتساب</button><button id="statementPng" class="bg-sky-700 text-white rounded-lg px-2 text-xs">صورة PNG</button></div>'+headline+'<div class="overflow-x-auto mt-3"><table class="w-full text-xs text-right"><thead><tr><th class="p-1">التاريخ</th><th class="p-1">العملية</th><th class="p-1">المبلغ</th><th class="p-1">التفاصيل</th></tr></thead><tbody>'+tr+'</tbody></table></div>');document.getElementById('statementPhoneSave').onclick=function(){var n=document.getElementById('statementPhone').value.trim();if(isSup)rememberSupplierPhone(name,n);else rememberCustomerPhone(name,n);showToast('✅ تم حفظ رقم واتساب');};document.getElementById('statementWhatsApp').onclick=function(){var n=document.getElementById('statementPhone').value.trim();if(isSup)rememberSupplierPhone(name,n);else rememberCustomerPhone(name,n);var summary=(isSup?'كشف حساب المورد ':'كشف حساب العميل ')+name+'\n'+(isSup?'إجمالي الشراء: '+fmt(bought)+'\nالمدفوع: '+fmt(paid)+'\nالمتبقي: '+fmt(debt?debt.amount:0):'إجمالي المبيعات: '+fmt(sold)+'\nالمدفوع: '+fmt(received)+'\nالمتبقي: '+fmt(debt?debt.amount:0));openWhatsApp(n,summary);};document.getElementById('statementPng').onclick=function(){var docRows=rows.map(function(x){return [String(x.date||''),String(x.what||''),fmt(x.amount)+' ج.م',String(x.detail||'')];});var totalLabel=isSup?'إجمالي الشراء':'إجمالي المبيعات',paidLabel=isSup?'المدفوع':'المتحصل';shareDocImage({title:'كشف حساب '+(isSup?'مورد':'عميل'),partyLabel:isSup?'المورد':'العميل',party:name,dateTime:todayStr()+'  '+timeStr(),meta:[],cols:[{h:'التاريخ',w:2.2},{h:'العملية',w:4.4},{h:'المبلغ',w:2.2},{h:'التفاصيل',w:3}],rows:docRows,totals:[{label:totalLabel,value:fmt(isSup?bought:sold)+' ج.م'},{label:paidLabel,value:fmt(isSup?paid:received)+' ج.م'},{label:isSup?'المتبقي للمورد':'المتبقي على العميل',value:fmt(debt?debt.amount:0)+' ج.م',main:true}]},'statement-'+name,normalizeWaPhone(document.getElementById('statementPhone').value),summary);};}
@@ -6546,7 +6522,7 @@
     });
     byId('pSupplier').addEventListener('change', renderSupplierDebtInfo);
 
-    var scaleInput=document.getElementById('scaleExtraSetting');if(scaleInput)scaleInput.value=localStorage.getItem('misk_scale_extra_v1')||'50';var scaleSave=document.getElementById('saveScaleExtra');if(scaleSave)scaleSave.addEventListener('click',function(){localStorage.setItem('misk_scale_extra_v1',String(Math.max(0,Number(scaleInput.value)||0)));showToast('✅ تم حفظ زيادة الميزان');});var ownerWaInput=document.getElementById('ownerWaPhone');if(ownerWaInput)ownerWaInput.value=localStorage.getItem('misk_owner_wa_v1')||'';document.getElementById('saveOwnerWaPhone').addEventListener('click',function(){localStorage.setItem('misk_owner_wa_v1',ownerWaInput.value.trim());showToast('✅ تم حفظ رقم واتساب');});document.getElementById('btnRepairZeroCostSales').addEventListener('click',function(){function run(){var cutoff=dateNDaysAgo(6),count=0;(state.sales||[]).forEach(function(row){if(!row.date||row.date<cutoff||(Number(row.buyPrice)||0)!==0)return;var it=state.items.find(function(x){return x.id===row.itemId;})||state.items.find(function(x){return x.name===row.itemName;});if(!it||it.noStock||isMixItem(it)||!(Number(it.buy)>0))return;var factor=it.packName===row.unit&&Number(it.packFactor)>0?Number(it.packFactor):1,buy=Number(it.buy)*factor,sign=(Number(row.total)||0)<0?-1:1,cost=Math.abs(Number(row.qty)||0)*buy;row.buyPrice=Number(buy.toFixed(4));row.profit=Number((Number(row.total)-sign*cost).toFixed(2));count++;});if(count){saveState();renderMirror();renderStats();showToast('✅ تم تصحيح تكلفة وربح '+count+' حركة بيع');}else showToast('لا توجد فواتير بتكلفة صفر خلال آخر 7 أيام');}requirePinAction('🔐 تصحيح أرباح الفواتير الصفرية','أدخل الرقم السري لتحديث فواتير تكلفتها صفر خلال آخر 7 أيام فقط.',run);});
+    var scaleInput=document.getElementById('scaleExtraSetting');if(scaleInput)scaleInput.value=localStorage.getItem('misk_scale_extra_v1')||'50';var scaleSave=document.getElementById('saveScaleExtra');if(scaleSave)scaleSave.addEventListener('click',function(){localStorage.setItem('misk_scale_extra_v1',String(Math.max(0,Number(scaleInput.value)||0)));showToast('✅ تم حفظ زيادة الميزان');});var ownerWaInput=document.getElementById('ownerWaPhone');if(ownerWaInput)ownerWaInput.value=localStorage.getItem('misk_owner_wa_v1')||'';document.getElementById('saveOwnerWaPhone').addEventListener('click',function(){localStorage.setItem('misk_owner_wa_v1',ownerWaInput.value.trim());showToast('✅ تم حفظ رقم واتساب');});document.getElementById('btnRepairZeroCostSales').addEventListener('click',function(){function run(){var cutoff=dateNDaysAgo(6),count=0;(state.sales||[]).forEach(function(row){if(!row.date||row.date<cutoff||(Number(row.buyPrice)||0)!==0)return;var it=findItemByIdOrUniqueName(row.itemId,row.itemName);if(!it||it.noStock||isMixItem(it)||!(Number(it.buy)>0))return;var factor=it.packName===row.unit&&Number(it.packFactor)>0?Number(it.packFactor):1,buy=Number(it.buy)*factor,sign=(Number(row.total)||0)<0?-1:1,cost=Math.abs(Number(row.qty)||0)*buy;row.buyPrice=Number(buy.toFixed(4));row.profit=Number((Number(row.total)-sign*cost).toFixed(2));count++;});if(count){saveState();renderMirror();renderStats();showToast('✅ تم تصحيح تكلفة وربح '+count+' حركة بيع');}else showToast('لا توجد فواتير بتكلفة صفر خلال آخر 7 أيام');}requirePinAction('🔐 تصحيح أرباح الفواتير الصفرية','أدخل الرقم السري لتحديث فواتير تكلفتها صفر خلال آخر 7 أيام فقط.',run);});
     function sendMorningShiftSummary(){var phone=localStorage.getItem('misk_owner_wa_v1')||'';if(!phone)return;var rows=state.sales.filter(function(s){return s.date===todayStr()&&shiftOf(s)==='am';});var total=function(pay){return rows.filter(function(s){return pay(s);}).reduce(function(a,s){return a+(Number(s.total)||0);},0);};var msg='ملخص شيفت الصبح '+todayStr()+'\nإجمالي المبيعات: '+fmt(total(function(){return true;}))+' ج.م\nكاش: '+fmt(total(function(s){return s.payment==='نقدي';}))+'\nإنستاباي: '+fmt(total(function(s){return s.payment&&s.payment.indexOf('إنستا باي')===0;}))+'\nآجل: '+fmt(total(function(s){return s.payment==='آجل / عميل';}))+'\nسحب: '+fmt(getShiftLedger().cashOuts.filter(function(x){return (x.shift==='morning'||x.shift==='am')&&x.date===todayStr();}).reduce(function(a,x){return a+(Number(x.amount)||0);},0));openWhatsApp(phone,msg);}
     function organizeItemCardForm(){var form=document.getElementById('addItemForm');if(!form||form.dataset.organized)return;form.dataset.organized='1';var nameRow=document.getElementById('newItemCat').parentElement.parentElement;var basics=document.createElement('section');basics.className='bg-slate-50 border border-slate-200 rounded-xl p-2.5 space-y-2';basics.innerHTML='<div class="text-[11px] font-extrabold text-slate-700">الأساسيات</div><div class="grid grid-cols-2 gap-2" id="itemBasicsPrices"></div><div class="grid grid-cols-2 gap-2" id="itemBasicsStock"></div>';nameRow.after(basics);var priceGrid=basics.querySelector('#itemBasicsPrices'),stockGrid=basics.querySelector('#itemBasicsStock');function move(id,target){var e=document.getElementById(id);if(e)target.appendChild(e.closest('div'));}move('newItemSell',priceGrid);move('newItemBuy',priceGrid);move('newItemStock',stockGrid);move('newItemUnit',stockGrid);var packSell=document.getElementById('newItemPackSell');if(packSell){var packRow=packSell.closest('div');var pack=Array.from(form.querySelectorAll('.bg-amber-50')).find(function(x){return x.contains(document.getElementById('newItemPackBuy'));});if(pack)pack.appendChild(packRow);}var image=document.getElementById('newItemImage'),imageBox=image&&image.parentElement,color=document.querySelector('#btnColorAuto')&&document.querySelector('#btnColorAuto').closest('.bg-slate-50');if(imageBox&&color){var media=document.createElement('section');media.className='bg-slate-50 border border-slate-200 rounded-xl p-2 space-y-2';media.appendChild(imageBox);media.appendChild(color);form.appendChild(media);}var oldTrade=Array.from(form.querySelectorAll('.bg-emerald-50')).find(function(x){return x.contains(document.getElementById('newItemPackSell'))||x.textContent.indexOf('البيع والمخزون')>-1;});if(oldTrade&&!oldTrade.querySelector('#newItemSell'))oldTrade.remove();}
     organizeItemCardForm();
@@ -7043,5 +7019,6 @@
     });
     refreshLogoUI();
   </script>
+<script>document.querySelectorAll("#tab-sales input, #saleModal input, #saleModal select, #salesCartBox input, #salesCartBox select").forEach(function(el){el.setAttribute("autocomplete","off");});</script>
 </body>
 </html>
