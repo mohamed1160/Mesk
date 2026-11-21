@@ -424,6 +424,12 @@
     <section id="tab-expenses" class="hidden space-y-4">
       <div class="grid grid-cols-3 gap-2.5" id="expenseSummaryCards"></div>
 
+      <div class="bg-white border border-rose-200 rounded-2xl p-3 space-y-2">
+        <h3 class="text-sm font-extrabold text-rose-700">📊 تقرير المصروفات</h3>
+        <div class="grid grid-cols-2 gap-2"><label class="text-[11px]">من <input id="expenseReportFrom" type="date" class="block w-full border rounded-lg p-2"></label><label class="text-[11px]">إلى <input id="expenseReportTo" type="date" class="block w-full border rounded-lg p-2"></label></div>
+        <div id="expenseReportSummary" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div><div id="expenseReportRows" class="overflow-x-auto"></div>
+      </div>
+
       <div class="bg-white border border-slate-200 shadow-sm rounded-2xl p-4 space-y-3">
         <h2 class="text-base font-bold text-rose-600">تسجيل مصروف جديد</h2>
         <form id="expenseForm" class="space-y-3">
@@ -466,6 +472,12 @@
           <div class="text-xs text-slate-500">إجمالي اللي عليا (لموردين)</div>
           <div id="debtPayableTotal" class="text-lg font-extrabold text-rose-600 mt-1">0.00 ج.م</div>
         </div>
+      </div>
+
+      <div class="bg-white border border-amber-200 rounded-2xl p-3 space-y-2">
+        <h3 class="text-sm font-extrabold text-amber-700">📊 تقرير الديون والعملاء والموردين</h3>
+        <div class="grid grid-cols-2 gap-2"><label class="text-[11px]">من <input id="debtReportFrom" type="date" class="block w-full border rounded-lg p-2"></label><label class="text-[11px]">إلى <input id="debtReportTo" type="date" class="block w-full border rounded-lg p-2"></label></div>
+        <div id="debtReportSummary" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div><div id="debtReportRows" class="overflow-x-auto"></div>
       </div>
 
       <div class="bg-white border border-slate-200 shadow-sm rounded-2xl p-4 space-y-3">
@@ -610,7 +622,13 @@
         </div>
       </div>
 
+      <div class="grid grid-cols-2 gap-2"><button id="mirrorOverviewBtn" type="button" class="bg-sky-600 text-white rounded-lg px-3 py-2 text-xs font-bold">المراية</button><button id="mirrorTablesBtn" type="button" class="bg-white border rounded-lg px-3 py-2 text-xs font-bold">جداول</button></div>
       <div id="mirrorContainer" class="space-y-4"></div>
+      <div id="mirrorTablesSection" class="hidden bg-white border border-cyan-200 rounded-2xl p-3 space-y-2">
+        <div class="flex items-center justify-between gap-2"><h3 class="text-sm font-extrabold text-cyan-800">📅 كشف الشهر اليومي</h3><input id="mirrorDailyMonth" type="month" class="border rounded-lg px-2 py-1.5 text-xs"></div>
+        <div class="flex flex-wrap items-end gap-2"><label class="text-[11px] flex-1">رصيد بداية الشهر (يُدخل مرة واحدة)<input id="mirrorDailyOpening" type="number" step="any" class="block w-full border rounded-lg p-2" placeholder="رصيد بداية الشهر"></label><button id="mirrorDailyOpeningSave" type="button" class="bg-cyan-700 text-white rounded-lg px-3 py-2 text-xs font-bold">حفظ وقفل رصيد البداية</button><span id="mirrorDailyOpeningState" class="text-[10px] text-slate-500"></span></div>
+        <div id="mirrorDailyTable" class="overflow-x-auto"></div>
+      </div>
     </section>
 
     <!-- TAB 5: النمو -->
@@ -1654,7 +1672,7 @@
     });
 
     var SALE_PREFS_KEY='misk_sale_prefs_v1';
-    function getSalePrefs(it){var all={};try{all=JSON.parse(localStorage.getItem(SALE_PREFS_KEY)||'{}')||{};}catch(e){}var p=all[it.id]||{};var rows=(state.sales||[]).filter(function(x){return !x.isReturn&&(x.itemId===it.id||(!x.itemId&&x.itemName===it.name));});var modes={qty:0,amt:0},units={base:0,pack:0},maxQty={base:0,pack:0},maxAmount=0;rows.forEach(function(x){var m=x.saleMode||'qty',u=x.saleUnitType==='pack'?'pack':'base';modes[m]=(modes[m]||0)+1;units[u]=(units[u]||0)+1;maxQty[u]=Math.max(maxQty[u],Math.abs(Number(x.qty)||0));maxAmount=Math.max(maxAmount,Number(x.saleAmount)||Number(x.total)||0);});modes.amt=Math.max(modes.amt,Number(p.amtCount)||0);modes.qty=Math.max(modes.qty,Number(p.qtyCount)||0);units.pack=Math.max(units.pack,Number(p.packCount)||0);units.base=Math.max(units.base,Number(p.baseCount)||0);p.mode=modes.amt>modes.qty?'amt':'qty';p.unit=units.pack>units.base?'pack':'base';p.maxQtyBase=Math.max(Number(p.maxQtyBase)||0,maxQty.base);p.maxQtyPack=Math.max(Number(p.maxQtyPack)||0,maxQty.pack);p.maxAmount=Math.max(Number(p.maxAmount)||0,maxAmount);return p;}
+    function getSalePrefs(it){var rows=(state.sales||[]).filter(function(x){return !x.isReturn&&(x.itemId===it.id||(!x.itemId&&x.itemName===it.name));}),modeCounts={qty:0,amt:0},unitCounts={base:0,pack:0},qtyFreq={base:{},pack:{}},amtFreq={};rows.forEach(function(x){var mode=x.saleMode==='amt'?'amt':'qty',unit=x.saleUnitType==='pack'?'pack':'base';modeCounts[mode]++;unitCounts[unit]++;if(mode==='amt'){var amount=Number(x.saleAmount)||Number(x.total)||0;if(amount>0){var ak=String(Number(amount.toFixed(2)));amtFreq[ak]=(amtFreq[ak]||0)+1;}}else{var q=Math.abs(Number(x.qty)||0);if(q>0&&Math.floor(q)===q){var qk=String(q);qtyFreq[unit][qk]=(qtyFreq[unit][qk]||0)+1;}}});function repeatedMode(map){var best=0,count=0;Object.keys(map).forEach(function(k){if(map[k]>=2&&map[k]>count){best=Number(k)||0;count=map[k];}});return best;}var pack=unitCounts.pack>unitCounts.base,unit=pack?'pack':'base';return {mode:modeCounts.amt>modeCounts.qty?'amt':'qty',unit:unit,maxQtyBase:repeatedMode(qtyFreq.base)||1,maxQtyPack:repeatedMode(qtyFreq.pack)||1,maxAmount:repeatedMode(amtFreq)||0};}
     function isWeightItem(it){var u=arNorm(String(it.unit||'')),c=arNorm(String(it.cat||''));return (/كيلو|كجم|لتر|جرام|غرام|مللى|مللي/.test(u)||u==='مل'||/سوايل/.test(c))&&!isMixItem(it)&&!(it.bundle&&it.bundle.length);}
     function scaleExtraBase(it){var v=Number(localStorage.getItem('misk_scale_extra_v1'));if(!Number.isFinite(v))v=50;var u=arNorm(it.unit||'');return /كيلو|كجم|لتر/.test(u)?v/1000:v;}
     function updateWeightDefault(){var box=document.getElementById('modalActualStockBox'),el=document.getElementById('modalActualStockQty');if(!currentItem||!isWeightItem(currentItem)){box.classList.add('hidden');return;}box.classList.remove('hidden');if(el.dataset.manual==='1')return;var q=0;if(saleMode==='qty')q=(Number(document.getElementById('modalQty').value)||0)*(saleUnitType==='pack'?(Number(currentItem.packFactor)||1):1);else{var price=activeUnitPrice();q=price>0?(Number(document.getElementById('modalAmt').value)||0)/price:0;q*=saleUnitType==='pack'?(Number(currentItem.packFactor)||1):1;}el.value=q>0?Number((q+scaleExtraBase(currentItem)).toFixed(3)):'';}
@@ -2136,6 +2154,19 @@
         box.appendChild(row);
       });
     }
+    function renderDebtReport() {
+      var inRange = reportRange('debtReport'), rows = [], totals = {receivable:0,payable:0,opening:0,collected:0,paid:0};
+      (state.debts||[]).forEach(function(d){var rec=d.type==='receivable';totals[rec?'receivable':'payable']+=Number(d.amount)||0;if(rec)totals.opening+=Number(d.openingBalance)||0;var adds=0,settled=0;
+        if(rec){(state.sales||[]).filter(function(s){return s.customer===d.person&&s.payment==='آجل / عميل'&&inRange(s);}).forEach(function(s){adds+=Number(s.dueAmount!==undefined?s.dueAmount:(Number(s.total)||0)-(Number(s.paidNow)||0))||0;});}
+        else {(state.purchases||[]).filter(function(p){return p.supplier===d.person&&!p.isReturn&&inRange(p);}).forEach(function(p){adds+=Number(p.remainingAmount)||Math.max(0,(Number(p.totalCost)||0)-(Number(p.paidAmount)||0));});}
+        (state.debtLog||[]).filter(function(l){return l.person===d.person&&l.type===d.type&&inRange(l);}).forEach(function(l){settled+=Number(l.amount)||0;});totals[rec?'collected':'paid']+=settled;
+        rows.push('<tr class="border-t"><td class="p-2">'+escHtml(d.person)+'</td><td class="p-2">'+(rec?fmt(Number(d.openingBalance)||0):'—')+'</td><td class="p-2">'+fmt(adds)+'</td><td class="p-2">'+fmt(settled)+'</td><td class="p-2 font-extrabold">'+fmt(d.amount)+'</td><td class="p-2">'+(rec?'عميل':'مورد')+'</td></tr>');
+      });
+      document.getElementById('debtReportSummary').innerHTML=reportCard('رصيد العملاء الحالي',totals.receivable,'text-emerald-700')+reportCard('رصيد الموردين الحالي',totals.payable,'text-rose-700')+reportCard('أرصدة بداية العملاء',totals.opening,'text-amber-700')+reportCard('تحصيل / سداد بالفترة',totals.collected+totals.paid,'text-sky-700');
+      document.getElementById('debtReportRows').innerHTML='<table class="w-full text-xs text-right mt-2"><thead><tr class="bg-slate-50"><th class="p-2">الاسم</th><th class="p-2">رصيد البداية</th><th class="p-2">ديون جديدة بالفترة</th><th class="p-2">تحصيل / سداد</th><th class="p-2">الرصيد الحالي</th><th class="p-2">النوع</th></tr></thead><tbody>'+(rows.join('')||'<tr><td colspan="6" class="p-3 text-center text-slate-400">لا توجد حسابات ديون</td></tr>')+'</tbody></table>';
+    }
+    document.getElementById('debtReportFrom').addEventListener('change',renderDebtReport);
+    document.getElementById('debtReportTo').addEventListener('change',renderDebtReport);
 
     document.getElementById('salesSearch').addEventListener('input', renderItemsGrid);
     document.getElementById('btnToggleRecentSales').addEventListener('click', function () {
@@ -2979,6 +3010,7 @@
       var list = document.getElementById('expensesList');
       if (state.expenses.length === 0) {
         list.innerHTML = '<div class="text-xs text-slate-500 text-center py-4">لا توجد مصروفات مسجلة بعد</div>';
+        renderExpenseReport();
         return;
       }
       list.innerHTML = '';
@@ -3004,7 +3036,24 @@
         });
         list.appendChild(row);
       });
+      renderExpenseReport();
     }
+
+    function reportRange(prefix) {
+      var from = document.getElementById(prefix + 'From').value;
+      var to = document.getElementById(prefix + 'To').value;
+      return function (x) { var d = String(x.date || ''); return (!from || d >= from) && (!to || d <= to); };
+    }
+    function reportCard(label, value, color) { return '<div class="rounded-lg p-2 bg-slate-50"><div class="text-[10px] text-slate-500">'+escHtml(label)+'</div><b class="text-xs '+(color||'text-slate-800')+'">'+fmt(value)+' ج.م</b></div>'; }
+    function renderExpenseReport() {
+      var list = (state.expenses || []).filter(reportRange('expenseReport'));
+      var total = list.reduce(function (a,x) { return a+(Number(x.amount)||0); },0);
+      var byCat = {}; list.forEach(function(x){byCat[x.category||'غير مصنف']=(byCat[x.category||'غير مصنف']||0)+(Number(x.amount)||0);});
+      document.getElementById('expenseReportSummary').innerHTML = reportCard('إجمالي المصروفات',total,'text-rose-700') + Object.keys(byCat).map(function(k){return reportCard(k,byCat[k],'text-rose-700');}).join('');
+      document.getElementById('expenseReportRows').innerHTML = '<table class="w-full text-xs text-right mt-2"><thead><tr class="bg-slate-50"><th class="p-2">التاريخ</th><th class="p-2">النوع</th><th class="p-2">البند</th><th class="p-2">المبلغ</th></tr></thead><tbody>'+(list.length?list.map(function(x){return '<tr class="border-t"><td class="p-2">'+escHtml(x.date||'')+'</td><td class="p-2">'+escHtml(x.category||'')+'</td><td class="p-2">'+escHtml(x.desc||'')+'</td><td class="p-2 font-bold">'+fmt(x.amount)+'</td></tr>';}).join(''):'<tr><td colspan="4" class="p-3 text-center text-slate-400">لا توجد مصروفات في الفترة</td></tr>')+'</tbody></table>';
+    }
+    document.getElementById('expenseReportFrom').addEventListener('change',renderExpenseReport);
+    document.getElementById('expenseReportTo').addEventListener('change',renderExpenseReport);
 
     var DEFAULT_EXPENSE_PRESETS = [
       'ايجار', 'مرتب وفاء', 'كهرباء', 'باقة محل', 'أكياس تغليف',
@@ -3110,10 +3159,14 @@
         titleEl.textContent = 'كشف حساب العميل: ' + name;
         var sls = state.sales.filter(function (s) { return s.customer === name; });
         var totS = sls.reduce(function (a, b) { return a + (b.total || 0); }, 0);
-        subEl.textContent = sls.length + ' عملية • الإجمالي: ' + fmt(totS) + ' ج.م';
-        if (sls.length === 0) {
+        var custDebt = (state.debts || []).find(function(d){return d.type==='receivable'&&d.person===name;});
+        var opening = Number(custDebt && custDebt.openingBalance) || 0;
+        totS += opening;
+        subEl.textContent = sls.length + ' عملية • رصيد البداية: ' + fmt(opening) + ' • الإجمالي: ' + fmt(totS) + ' ج.م';
+        if (sls.length === 0 && opening <= 0) {
           bodyEl.innerHTML = '<div class="text-center text-slate-400 py-6">لا توجد مبيعات مسجلة باسم هذا العميل بعد</div>';
         } else {
+          if (opening > 0) { var openingCard=document.createElement('div'); openingCard.className='bg-amber-50 border border-amber-200 rounded-xl p-2.5 flex justify-between text-xs'; openingCard.innerHTML='<b>رصيد بداية قبل النظام</b><b class="text-amber-700">'+fmt(opening)+' ج.م</b>'; bodyEl.appendChild(openingCard); }
           sls.forEach(function (sl) {
             var card = document.createElement('div');
             card.className = 'bg-slate-50 border border-slate-200 rounded-xl p-2.5 flex justify-between items-center';
@@ -3178,6 +3231,7 @@
       var box = document.getElementById('debtsList');
       if (state.debts.length === 0) {
         box.innerHTML = '<div class="text-xs text-slate-500 text-center py-4">لا توجد ديون مسجلة</div>';
+        renderDebtReport();
         return;
       }
       box.innerHTML = '';
@@ -3198,10 +3252,13 @@
         var payBtn = row.querySelector('button');
         payBtn.textContent = '💵 سداد';
         payBtn.addEventListener('click', function () { openDebtPay(d.id); });
+        var partyLink = row.querySelector('.party-link');
+        if (partyLink) partyLink.addEventListener('click', function () { showPartyStatement(d.type === 'payable' ? 'supplier' : 'customer', d.person); });
         var lk = row.querySelector('.debt-link');
         if (lk) lk.addEventListener('click', function (ev) { ev.stopPropagation(); goToSupplierInvoices(d.person); });
         box.appendChild(row);
       });
+      renderDebtReport();
     }
     document.getElementById('dType').addEventListener('change',function(){var x=document.getElementById('dOpeningBalance');x.classList.toggle('hidden',this.value!=='receivable');});document.getElementById('dType').dispatchEvent(new Event('change'));
     document.getElementById('debtForm').addEventListener('submit', function (e) {
@@ -3718,6 +3775,33 @@
 
     var mirrorSubMode = 'all';
     var mirrorSelectedMonth = todayStr().slice(0, 7);
+    function renderMirrorDailyTable(){
+      var month=document.getElementById('mirrorDailyMonth'), ym=month.value||todayStr().slice(0,7); if(!month.value)month.value=ym;
+      if(!state.mirrorDailyOpenings)state.mirrorDailyOpenings={};
+      var previousMonthDate=new Date(Number(ym.slice(0,4)),Number(ym.slice(5,7))-2,1),previousMonth=previousMonthDate.getFullYear()+'-'+String(previousMonthDate.getMonth()+1).padStart(2,'0');
+      if(!state.mirrorDailyOpenings[ym]&&state.mirrorDailyOpenings[previousMonth]&&Number.isFinite(Number(state.mirrorDailyOpenings[previousMonth].closingBalance))){state.mirrorDailyOpenings[ym]={value:Number(state.mirrorDailyOpenings[previousMonth].closingBalance),locked:true,auto:true};saveState();}
+      var opening=state.mirrorDailyOpenings[ym], openingInput=document.getElementById('mirrorDailyOpening'), lockBtn=document.getElementById('mirrorDailyOpeningSave');
+      openingInput.value=opening?Number(opening.value)||0:'';openingInput.disabled=!!(opening&&opening.locked);lockBtn.disabled=!!(opening&&opening.locked);lockBtn.classList.toggle('opacity-50',lockBtn.disabled);
+      document.getElementById('mirrorDailyOpeningState').textContent=opening&&opening.locked?'تم قفل رصيد بداية الشهر':'لم يتم حفظ رصيد البداية بعد';
+      var [year,mon]=ym.split('-').map(Number), days=new Date(year,mon,0).getDate(), map={};
+      for(var d=1;d<=days;d++){var date=ym+'-'+String(d).padStart(2,'0');map[date]={date:date,am:0,pm:0,revenue:0,op:0,home:0,sad:0,goods:0,rec:0,pay:0,profit:0,remaining:0};}
+      (EXCEL_BASELINES.dailySales||{});
+      Object.keys(EXCEL_BASELINES.dailySales||{}).forEach(function(date){if(date.slice(0,7)===ym&&map[date]){var x=EXCEL_BASELINES.dailySales[date]||{};map[date].am=Number(x.am)||0;map[date].pm=Number(x.pm)||0;map[date].revenue=Number(x.total)||map[date].am+map[date].pm;}});
+      (state.sales||[]).forEach(function(s){var r=map[s.date];if(!r)return;if(s.date!==todayStr()&&EXCEL_BASELINES.cutoffDate&&s.date<=EXCEL_BASELINES.cutoffDate&&(EXCEL_BASELINES.dailySales||{})[s.date])return;var amount=Number(s.total)||0;r.revenue+=amount;r.profit+=Number(s.profit)||0;var sh=shiftOf(s);if(sh==='am'||sh==='morning')r.am+=amount;else r.pm+=amount;if(s.payment==='آجل / عميل')r.rec+=Math.max(0,Number(s.dueAmount!==undefined?s.dueAmount:(amount-(Number(s.paidNow)||0)))||0);});
+      (state.expenses||[]).forEach(function(x){var r=map[x.date];if(!r)return;var v=Number(x.amount)||0;if(x.category==='مصروفات البيت (خاصة)')r.home+=v;else if(x.category==='صدقة')r.sad+=v;else r.op+=v;});
+      (state.purchases||[]).forEach(function(x){var r=map[x.date];if(!r)return;r.goods+=Math.abs(Number(x.totalCost)||0);r.pay+=Math.max(0,Number(x.remainingAmount)||0);});(state.purchaseArchive&&state.purchaseArchive.days||[]).forEach(function(x){var r=map[x.date];if(!r)return;r.goods+=Math.abs(Number(x.totalCost)||0);r.pay+=Math.max(0,Number(x.remainingAmount)||0);});
+      (state.debtLog||[]).forEach(function(x){var r=map[x.date];if(!r)return;if(x.type==='receivable')r.rec-=Number(x.amount)||0;else r.pay-=Number(x.amount)||0;});
+      (state.waste||[]).forEach(function(x){var r=map[x.date];if(r)r.profit-=Number(x.cost)||0;});
+      var carry=opening&&opening.locked?Number(opening.value)||0:0, sums={am:0,pm:0,revenue:0,op:0,home:0,sad:0,expenses:0,goods:0,rec:0,pay:0,profit:0,remaining:0};
+      var body=Object.keys(map).sort().map(function(date){var r=map[date],exp=r.op+r.home+r.sad;r.profit-=exp;var creditSales=(state.sales||[]).filter(function(s){return s.date===date&&s.payment==='آجل / عميل';}).reduce(function(a,s){var t=Number(s.total)||0;return a+Math.min(Math.abs(t),Math.max(0,Number(s.dueAmount!==undefined?s.dueAmount:t-(Number(s.paidNow)||0))||0));},0);var debtPaid=(state.debtLog||[]).filter(function(l){return l.date===date;}).reduce(function(a,l){return a+(l.type==='receivable'?Number(l.amount)||0:-(Number(l.amount)||0));},0);var cashSales=r.revenue-creditSales;r.remaining=carry+cashSales+debtPaid-exp-(state.purchases||[]).filter(function(p){return p.date===date;}).reduce(function(a,p){return a+(Number(p.paidAmount!==undefined?p.paidAmount:p.totalCost)||0);},0);carry=r.remaining;sums.am+=r.am;sums.pm+=r.pm;sums.revenue+=r.revenue;sums.op+=r.op;sums.home+=r.home;sums.sad+=r.sad;sums.expenses+=exp;sums.goods+=r.goods;sums.rec+=r.rec;sums.pay+=r.pay;sums.profit+=r.profit;sums.remaining=r.remaining;return '<tr class="border-t"><td class="p-2 whitespace-nowrap">'+escHtml(date)+'</td><td class="p-2">'+fmt(r.am)+'</td><td class="p-2">'+fmt(r.pm)+'</td><td class="p-2 font-bold">'+fmt(r.revenue)+'</td><td class="p-2">'+fmt(r.op)+'</td><td class="p-2">'+fmt(r.home)+'</td><td class="p-2">'+fmt(r.sad)+'</td><td class="p-2">'+fmt(exp)+'</td><td class="p-2">'+fmt(r.goods)+'</td><td class="p-2">'+fmt(r.rec)+'</td><td class="p-2">'+fmt(r.pay)+'</td><td class="p-2 font-bold">'+fmt(r.profit)+'</td><td class="p-2 font-extrabold">'+fmt(r.remaining)+'</td></tr>';}).join('');
+      var labels=['اليوم / التاريخ','الصبح','الليل','إجمالي الإيراد','تشغيلية','البيت','صدقة','إجمالي المصروفات','البضاعة','ديون له','ديون عليه','الربح بالجنيه','الباقي'];
+      document.getElementById('mirrorDailyTable').innerHTML='<table class="min-w-[1100px] w-full text-[11px] text-right"><thead class="bg-cyan-50"><tr>'+labels.map(function(x){return '<th class="p-2 whitespace-nowrap">'+x+'</th>';}).join('')+'</tr></thead><tbody>'+body+'<tr class="border-t-2 border-cyan-300 bg-cyan-50 font-extrabold"><td class="p-2">إجمالي الشهر</td>'+[sums.am,sums.pm,sums.revenue,sums.op,sums.home,sums.sad,sums.expenses,sums.goods,sums.rec,sums.pay,sums.profit,sums.remaining].map(function(x){return '<td class="p-2">'+fmt(x)+'</td>';}).join('')+'</tr></tbody></table><p class="text-[10px] text-slate-500 mt-2">الباقي = رصيد بداية الشهر + حركة النقدية اليومية (المبيعات بعد خصم الآجل والتحصيل، ناقص المصروفات والمدفوع للموردين).</p>';
+      if(opening&&opening.locked&&Math.abs((Number(opening.closingBalance)||0)-carry)>=0.005){opening.closingBalance=Number(carry.toFixed(2));saveState();setTimeout(pushCloudSnapshot,200);}
+    }
+    document.getElementById('mirrorDailyMonth').addEventListener('change',renderMirrorDailyTable);
+    document.getElementById('mirrorDailyOpeningSave').addEventListener('click',function(){var ym=document.getElementById('mirrorDailyMonth').value||todayStr().slice(0,7);if(!state.mirrorDailyOpenings)state.mirrorDailyOpenings={};if(state.mirrorDailyOpenings[ym]&&state.mirrorDailyOpenings[ym].locked){showToast('رصيد بداية الشهر مقفول بالفعل');return;}var value=Number(document.getElementById('mirrorDailyOpening').value);if(!Number.isFinite(value)){showToast('⚠️ اكتب رصيد بداية صحيح');return;}state.mirrorDailyOpenings[ym]={value:value,locked:true,lockedAt:Date.now()};saveState();setTimeout(pushCloudSnapshot,200);renderMirrorDailyTable();showToast('✅ تم حفظ وقفل رصيد بداية الشهر');});
+    document.getElementById('mirrorOverviewBtn').addEventListener('click',function(){document.getElementById('mirrorContainer').classList.remove('hidden');document.getElementById('mirrorTablesSection').classList.add('hidden');});
+    document.getElementById('mirrorTablesBtn').addEventListener('click',function(){document.getElementById('mirrorContainer').classList.add('hidden');document.getElementById('mirrorTablesSection').classList.remove('hidden');renderMirrorDailyTable();});
 
     function postedSaleAmount(s){var t=Number(s.total)||0;if(s.shiftPosted===true||(s.date||'')<todayStr())return t;var p=Number(s.shiftPostedAmount)||0;if(!p)return 0;return t<0?-Math.min(Math.abs(t),p):Math.min(t,p);}
     function postShiftPortion(key,amount){state.sales.forEach(function(s){if(s.date===todayStr()&&shiftOf(s)===key&&s.payment==='آجل / عميل')s.shiftPosted=true;});var negatives=state.sales.filter(function(s){return s.date===todayStr()&&shiftOf(s)===key&&s.payment!=='آجل / عميل'&&(Number(s.total)||0)<0&&!s.shiftPosted;});var negSum=negatives.reduce(function(a,s){s.shiftPosted=true;return a+Math.abs(Number(s.total)||0);},0);var left=Math.max(0,(Number(amount)||0)+negSum), rows=state.sales.filter(function(s){return s.date===todayStr()&&shiftOf(s)===key&&s.payment!=='آجل / عميل'&&(Number(s.total)||0)>0;}).slice().reverse();rows.forEach(function(s){if(left<=0)return;var t=Number(s.total)||0,old=Number(s.shiftPostedAmount)||0,avail=Math.max(0,t-old),take=Math.min(avail,left);if(take){s.shiftPostedAmount=old+take;left-=take;if(s.shiftPostedAmount>=t-.005)s.shiftPosted=true;}});return Number((amount-left+negSum).toFixed(2));}
@@ -3809,7 +3893,7 @@
           var closedCo = led.closedShifts.filter(function (x) { return x.date === todayStr(); }).reduce(function (a, b) { return a + b.cashOut; }, 0);
           var totCoToday = coSum + closedCo;
           var expectedDrawer = Math.max(0,(Number(led.amCash)||0)+(Number(led.pmCash)||0)-coSum);
-          var dayMap={},excelDays=EXCEL_BASELINES.dailySales||{};Object.keys(excelDays).forEach(function(k){var d=excelDays[k]||{},v=Number(d.total)||((Number(d.am)||0)+(Number(d.pm)||0));if(v>0)dayMap[k]=v;});(state.sales||[]).forEach(function(x){var k=x.date||todayStr();if(dayMap[k]!==undefined&&(EXCEL_BASELINES.cutoffDate? k<=EXCEL_BASELINES.cutoffDate:true))return;var v=postedSaleAmount(x);if(!v)return;dayMap[k]=(dayMap[k]||0)+v;});var dayVals=Object.keys(dayMap).map(function(k){return dayMap[k];}).filter(function(v){return v>0;});var avgDaily=dayVals.length?dayVals.reduce(function(a,v){return a+v;},0)/dayVals.length:0;var todayDaily=(dayMap[todayStr()]!==undefined?dayMap[todayStr()]:0),dailyDiff=todayDaily-avgDaily,dailyPct=avgDaily?dailyDiff/avgDaily*100:0,dailyStatus=avgDaily<=0?'لا توجد بيانات كافية':(dailyPct>5?'أعلى من المتوسط بكذا':(dailyPct< -5?'أقل من المتوسط بكذا':'في المتوسط الطبيعي'));var dailyAvgHtml='<div class="bg-cyan-50 border border-cyan-200 rounded-xl p-3 text-xs"><div class="font-extrabold text-cyan-900">📈 مبيعات اليوم مقارنة بمتوسط كل الأيام (الإكسيل + التطبيق)</div><div class="grid grid-cols-3 gap-2 mt-2"><div>اليوم<strong class="block text-sm">'+fmt(todayDaily)+' ج.م</strong></div><div>المتوسط اليومي<strong class="block text-sm">'+fmt(avgDaily)+' ج.م</strong></div><div>الحالة<strong class="block '+(dailyDiff>=0?'text-emerald-700':'text-rose-700')+'">'+dailyStatus+' '+(avgDaily?fmt(Math.abs(dailyDiff))+' ج.م ('+(dailyDiff>=0?'+':'')+dailyPct.toFixed(1)+'%)':'')+'</strong></div></div></div>';
+          var dayMap={},excelDays=EXCEL_BASELINES.dailySales||{},todayKey=todayStr();Object.keys(excelDays).forEach(function(k){if(k===todayKey)return;var d=excelDays[k]||{},v=Number(d.total)||((Number(d.am)||0)+(Number(d.pm)||0));if(v>0)dayMap[k]=v;});(state.sales||[]).forEach(function(x){var k=x.date||todayKey;if(k!==todayKey&&dayMap[k]!==undefined&&(EXCEL_BASELINES.cutoffDate?k<=EXCEL_BASELINES.cutoffDate:true))return;var v=Number(x.total)||0;if(!v)return;dayMap[k]=(dayMap[k]||0)+v;});var dayVals=Object.keys(dayMap).filter(function(k){return k!==todayKey;}).map(function(k){return dayMap[k];}).filter(function(v){return v>0;});var avgDaily=dayVals.length?dayVals.reduce(function(a,v){return a+v;},0)/dayVals.length:0;var todayDaily=(state.sales||[]).filter(function(x){return x.date===todayKey;}).reduce(function(a,x){return a+(Number(x.total)||0);},0);var dailyDiff=todayDaily-avgDaily,dailyPct=avgDaily?dailyDiff/avgDaily*100:0,dailyStatus=avgDaily<=0?'لا توجد بيانات كافية':(dailyPct>5?'أعلى من المتوسط بـ':(dailyPct< -5?'أقل من المتوسط بـ':'في المتوسط الطبيعي'));var dailyAvgHtml='<div class="bg-cyan-50 border border-cyan-200 rounded-xl p-3 text-xs"><div class="font-extrabold text-cyan-900">📈 مبيعات اليوم مقارنة بمتوسط الأيام السابقة (الإكسيل + التطبيق)</div><div class="grid grid-cols-3 gap-2 mt-2"><div>اليوم<strong class="block text-sm">'+fmt(todayDaily)+' ج.م</strong></div><div>المتوسط اليومي<strong class="block text-sm">'+fmt(avgDaily)+' ج.م</strong></div><div>الحالة<strong class="block '+(dailyDiff>=0?'text-emerald-700':'text-rose-700')+'">'+dailyStatus+' '+(avgDaily?fmt(Math.abs(dailyDiff))+' ج.م ('+(dailyDiff>=0?'+':'')+dailyPct.toFixed(1)+'%)':'')+'</strong></div></div></div>';
           var histRows = led.closedShifts.slice(0, 10).map(function (h) {
             return '<tr class="border-b border-slate-200"><td class="py-1.5 px-2">' + h.date + '</td><td class="py-1.5 px-2 font-bold">' + h.shift + '</td><td class="py-1.5 px-2 text-sky-700 font-bold">' + fmt(h.sales) + '</td><td class="py-1.5 px-2 text-rose-600">' + fmt(h.cashOut) + '</td><td class="py-1.5 px-2 text-emerald-700 font-extrabold">' + fmt(h.net) + '</td><td class="py-1.5 px-2">'+(Number(h.variance)<0?'عجز ':Number(h.variance)>0?'زيادة ':'—')+(Number(h.variance)?fmt(Math.abs(Number(h.variance))):'')+'</td></tr>';
           }).join('');
@@ -3833,7 +3917,7 @@
                 '<div class="bg-rose-50 border border-rose-200 rounded-lg p-1.5 text-center"><span class="block text-slate-500">📱 فودافون كاش</span><strong class="text-rose-700">' + fmt(vfT) + '</strong></div>' +
                 '<div class="bg-indigo-50 border border-indigo-200 rounded-lg p-1.5 text-center"><span class="block text-slate-500">🏦 إنستا باي</span><strong class="text-indigo-700">' + fmt(ipT) + '</strong></div>' +
                 '<div class="bg-sky-50 border border-sky-200 rounded-lg p-1.5 text-center"><span class="block text-slate-500">💳 فيزا</span><strong class="text-sky-700">' + fmt(visaT) + '</strong></div>' +
-                '<div class="bg-amber-50 border border-amber-200 rounded-lg p-1.5 text-center col-span-2 sm:col-span-1"><span class="block text-slate-500">📒 آجل اليوم (الإجمالي: ' + fmt(appRec) + ')</span><strong class="text-amber-700">' + fmt(ajelT) + '</strong></div>' +
+                '<div class="bg-amber-50 border border-amber-200 rounded-lg p-1.5 text-center col-span-2 sm:col-span-1"><span class="block text-slate-500">📒 آجل اليوم (الإجمالي: ' + fmt(ajelT) + ')</span><strong class="text-amber-700">' + fmt(ajelT) + '</strong></div>' +
               '</div>';
             })() +
             (histRows ? ('<div class="overflow-x-auto pt-1"><table class="w-full text-[11px] text-right"><thead class="bg-slate-100 text-slate-700"><tr><th class="py-1.5 px-2">التاريخ</th><th class="py-1.5 px-2">الشفت</th><th class="py-1.5 px-2">المبيعات</th><th class="py-1.5 px-2">المسحوبات</th><th class="py-1.5 px-2">المرحل فعلياً</th><th class="py-1.5 px-2">عجز/زيادة</th></tr></thead><tbody>' + histRows + '</tbody></table></div>') : '<div class="text-[11px] text-slate-500">لا توجد شيفتات مرحّلة بعد</div>') +
