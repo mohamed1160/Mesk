@@ -21,12 +21,15 @@
       -webkit-font-smoothing: antialiased;
       font-variant-numeric: tabular-nums;
     }
-    body.morning-mode #headerTodaySales, body.morning-mode #drawerBalanceLabel, body.morning-mode #shiftCountersLine { display:none !important; }
+    body.morning-mode #headerTodaySales, body.morning-mode #drawerBalanceLabel, body.morning-mode #shiftCountersLine, body.morning-mode #drawerBreakdownLine { display:none !important; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     .tile-press:active { transform: none; }
     input, select, button { font-family: inherit; }
     .wa-brand-icon{display:inline-flex;align-items:center;justify-content:center;width:1.35rem;height:1.35rem;border-radius:9999px;background:#25D366;color:#fff;font-size:13px;line-height:1;vertical-align:middle}
+    /* تكبير صور المنتجات فقط؛ بقية صور التطبيق تحتفظ بمقاسها الحالي. */
+    #itemsGrid img { width:72px !important; height:72px !important; object-fit:cover; border-radius:12px; border:1.5px solid rgba(255,255,255,.7); box-shadow:0 2px 6px rgba(15,23,42,.12); margin:0 auto 6px; display:block; }
+    #itemsDirList img { width:84px !important; height:84px !important; object-fit:cover; border-radius:14px; border:1px solid #cbd5e1; }
   
     body.morning-mode #mainNav,
     body.morning-mode #btnOpenAddItem,
@@ -142,11 +145,12 @@
     <!-- TAB 1: المبيعات (POS) -->
     <section id="tab-sales" class="space-y-4">
       <!-- Full-Width Shift / Drawer & Actions Banner -->
-      <div class="w-full bg-emerald-50 border-2 border-emerald-400 rounded-2xl p-3.5 shadow-sm space-y-2.5">
+      <div id="drawerSummaryCard" role="group" tabindex="0" aria-label="اضغط لعرض تفصيل الدرج الآن" title="اضغط لعرض تفصيل الدرج" class="w-full bg-emerald-50 border-2 border-emerald-400 rounded-2xl p-3.5 shadow-sm space-y-2.5 cursor-pointer">
         <div class="flex items-center justify-between gap-2">
           <div>
             <div id="drawerBalanceLabel" class="text-xs sm:text-sm font-extrabold text-emerald-900">💰 الرصيد في الدرج الآن</div>
             <div id="shiftCountersLine" class="text-[11px] font-bold text-emerald-700">☀️ الصبح: 0.00 | 🌙 الليل: 0.00 | 💸 سحب: 0.00</div>
+            <div id="drawerBreakdownLine" class="text-[10px] text-emerald-800">مبيعات نقدية: 0.00 • مقدم آجل: 0.00 • مرتجعات: 0.00</div>
           </div>
           <div id="headerTodaySales" class="text-2xl sm:text-3xl font-black text-emerald-700 tracking-tight">0.00 ج.م</div>
         </div>
@@ -396,6 +400,7 @@
             <label class="block text-[11px] text-slate-600 font-bold mb-1">الباقي عليك للمورد</label>
             <div id="pRemainingAmount" class="w-full bg-rose-50 border border-rose-200 rounded-lg px-2.5 py-2 text-rose-600 font-extrabold text-sm text-center">0.00 ج.م</div>
           </div>
+          <label class="col-span-2 flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-2 text-[11px] font-bold text-amber-900"><input id="pPaidFromDrawer" type="checkbox" class="accent-amber-600"> المدفوع من الفاتورة خارج من درج الشيفت</label>
         </div>
 
         <div id="pOrderActionsBox" class="hidden grid grid-cols-2 gap-2">
@@ -1340,6 +1345,7 @@
     if (!Array.isArray(state.stockLog)) state.stockLog=[];
     if (!state.items.some(function(it){return it.name==='نقدي';})) state.items.unshift({id:'item-cash-rounding',name:'نقدي',unit:'وحدة',cat:'خدمات',buy:0,sell:1,stock:0,img:'',color:'#0f766e',noStock:true,packName:'',packFactor:0,packSell:0});
     else { var cashItem=state.items.find(function(it){return it.name==='نقدي';}); cashItem.sell=1;cashItem.stock=0;cashItem.noStock=true; }
+    var coreRuleChanged=false;(state.items||[]).forEach(function(it){if(String(it.name||'').trim()==='كراتين'&&(!it.noStock||Number(it.stock)!==0)){it.noStock=true;it.stock=0;coreRuleChanged=true;}});if(state.itemSalePrefs){delete state.itemSalePrefs;coreRuleChanged=true;}if(coreRuleChanged)saveState();
     var currentItem = null;
     var salesChartInst = null;
     var expensesChartInst = null;
@@ -2892,6 +2898,9 @@
         time: timeStr(),
         ts: Date.now(),
         isReturn: isRet,
+        shift: curShiftKey(),
+        paidFromDrawer: !!document.getElementById('pPaidFromDrawer').checked,
+        shiftPosted: false,
         supplier: supplier,
         items: signedItems,
         itemCount: signedItems.length,
@@ -2917,6 +2926,7 @@
       }
 
       document.getElementById('pPaidAmount').value = '';
+      document.getElementById('pPaidFromDrawer').checked = false;
       document.getElementById('purchaseTableBody').innerHTML = '';
       addPurchaseRows(2);
       recalcPurchaseTable();
@@ -2924,6 +2934,7 @@
       renderItemsGrid();
       renderDatalist();
       renderPurchasesLog();
+      refreshShiftBanner();renderMirrorDailyTable();
       showToast('✅ تم حفظ الفاتورة (' + itemsList.length + ' صنف)');
     });
 
@@ -4376,14 +4387,15 @@
     // Two-tap Close Morning Shift
     document.getElementById('btnCloseAmShift').addEventListener('click', function () {
       var led = getShiftLedger();
-      if (led.amSales <= 0) { showToast('☀️ عداد شفت الصبح 0 حالياً'); return; }
+      var amDrawerPurchase=(state.purchases||[]).some(function(p){return p.date===todayStr()&&p.paidFromDrawer&&!p.shiftPosted&&(p.shift==='morning'?'am':p.shift==='night'?'pm':p.shift||curShiftKey())==='am';});if(led.amSales<=0&&!amDrawerPurchase){showToast('☀️ عداد شفت الصبح 0 حالياً');return;}
       function doAmTransfer(){
         var curLed = getShiftLedger();
-        var available=Number(curLed.amSales)||0,postId='SH-AM-'+Date.now(),expectedCash=unpostedDrawerFor('am');var requested=prompt('المفروض نقداً بالدرج: '+fmt(expectedCash)+' ج.م\nاكتب الجرد الفعلي الذي سيتم ترحيله للخزنة:',String(expectedCash));if(requested===null)return;var actual=Number(requested);if(!Number.isFinite(actual)||actual<0){showToast('⚠️ أدخل مبلغ جرد صحيح');return;}var variance=Number((actual-expectedCash).toFixed(2));postShiftPortion('am',available,postId);state.drawerAdjustments=state.drawerAdjustments||[];if(variance)state.drawerAdjustments.unshift({id:'DA-'+Date.now(),postId:postId,date:todayStr(),shift:'morning',expected:expectedCash,actual:actual,amount:variance,ts:Date.now()});saveState();
+        var available=Number(curLed.amSales)||0,postId='SH-AM-'+Date.now(),expectedCash=unpostedDrawerFor('am');var requested=prompt('المفروض نقداً بالدرج: '+fmt(expectedCash)+' ج.م\nاكتب الجرد الفعلي الذي سيتم ترحيله للخزنة:',String(expectedCash));if(requested===null)return;var actual=Number(requested);if(!Number.isFinite(actual)||actual<0){showToast('⚠️ أدخل مبلغ جرد صحيح');return;}var variance=Number((actual-expectedCash).toFixed(2));postShiftPortion('am',available,postId);if(window.postDrawerPurchases)window.postDrawerPurchases('am',postId);state.drawerAdjustments=state.drawerAdjustments||[];if(variance)state.drawerAdjustments.unshift({id:'DA-'+Date.now(),postId:postId,date:todayStr(),shift:'morning',expected:expectedCash,actual:actual,amount:variance,ts:Date.now()});saveState();
         curLed.closedShifts.unshift({ id: postId, postId:postId, date: todayStr(), shift: 'صباحي ☀️', sales: available, cashOut: 0, net: actual, expected:expectedCash,actual:actual,variance:variance,cashOuts:[] });
         curLed.amSales = 0;curLed.amCash=0;
         saveShiftLedger(curLed);
         refreshShiftBanner();
+        renderMirror();renderMirrorDailyTable();
         showToast('✅ تم ترحيل فعلي '+fmt(actual)+' ج.م — '+(variance<0?'عجز ':'زيادة ')+fmt(Math.abs(variance))+' ج.م'); sendMorningShiftSummary();
       }
       if(getShiftMode()==='morning')doAmTransfer();else requirePinAction('📤 تأكيد ترحيل شفت الصبح','سيتم ترحيل مبلغ من عداد الصبح.',doAmTransfer);
@@ -4393,16 +4405,17 @@
     document.getElementById('btnClosePmShift').addEventListener('click', function () {
       var led = getShiftLedger();
       var coSum = led.cashOuts.reduce(function (a, b) { return a + (Number(b.amount) || 0); }, 0);
-      if (led.pmSales <= 0 && coSum <= 0) { showToast('🌙 عداد شفت الليل 0 حالياً'); return; }
+      var pmDrawerPurchase=(state.purchases||[]).some(function(p){return p.date===todayStr()&&p.paidFromDrawer&&!p.shiftPosted&&(p.shift==='morning'?'am':p.shift==='night'?'pm':p.shift||curShiftKey())==='pm';});if(led.pmSales<=0&&coSum<=0&&!pmDrawerPurchase){showToast('🌙 عداد شفت الليل 0 حالياً');return;}
       requirePinAction('🌙 تأكيد ترحيل شفت الليل', 'صافي الترحيل: ' + fmt(led.pmSales - coSum) + ' ج.م وتصفير عداد الليل.', function () {
         var curLed = getShiftLedger();
         var cSum = curLed.cashOuts.reduce(function (a, b) { return a + (Number(b.amount) || 0); }, 0);
-        var available=Number(curLed.pmSales)||0,postId='SH-PM-'+Date.now();var expected=unpostedDrawerFor('pm');var requested=prompt('المفروض بالدرج بعد المسحوبات: '+fmt(expected)+' ج.م\nاكتب الجرد الفعلي الذي سيتم ترحيله للخزنة:',String(expected));if(requested===null)return;var actual=Number(requested);if(!Number.isFinite(actual)||actual<0){showToast('⚠️ أدخل مبلغ جرد صحيح');return;}var variance=Number((actual-expected).toFixed(2));postShiftPortion('pm',available,postId);saveState();var netPm=actual;state.drawerAdjustments=state.drawerAdjustments||[];if(variance)state.drawerAdjustments.unshift({id:'DA-'+Date.now(),postId:postId,date:todayStr(),shift:'night',expected:expected,actual:actual,amount:variance,ts:Date.now()});saveState();
+        var available=Number(curLed.pmSales)||0,postId='SH-PM-'+Date.now();var expected=unpostedDrawerFor('pm');var requested=prompt('المفروض بالدرج بعد المسحوبات: '+fmt(expected)+' ج.م\nاكتب الجرد الفعلي الذي سيتم ترحيله للخزنة:',String(expected));if(requested===null)return;var actual=Number(requested);if(!Number.isFinite(actual)||actual<0){showToast('⚠️ أدخل مبلغ جرد صحيح');return;}var variance=Number((actual-expected).toFixed(2));postShiftPortion('pm',available,postId);if(window.postDrawerPurchases)window.postDrawerPurchases('pm',postId);saveState();var netPm=actual;state.drawerAdjustments=state.drawerAdjustments||[];if(variance)state.drawerAdjustments.unshift({id:'DA-'+Date.now(),postId:postId,date:todayStr(),shift:'night',expected:expected,actual:actual,amount:variance,ts:Date.now()});saveState();
         curLed.closedShifts.unshift({ id: postId, postId:postId, date: todayStr(), shift: 'ليلي 🌙', sales: available, cashOut: cSum, net: netPm,expected:expected,actual:actual,variance:variance,cashOuts:curLed.cashOuts.slice() });
         curLed.pmSales = 0;curLed.pmCash=0;
         curLed.cashOuts = [];
         saveShiftLedger(curLed);
         refreshShiftBanner();
+        renderMirror();renderMirrorDailyTable();
         showToast('✅ تم ترحيل '+fmt(actual)+' ج.م — '+(variance<0?'عجز ':'زيادة ')+fmt(Math.abs(variance))+' ج.م وتصفير الدرج');
       });
     });
@@ -6574,12 +6587,22 @@
       function esc(v){return escHtml(String(v==null?'':v));}
       function noAuto(root){(root||document).querySelectorAll('input,textarea,select').forEach(function(el){if(el.closest('#tab-sales,#saleModal,#salesCartBox')){el.setAttribute('autocomplete','off');el.setAttribute('autocorrect','off');el.setAttribute('autocapitalize','off');}});}
       noAuto(); if(window.MutationObserver)new MutationObserver(function(rs){rs.forEach(function(r){r.addedNodes.forEach(function(n){if(n.nodeType===1)noAuto(n);});});}).observe(document.body,{childList:true,subtree:true});
-      function unpostedDrawerFor(key){var amount=(state.sales||[]).filter(function(s){return s.date===todayStr()&&shiftOf(s)===key;}).reduce(function(sum,s){var total=Number(s.total)||0;if(s.payment==='نقدي'){var unposted=s.shiftPosted?0:(s.shiftPostedAmount?Math.max(0,total-Number(s.shiftPostedAmount)):total);return sum+unposted;}if(s.payment==='آجل / عميل'&&!s.shiftPosted)return sum+(Number(s.paidNow)||0);return sum;},0);var led=getShiftLedger(),outs=(led.cashOuts||[]).filter(function(x){return (x.shift||curShiftKey())===key;}).reduce(function(v,x){return v+(Number(x.amount)||0);},0);return Math.max(0,Number((amount-outs).toFixed(2)));}
-      var oldRefreshShiftBanner=refreshShiftBanner;refreshShiftBanner=function(){oldRefreshShiftBanner();var h=document.getElementById('headerTodaySales');if(h)h.textContent=fmt(unpostedDrawerFor('am')+unpostedDrawerFor('pm'))+' ج.م';};
+      function getDrawerBreakdown(key){
+        var parts={cashSales:0,ajelDownpayments:0,cashReturns:0,drawerCashOut:0,purchaseCashOut:0,partialPosted:Number((state.partialPosted||{})[key]||0)};
+        (state.sales||[]).forEach(function(s){if(s.date!==todayStr()||shiftOf(s)!==key||s.shiftPosted)return;var total=Number(s.total)||0,posted=Math.min(Math.abs(total),Number(s.shiftPostedAmount)||0),open=Math.max(0,Math.abs(total)-posted);if(s.isReturn){var refund=s.payment==='آجل / عميل'?Math.abs(Number(s.paidNow)||0):s.payment==='نقدي'?Math.abs(total):0;parts.cashReturns+=Math.max(0,refund-Math.min(refund,posted));return;}if(s.payment==='نقدي')parts.cashSales+=open;else if(s.payment==='آجل / عميل')parts.ajelDownpayments+=Math.max(0,Number(s.paidNow)||0);});
+        var led=getShiftLedger();parts.drawerCashOut=(led.cashOuts||[]).filter(function(x){return x.date===todayStr()&&!x.posted&&(x.shift==='morning'?'am':x.shift==='night'?'pm':x.shift||curShiftKey())===key;}).reduce(function(a,x){return a+(Number(x.amount)||0);},0);
+        parts.purchaseCashOut=(state.purchases||[]).filter(function(p){return p.date===todayStr()&&p.paidFromDrawer&&!p.shiftPosted&&(p.shift==='morning'?'am':p.shift==='night'?'pm':p.shift||curShiftKey())===key;}).reduce(function(a,p){var paid=Number(p.paidAmount!==undefined?p.paidAmount:p.totalCost)||0;return a+(p.isReturn?-Math.abs(paid):Math.abs(paid));},0);parts.drawerCashOut+=parts.purchaseCashOut;
+        ['cashSales','ajelDownpayments','cashReturns','drawerCashOut','purchaseCashOut','partialPosted'].forEach(function(k){parts[k]=Number(parts[k].toFixed(2));});parts.expectedInDrawer=Math.max(0,Number((parts.cashSales+parts.ajelDownpayments-parts.cashReturns-parts.drawerCashOut-parts.partialPosted).toFixed(2)));return parts;
+      }
+      window.getDrawerBreakdown=getDrawerBreakdown;
+      function unpostedDrawerFor(key){return getDrawerBreakdown(key).expectedInDrawer;}
+      window.unpostedDrawerFor=unpostedDrawerFor;
+      window.postDrawerPurchases=function(key,postId){(state.purchases||[]).forEach(function(p){if(p.date===todayStr()&&(p.shift==='morning'?'am':p.shift==='night'?'pm':p.shift||curShiftKey())===key&&p.paidFromDrawer&&!p.shiftPosted){p.shiftPosted=true;p.postId=postId;}});};
+      var oldRefreshShiftBanner=refreshShiftBanner;refreshShiftBanner=function(){oldRefreshShiftBanner();var am=getDrawerBreakdown('am'),pm=getDrawerBreakdown('pm'),h=document.getElementById('headerTodaySales'),line=document.getElementById('shiftCountersLine'),detail=document.getElementById('drawerBreakdownLine');if(h)h.textContent=fmt(am.expectedInDrawer+pm.expectedInDrawer)+' ج.م';if(line)line.textContent='☀️ الصبح: '+fmt(am.expectedInDrawer)+' | 🌙 الليل: '+fmt(pm.expectedInDrawer)+' | 💸 سحب: '+fmt(am.drawerCashOut+pm.drawerCashOut);if(detail)detail.textContent='مبيعات نقدية: '+fmt(am.cashSales+pm.cashSales)+' • مقدم آجل: '+fmt(am.ajelDownpayments+pm.ajelDownpayments)+' • مرتجعات: '+fmt(am.cashReturns+pm.cashReturns);};
       var originalOpenSale=openSaleModal;openSaleModal=function(it){originalOpenSale(it);var q=document.getElementById('modalQty'),a=document.getElementById('modalAmt');if(q)q.value='1';if(a)a.value='1';document.getElementById('modalDiscount').value='0';document.getElementById('modalCustomer').value='';document.getElementById('modalCustomerPhone').value='';document.getElementById('modalPayment').value='نقدي';updateModalTotal();noAuto(document.getElementById('saleModal'));};
       var changed=false;state.items.forEach(function(it){var n=normName(it.name);if(n==='فامليا مطبخ ازرق'||n==='فاميليا مطبخ ازرق'){if(it.unit!=='بكرة'||Number(it.sell)!==12||it.packName!=='باكت'||Number(it.packFactor)!==6||Number(it.packSell)!==60){Object.assign(it,{unit:'بكرة',sell:12,packName:'باكت',packFactor:6,packSell:60});changed=true;}}else if(n==='فامليا مطبخ اخضر'||n==='فاميليا مطبخ اخضر'){if(it.unit!=='بكرة'||Number(it.sell)!==15||it.packName!=='باكت'||Number(it.packFactor)!==6||Number(it.packSell)!==70){Object.assign(it,{unit:'بكرة',sell:15,packName:'باكت',packFactor:6,packSell:70});changed=true;}}});if(changed)saveState();
-      function undoClosedShift(id){var led=getShiftLedger(),idx=led.closedShifts.findIndex(function(x){return x.id===id||x.postId===id;});if(idx<0){showToast('سجل الترحيل غير موجود');return;}var h=led.closedShifts[idx],key=String(h.shift||'').indexOf('صباحي')>-1?'am':'pm',rows=(state.sales||[]).filter(function(s){return s.date===h.date&&shiftOf(s)===key;});if(!rows.length){showToast('لا توجد فواتير مرتبطة بهذا الترحيل.');return;}var other=led.closedShifts.some(function(x,i){return i!==idx&&x.date===h.date&&((String(x.shift||'').indexOf('صباحي')>-1?'am':'pm')===key);});if(other){showToast('لا يمكن عكس ترحيلات متداخلة لهذا الشيفت بأمان.');return;}
-        requirePinAction('🔐 التراجع عن ترحيل الشيفت','سيُخصم المبلغ الفعلي من الخزنة وتعود الفواتير غير مرحّلة.',function(){if(!rows.some(function(s){return (s.shiftPostAllocations||[]).some(function(a){return a.postId===id;})})){var gross=rows.reduce(function(a,s){return a+(s.payment==='آجل / عميل'?0:Number(s.total)||0);},0);if(Math.abs(gross-(Number(h.sales)||0))>0.02){showToast('هذا ترحيل قديم بلا ربط كافٍ بالفواتير، لذلك لم أغيّر الأرصدة.');return;}rows.forEach(function(s){s.shiftPostAllocations=[{postId:id,amount:Number(s.total)||0}];s.postId=id;if(s.payment==='آجل / عميل')s.shiftPosted=true;else{s.shiftPostedAmount=Number(s.total)||0;s.shiftPosted=true;}});}rows.forEach(function(s){var before=s.shiftPostAllocations||[],removed=before.filter(function(a){return a.postId===id;}),left=before.filter(function(a){return a.postId!==id;});if(!removed.length)return;s.shiftPostAllocations=left;if(left.length)s.postId=left[left.length-1].postId;else delete s.postId;var t=Number(s.total)||0;if(s.payment==='آجل / عميل'){s.shiftPosted=left.length>0;}else if(t<0){s.shiftPosted=left.length>0;}else{s.shiftPostedAmount=Number(Math.max(0,(Number(s.shiftPostedAmount)||0)-removed.reduce(function(a,x){return a+(Number(x.amount)||0);},0)).toFixed(2));s.shiftPosted=s.shiftPostedAmount>=t-.005;if(!s.shiftPosted)delete s.shiftPostedAmount;}});led.closedShifts=led.closedShifts.filter(function(x){return x.id!==id&&x.postId!==id;});led.cashOuts=(led.cashOuts||[]).concat(h.cashOuts||[]);state.drawerAdjustments=(state.drawerAdjustments||[]).filter(function(x){return x.postId!==id;});var remaining=(state.sales||[]).filter(function(s){return s.date===h.date&&shiftOf(s)===key&&!s.shiftPosted;});var saleTotal=remaining.filter(function(s){return s.payment!=='آجل / عميل';}).reduce(function(a,s){return a+(Number(s.total)||0);},0),cashTotal=remaining.filter(function(s){return s.payment==='نقدي';}).reduce(function(a,s){return a+(Number(s.total)||0);},0);if(key==='am'){led.amSales=saleTotal;led.amCash=cashTotal;}else{led.pmSales=saleTotal;led.pmCash=cashTotal;}saveShiftLedger(led);saveState();refreshShiftBanner();renderMirror();renderStats();renderMirrorDailyTable();showToast('✅ تم التراجع عن الترحيل وإعادة الفواتير للدرج');});}
+      function undoClosedShift(id){var led=getShiftLedger(),idx=led.closedShifts.findIndex(function(x){return x.id===id||x.postId===id;});if(idx<0){showToast('سجل الترحيل غير موجود');return;}var h=led.closedShifts[idx],key=String(h.shift||'').indexOf('صباحي')>-1?'am':'pm',rows=(state.sales||[]).filter(function(s){return s.date===h.date&&shiftOf(s)===key;});if(!rows.length&&!((state.purchases||[]).some(function(p){return p.postId===id;})||(h.cashOuts||[]).length)){showToast('لا توجد حركات مرتبطة بهذا الترحيل.');return;}var other=led.closedShifts.some(function(x,i){return i!==idx&&x.date===h.date&&((String(x.shift||'').indexOf('صباحي')>-1?'am':'pm')===key);});if(other){showToast('لا يمكن عكس ترحيلات متداخلة لهذا الشيفت بأمان.');return;}
+        requirePinAction('🔐 التراجع عن ترحيل الشيفت','سيُخصم المبلغ الفعلي من الخزنة وتعود الفواتير غير مرحّلة.',function(){if(!rows.some(function(s){return (s.shiftPostAllocations||[]).some(function(a){return a.postId===id;})})){var gross=rows.reduce(function(a,s){return a+(s.payment==='آجل / عميل'?0:Number(s.total)||0);},0);if(Math.abs(gross-(Number(h.sales)||0))>0.02){showToast('هذا ترحيل قديم بلا ربط كافٍ بالفواتير، لذلك لم أغيّر الأرصدة.');return;}rows.forEach(function(s){s.shiftPostAllocations=[{postId:id,amount:Number(s.total)||0}];s.postId=id;if(s.payment==='آجل / عميل')s.shiftPosted=true;else{s.shiftPostedAmount=Number(s.total)||0;s.shiftPosted=true;}});}rows.forEach(function(s){var before=s.shiftPostAllocations||[],removed=before.filter(function(a){return a.postId===id;}),left=before.filter(function(a){return a.postId!==id;});if(!removed.length)return;s.shiftPostAllocations=left;if(left.length)s.postId=left[left.length-1].postId;else delete s.postId;var t=Number(s.total)||0;if(s.payment==='آجل / عميل'){s.shiftPosted=left.length>0;}else if(t<0){s.shiftPosted=left.length>0;}else{s.shiftPostedAmount=Number(Math.max(0,(Number(s.shiftPostedAmount)||0)-removed.reduce(function(a,x){return a+(Number(x.amount)||0);},0)).toFixed(2));s.shiftPosted=s.shiftPostedAmount>=t-.005;if(!s.shiftPosted)delete s.shiftPostedAmount;}});(state.purchases||[]).forEach(function(p){if(p.postId===id){delete p.postId;p.shiftPosted=false;}});led.closedShifts=led.closedShifts.filter(function(x){return x.id!==id&&x.postId!==id;});led.cashOuts=(led.cashOuts||[]).concat(h.cashOuts||[]);state.drawerAdjustments=(state.drawerAdjustments||[]).filter(function(x){return x.postId!==id;});var remaining=(state.sales||[]).filter(function(s){return s.date===h.date&&shiftOf(s)===key&&!s.shiftPosted;});var saleTotal=remaining.filter(function(s){return s.payment!=='آجل / عميل';}).reduce(function(a,s){return a+(Number(s.total)||0);},0),cashTotal=remaining.filter(function(s){return s.payment==='نقدي';}).reduce(function(a,s){return a+(Number(s.total)||0);},0);if(key==='am'){led.amSales=saleTotal;led.amCash=cashTotal;}else{led.pmSales=saleTotal;led.pmCash=cashTotal;}saveShiftLedger(led);saveState();refreshShiftBanner();renderMirror();renderStats();renderMirrorDailyTable();showToast('✅ تم التراجع عن الترحيل وإعادة الفواتير للدرج');});}
       var mirrorClickTarget=document.getElementById('mirrorContainer');if(mirrorClickTarget)mirrorClickTarget.addEventListener('click',function(e){var b=e.target.closest('[data-undo-shift]');if(b)undoClosedShift(b.dataset.undoShift);});
       function dormant(name){var d=(state.debts||[]).find(function(x){return x.type==='receivable'&&x.person===name&&Number(x.amount)>0;});if(!d)return null;var pays=(state.debtLog||[]).filter(function(x){return x.type==='receivable'&&x.person===name;}).sort(function(a,b){return (Number(b.ts)||0)-(Number(a.ts)||0);});var firstSale=(state.sales||[]).filter(function(x){return x.customer===name&&x.payment==='آجل / عميل'&&Number(x.total)>0;}).sort(function(x,y){return String(x.date||'').localeCompare(String(y.date||''));})[0],last=pays.length?(Number(pays[0].ts)||new Date(String(pays[0].date)+'T12:00:00').getTime()):(firstSale?Number(firstSale.ts)||new Date(String(firstSale.date)+'T12:00:00').getTime():new Date(todayStr()+'T12:00:00').getTime());var days=Math.max(0,Math.floor((Date.now()-last)/86400000));return {amount:Number(d.amount)||0,days:days,stale:days>=30};}
       document.addEventListener('click',function(e){var b=e.target&&e.target.closest&&e.target.closest('#btnSaveSale,#btnCheckoutCart');if(!b)return;var name=(document.getElementById(b.id==='btnSaveSale'?'modalCustomer':'sCartCustomer').value||'').trim(),d=name&&dormant(name);if(d&&d.stale&&!confirm('⚠️ العميل '+name+' حساب راكد: عليه '+fmt(d.amount)+' ج.م ولم يسدد منذ '+d.days+' يوماً. هل تريد متابعة البيع؟')){e.preventDefault();e.stopImmediatePropagation();}},true);
@@ -7125,6 +7148,37 @@
     async function restoreLatest(){try{var list=await sbIdbGet(key)||[];if(!list.length){showToast('لا توجد نسخة تلقائية محفوظة بعد');return;}if(!confirm('استعادة آخر نسخة تلقائية؟ سيتم استبدال البيانات الحالية.'))return;var b=list[0];if(!b.state||!Array.isArray(b.state.items)){showToast('النسخة التلقائية غير صالحة');return;}state=b.state;if(b.extraStorage)Object.keys(b.extraStorage).forEach(function(k){if(k!=='misk_sb_session_v1'&&k!=='misk_cloud_ts_v1')try{localStorage.setItem(k,b.extraStorage[k]);}catch(e){}});if(b.salePreferences)localStorage.setItem(SALE_PREFS_KEY,b.salePreferences);if(b.scaleExtra)localStorage.setItem('misk_scale_extra_v1',b.scaleExtra);if(Array.isArray(b.baselinesMonths)){EXCEL_BASELINES.allMonths=b.baselinesMonths;localStorage.setItem(BASELINES_STORAGE_KEY,JSON.stringify(b.baselinesMonths));recomputeBaselinesFromMonths();}if(b.dailySales){EXCEL_BASELINES.dailySales=b.dailySales;localStorage.setItem(DAILY_SALES_KEY,JSON.stringify(b.dailySales));}if(b.mirrorCash)localStorage.setItem(MIRROR_CASH_KEY,JSON.stringify(b.mirrorCash));if(b.shiftLedger)localStorage.setItem(SHIFT_LEDGER_KEY,JSON.stringify(b.shiftLedger));if(b.nightPin)localStorage.setItem(NIGHT_PIN_KEY,b.nightPin);if(b.syncUrl)localStorage.setItem(SYNC_URL_KEY,b.syncUrl);saveState();status('✅ تم استرجاع نسخة '+(b.createdAt||b.date));setTimeout(function(){location.reload();},300);}catch(e){showToast('تعذر استعادة النسخة التلقائية');}}
     var btn=document.getElementById('btnRestoreAutoBackup');if(btn)btn.addEventListener('click',restoreLatest);
     setTimeout(createBackup,20000);setInterval(createBackup,intervalMs);document.addEventListener('visibilitychange',function(){if(!document.hidden)createBackup();});window.addEventListener('online',createBackup);
+  })();
+  </script>
+  <script>
+  // حساب الأستاذ العام من حقول التطبيق الحالية مع استخدام المبالغ الفعلية للترحيلات.
+  (function installDrawerGeneralLedger(){
+    function amount(v){var x=Number(v);return Number.isFinite(x)?x:0;}
+    function shiftKey(h){var s=String(h.shift||'');return s.indexOf('صباحي')>-1||s==='am'||s==='morning'?'am':'pm';}
+    function buildGeneralLedgerRow(dateStr,prevRemainingBalance,fallback){
+      var ledger=getShiftLedger(),posts=(ledger.closedShifts||[]).filter(function(p){return p.date===dateStr;}),amPosts=posts.filter(function(p){return shiftKey(p)==='am';}),pmPosts=posts.filter(function(p){return shiftKey(p)==='pm';}),today=dateStr===todayStr();
+      var am=amPosts.length?amPosts.reduce(function(a,p){return a+amount(p.actual!==undefined?p.actual:p.net);},0):today?window.getDrawerBreakdown('am').expectedInDrawer:amount(fallback&&fallback.am);
+      var pm=pmPosts.length?pmPosts.reduce(function(a,p){return a+amount(p.actual!==undefined?p.actual:p.net);},0):today?window.getDrawerBreakdown('pm').expectedInDrawer:amount(fallback&&fallback.pm);
+      var sales=(state.sales||[]).filter(function(s){return s.date===dateStr;}),electronic=sales.filter(function(s){return s.payment==='فودافون كاش'||s.payment==='فيزا / كارت'||String(s.payment||'').indexOf('إنستا باي')===0;}).reduce(function(a,s){return a+amount(s.total);},0);
+      var creditOut=sales.filter(function(s){return s.payment==='آجل / عميل';}).reduce(function(a,s){var due=s.dueAmount!==undefined?amount(s.dueAmount):amount(s.total)-amount(s.paidNow);return a+due;},0);
+      var outflowsById={},outflows=0;(ledger.cashOuts||[]).concat(posts.reduce(function(a,p){return a.concat(Array.isArray(p.cashOuts)?p.cashOuts:[]);},[])).forEach(function(o){if(o.date!==dateStr)return;var id=o.id||[o.date,o.shift,o.amount,o.reason].join('|');if(outflowsById[id])return;outflowsById[id]=true;outflows+=amount(o.amount);});if(!Object.keys(outflowsById).length&&posts.length)outflows=posts.reduce(function(a,p){return a+amount(p.cashOut);},0);outflows+=(state.purchases||[]).filter(function(p){return p.date===dateStr&&p.paidFromDrawer;}).reduce(function(a,p){var paid=amount(p.paidAmount!==undefined?p.paidAmount:p.totalCost);return a+(p.isReturn?-Math.abs(paid):Math.abs(paid));},0);
+      var cashIn=am+pm, totalRev=!posts.length&&!today&&fallback?amount(fallback.totalRev):Number((cashIn+outflows+electronic+creditOut).toFixed(2));
+      var ex=(state.expenses||[]).filter(function(e){return e.date===dateStr;}),opExp=ex.filter(function(e){return e.category==='مصروفات تشغيلية';}).reduce(function(a,e){return a+amount(e.amount);},0),homeExp=ex.filter(function(e){return e.category==='مصروفات البيت (خاصة)';}).reduce(function(a,e){return a+amount(e.amount);},0),charityExp=ex.filter(function(e){return e.category==='صدقة';}).reduce(function(a,e){return a+amount(e.amount);},0),totalExp=opExp+homeExp+charityExp;
+      var purchases=(state.purchases||[]).filter(function(p){return p.date===dateStr;}),goods=purchases.reduce(function(a,p){return a+(p.isReturn?-1:1)*Math.abs(amount(p.totalCost));},0),paidPurchases=purchases.reduce(function(a,p){var paid=p.paidAmount!==undefined?amount(p.paidAmount):amount(p.totalCost);return a+(p.isReturn?-1:1)*Math.abs(paid);},0);
+      var debtCollected=(state.debtLog||[]).filter(function(d){return d.date===dateStr&&d.type==='receivable';}).reduce(function(a,d){return a+amount(d.amount);},0),netProfit=sales.reduce(function(a,s){return a+amount(s.profit);},0)-opExp;
+      // الإيراد يشمل الآجل الجديد، ثم يُستبعد من رصيد النقدية؛ المشتريات تُخصم بالمدفوع الفعلي.
+      var remaining=Number((amount(prevRemainingBalance)+totalRev-creditOut-totalExp-paidPurchases+debtCollected).toFixed(2));
+      return {date:dateStr,am:Number(am.toFixed(2)),pm:Number(pm.toFixed(2)),totalRev:totalRev,electronicRev:Number(electronic.toFixed(2)),opExp:Number(opExp.toFixed(2)),homeExp:Number(homeExp.toFixed(2)),charityExp:Number(charityExp.toFixed(2)),totalExp:Number(totalExp.toFixed(2)),goods:Number(goods.toFixed(2)),creditOut:Number(creditOut.toFixed(2)),debtCollected:Number(debtCollected.toFixed(2)),netProfit:Number(netProfit.toFixed(2)),remaining:remaining};
+    }
+    window.buildGeneralLedgerRow=buildGeneralLedgerRow;
+    var renderBase=renderMirrorDailyTable;
+    renderMirrorDailyTable=function(){renderBase();var wrap=document.getElementById('mirrorDailyTable'),table=wrap&&wrap.querySelector('table');if(!table)return;var month=document.getElementById('mirrorDailyMonth'),ym=month&&month.value||todayStr().slice(0,7),opening=(state.mirrorDailyOpenings||{})[ym],carry=opening&&opening.locked?amount(opening.value):0,rows=Array.from(table.querySelectorAll('tbody tr')).filter(function(r){return r.cells[0]&&/\d{4}-\d{2}-\d{2}/.test(r.cells[0].textContent);}),totals=Array(12).fill(0);
+      rows.forEach(function(r){var label=r.cells[0].textContent.trim(),dateMatch=label.match(/\d{4}-\d{2}-\d{2}/);if(!dateMatch)return;var d=dateMatch[0],fallback={am:amount(String(r.cells[1].textContent).replace(/,/g,'')),pm:amount(String(r.cells[2].textContent).replace(/,/g,'')),totalRev:amount(String(r.cells[3].textContent).replace(/,/g,''))},g=buildGeneralLedgerRow(d,carry,fallback);carry=g.remaining;[g.am,g.pm,g.totalRev,g.opExp,g.homeExp,g.charityExp,g.totalExp,g.goods,amount(r.cells[9]&&String(r.cells[9].textContent).replace(/,/g,'')),amount(r.cells[10]&&String(r.cells[10].textContent).replace(/,/g,'')),g.netProfit,g.remaining].forEach(function(v,i){if(r.cells[i+1]){r.cells[i+1].textContent=fmt(v);if(i<11)totals[i]+=v;}});});
+      var totalRow=Array.from(table.querySelectorAll('tbody tr')).find(function(r){return r.cells[0]&&r.cells[0].textContent.indexOf('إجمالي الشهر')===0;});if(totalRow){for(var i=0;i<11;i++)if(totalRow.cells[i+1])totalRow.cells[i+1].textContent=fmt(totals[i]);if(totalRow.cells[12])totalRow.cells[12].textContent=fmt(carry);}wrap.style.maxHeight='70vh';wrap.style.overflow='auto';table.querySelectorAll('thead th').forEach(function(th){th.style.position='sticky';th.style.top='0';th.style.zIndex='5';th.style.background='#ecfeff';});};
+    renderMirrorDailyTable();
+    function openDrawerDetails(){var am=window.getDrawerBreakdown('am'),pm=window.getDrawerBreakdown('pm'),money=function(v){return fmt(Number(v)||0)+' ج.م';},out=(Number(am.drawerCashOut)||0)+(Number(pm.drawerCashOut)||0)+(Number(am.partialPosted)||0)+(Number(pm.partialPosted)||0),total=(Number(am.expectedInDrawer)||0)+(Number(pm.expectedInDrawer)||0);showActivity('تفصيل الدرج الآن','<div class="space-y-2 text-sm"><div class="flex justify-between gap-3 border-b pb-2"><span>مبيعات النقدي غير المرحّلة</span><b>'+money((Number(am.cashSales)||0)+(Number(pm.cashSales)||0))+'</b></div><div class="flex justify-between gap-3 border-b pb-2"><span>الكاش المدفوع مقدمًا في الآجل غير المرحّل</span><b>'+money((Number(am.ajelDownpayments)||0)+(Number(pm.ajelDownpayments)||0))+'</b></div><div class="flex justify-between gap-3 border-b pb-2"><span>المرتجعات النقدية</span><b class="text-rose-700">− '+money((Number(am.cashReturns)||0)+(Number(pm.cashReturns)||0))+'</b></div><div class="flex justify-between gap-3 border-b pb-2"><span>المصروفات والمشتريات والمبالغ الخارجة من الدرج</span><b class="text-rose-700">− '+money(out)+'</b></div><div class="flex justify-between gap-3 pt-1 text-base font-black text-emerald-800"><span>الرصيد المفروض الآن</span><b>'+money(total)+'</b></div></div>');}
+    var drawerCard=document.getElementById('drawerSummaryCard');if(drawerCard){drawerCard.addEventListener('click',function(e){if(e.target.closest('button,input,select,a'))return;openDrawerDetails();});drawerCard.addEventListener('keydown',function(e){if((e.key==='Enter'||e.key===' ')&&e.target===drawerCard){e.preventDefault();openDrawerDetails();}});}
+    refreshShiftBanner();
   })();
   </script>
 </body>
