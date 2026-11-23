@@ -2125,6 +2125,7 @@
         row.innerHTML =
           '<div>' +
             '<div class="font-bold text-slate-900">' + retBadge + s.itemName + (s.discount > 0 ? ' <span class="text-amber-600 text-[11px]">(خصم ' + s.discount + ' ج.م)</span>' : '') + '</div>' +
+            '<div class="mt-0.5 text-[10px] font-bold ' + (s.createdRole === 'admin' ? 'text-indigo-700' : s.createdRole === 'seller' ? 'text-emerald-700' : 'text-slate-500') + '">' + (s.createdBy ? ((s.createdRole === 'admin' ? '⭐ الأدمن: ' : '🛒 اليوزر: ') + escHtml(s.createdBy)) : '⚪ الحساب غير مسجل (عملية قديمة)') + '</div>' +
             '<div class="text-slate-500">' + Math.abs(s.qty) + ' ' + s.unit + ' • ' + s.payment + ' • ' + dtStr(s) + '</div>' +
           '</div>' +
           '<div class="flex items-center gap-1.5">' +
@@ -6214,7 +6215,8 @@
         return '<details class="bg-white border ' + (neg ? 'border-rose-200' : 'border-slate-200') + ' rounded-2xl shadow-sm overflow-hidden">' +
           '<summary class="list-none cursor-pointer p-3 flex items-center justify-between gap-2">' +
             '<div class="min-w-0"><div class="text-xs font-black text-slate-900">🧾 فاتورة #' + inv.no + (neg ? ' <span class="text-rose-600">[مرتجع]</span>' : '') + '</div>' +
-            '<div class="text-[11px] text-slate-500 truncate">' + inv.date + (inv.time ? ' • 🕒 ' + inv.time : '') + ' • ' + (inv.customer ? '👤 ' + escHtml(inv.customer) : 'بدون عميل') + ' • ' + (inv.createdBy ? ((inv.createdRole === 'admin' ? '⭐ الأدمن: ' : '🛒 اليوزر: ') + escHtml(inv.createdBy)) : '⚪ الحساب غير مسجل (فاتورة قديمة)') + '</div></div>' +
+            '<div class="text-[11px] text-slate-500 truncate">' + inv.date + (inv.time ? ' • 🕒 ' + inv.time : '') + ' • ' + (inv.customer ? '👤 ' + escHtml(inv.customer) : 'بدون عميل') + '</div>' +
+            '<div class="mt-1 inline-flex max-w-full items-center rounded-full px-2 py-0.5 text-[10px] font-extrabold ' + (inv.createdRole === 'admin' ? 'bg-indigo-50 text-indigo-700' : inv.createdRole === 'seller' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600') + '">' + (inv.createdBy ? ((inv.createdRole === 'admin' ? '⭐ الأدمن: ' : '🛒 اليوزر: ') + escHtml(inv.createdBy)) : '⚪ الحساب غير مسجل (فاتورة قديمة)') + '</div></div>' +
             '<div class="text-left shrink-0"><div class="text-sm font-black ' + (neg ? 'text-rose-600' : 'text-emerald-700') + '">' + fmt(Math.abs(inv.total)) + ' ج.م</div>' +
             '<div class="text-[10px] text-slate-500">' + inv.lines.length + ' صنف • ' + escHtml(inv.payment) + '</div></div>' +
           '</summary>' +
